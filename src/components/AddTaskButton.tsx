@@ -14,7 +14,8 @@ const AddTaskButton = ({ onAddTask, totalTasks }: AddTaskButtonProps) => {
     <>
       <button
         onClick={() => setIsOpen(true)}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+        className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-4 py-2 rounded-md flex items-center gap-2 transition-colors"
+        aria-label="Add Task"
       >
         <svg
           className="w-5 h-5"
@@ -29,7 +30,7 @@ const AddTaskButton = ({ onAddTask, totalTasks }: AddTaskButtonProps) => {
             d="M12 4v16m8-8H4"
           />
         </svg>
-        <span>Add Task</span>
+        <span className="hidden sm:inline">Add Task</span>
       </button>
       <AddTaskPanel
         isOpen={isOpen}

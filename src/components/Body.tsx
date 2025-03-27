@@ -13,7 +13,7 @@ import { Task } from "../types/Task";
 import TaskCard from "./task-card/TaskCard";
 import { ViewToggle } from "./ViewToggle";
 
-type SortField = "priority" | "dueDate" | "createdAt" | "updatedAt" | "title";
+type SortField = "priority" | "dueDate" | "updatedAt" | "title";
 type SortDirection = "asc" | "desc";
 
 const Body = () => {
@@ -30,7 +30,7 @@ const Body = () => {
     taskId: string;
     newPosition: number;
   } | null>(null);
-  const [sortField, setSortField] = useState<SortField>("createdAt");
+  const [sortField, setSortField] = useState<SortField>("updatedAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const [isHeaderMinimized, setIsHeaderMinimized] = useState(false);
   const [isSortMinimized, setIsSortMinimized] = useState(false);
@@ -43,14 +43,16 @@ const Body = () => {
   const allLabels = Array.from(
     new Set(
       tasks
+        .filter((task) => !task.archived) // Only include labels from non-archived tasks
         .flatMap((task) => task.labels || [])
-        .concat(lists.flatMap((list) => list.labels || []))
     )
   ).sort();
 
   // Get task counts for each label
   const labelCounts = allLabels.reduce((acc, label) => {
-    acc[label] = tasks.filter((task) => task.labels?.includes(label)).length;
+    acc[label] = tasks.filter(
+      (task) => !task.archived && task.labels?.includes(label)
+    ).length;
     return acc;
   }, {} as Record<string, number>);
 
@@ -177,10 +179,25 @@ const Body = () => {
       const existingFilter = current.find(
         (f: LabelFilter) => f.label === label
       );
-      if (existingFilter) {
-        return current.filter((f: LabelFilter) => f.label !== label);
+
+      if (!existingFilter) {
+        // First click: Show only tasks with this label
+        return [...current, { label, state: LabelState.SHOW_ONLY }];
       }
-      return [...current, { label, state: LabelState.SHOW_ALL }];
+
+      if (existingFilter.state === LabelState.SHOW_ONLY) {
+        // Second click: Show tasks without this label
+        return current.map((f) =>
+          f.label === label ? { ...f, state: LabelState.SHOW_OTHERS } : f
+        );
+      }
+
+      if (existingFilter.state === LabelState.SHOW_OTHERS) {
+        // Third click: Remove filter
+        return current.filter((f) => f.label !== label);
+      }
+
+      return current;
     });
   };
 
@@ -335,8 +352,6 @@ const Body = () => {
           if (!a.dueDate) return 1;
           if (!b.dueDate) return -1;
           return multiplier * (a.dueDate.getTime() - b.dueDate.getTime());
-        case "createdAt":
-          return multiplier * (a.createdAt.getTime() - b.createdAt.getTime());
         case "updatedAt": {
           const aLatest =
             a.updates[a.updates.length - 1]?.updatedAt || a.createdAt;
@@ -362,7 +377,7 @@ const Body = () => {
   }) => (
     <button
       onClick={() => handleSort(field)}
-      className={`px-3 py-1.5 text-sm rounded-md transition-colors ${
+      className={`px-2 py-1 text-xs sm:text-sm rounded-md transition-colors ${
         sortField === field
           ? "bg-blue-500 text-white"
           : "bg-gray-700 text-gray-300 hover:bg-gray-600"
@@ -421,10 +436,10 @@ const Body = () => {
 
   return (
     <div className="flex flex-col h-screen">
-      <div className="sticky top-0 z-10 bg-gray-900 border-b border-gray-800">
+      <div className="bg-gray-900 border-b border-gray-800">
         {/* Header Section */}
         <div
-          className={`flex items-center justify-between ${
+          className={`flex items-start justify-between ${
             isHeaderMinimized ? "py-1" : "p-4"
           } transition-all duration-200`}
         >
@@ -452,7 +467,7 @@ const Body = () => {
         </div>
 
         {/* Sort Section */}
-        <div className="border-t border-gray-800 ">
+        <div className="border-t border-gray-800">
           <div
             className={`flex items-center justify-between ${
               isSortMinimized ? "py-1" : "p-4"
@@ -463,11 +478,12 @@ const Body = () => {
                 isSortMinimized ? "h-6 overflow-hidden opacity-0" : ""
               }`}
             >
-              <div className="flex gap-2">
-                <span className="text-sm text-gray-400 mr-2">Sort by:</span>
+              <div className="flex gap-2 overflow-x-auto max-w-[calc(100vw-2rem)] items-center ml-1">
+                <span className="text-xs sm:text-sm text-gray-400 mr-2 whitespace-nowrap">
+                  Sort:
+                </span>
                 <SortButton field="priority" label="Priority" />
-                <SortButton field="dueDate" label="Due Date" />
-                <SortButton field="createdAt" label="Created" />
+                <SortButton field="dueDate" label="Due" />
                 <SortButton field="updatedAt" label="Updated" />
                 <SortButton field="title" label="Title" />
               </div>
