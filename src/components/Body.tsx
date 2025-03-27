@@ -435,11 +435,11 @@ const Body = () => {
   });
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col min-h-screen">
       <div className="bg-gray-900 border-b border-gray-800">
         {/* Header Section */}
         <div
-          className={`flex items-start justify-between ${
+          className={`flex items-center justify-between ${
             isHeaderMinimized ? "py-1" : "p-4"
           } transition-all duration-200`}
         >
@@ -478,7 +478,7 @@ const Body = () => {
                 isSortMinimized ? "h-6 overflow-hidden opacity-0" : ""
               }`}
             >
-              <div className="flex gap-2 overflow-x-auto max-w-[calc(100vw-2rem)] items-center ml-1">
+              <div className="flex gap-2 overflow-x-auto pb-2 max-w-[calc(100vw-2rem)]">
                 <span className="text-xs sm:text-sm text-gray-400 mr-2 whitespace-nowrap">
                   Sort:
                 </span>
@@ -502,126 +502,123 @@ const Body = () => {
           </div>
         </div>
       </div>
-      <div className="flex-1 overflow-hidden">
-        <div ref={scrollContainerRef} className="h-full overflow-y-auto p-6">
-          <div className="max-w-4xl mx-auto space-y-6">
-            <div className="flex flex-col gap-6">
-              <ViewToggle view={view} onViewChange={setView} />
-              <div className="flex flex-wrap gap-2">
+      <div ref={scrollContainerRef} className="flex-1 p-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <div className="flex flex-col gap-6">
+            <ViewToggle view={view} onViewChange={setView} />
+            <div className="flex flex-wrap gap-2">
+              <LabelPill
+                label="Show all"
+                onClick={clearAllFilters}
+                state={
+                  labelFilters.length === 0
+                    ? LabelState.SHOW_ONLY
+                    : LabelState.SHOW_ALL
+                }
+                count={tasks.length}
+              />
+              <LabelPill
+                label="Completed"
+                onClick={handleCompletedClick}
+                state={getCompletedState()}
+                count={completedCount}
+              />
+              <LabelPill
+                label="Due date"
+                onClick={handleDueDateClick}
+                state={getDueDateState()}
+                count={tasksWithDueDate}
+              />
+              {allLabels.map((label) => (
                 <LabelPill
-                  label="Show all"
-                  onClick={clearAllFilters}
-                  state={
-                    labelFilters.length === 0
-                      ? LabelState.SHOW_ONLY
-                      : LabelState.SHOW_ALL
-                  }
-                  count={tasks.length}
+                  key={label}
+                  label={label}
+                  onClick={() => handleLabelClick(label)}
+                  state={getLabelState(label)}
+                  count={labelCounts[label]}
                 />
-                <LabelPill
-                  label="Completed"
-                  onClick={handleCompletedClick}
-                  state={getCompletedState()}
-                  count={completedCount}
-                />
-                <LabelPill
-                  label="Due date"
-                  onClick={handleDueDateClick}
-                  state={getDueDateState()}
-                  count={tasksWithDueDate}
-                />
-                {allLabels.map((label) => (
-                  <LabelPill
-                    key={label}
-                    label={label}
-                    onClick={() => handleLabelClick(label)}
-                    state={getLabelState(label)}
-                    count={labelCounts[label]}
-                  />
-                ))}
-              </div>
+              ))}
             </div>
-            <div className="space-y-6">
-              {view === "lists" ? (
-                sortedLists.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                    <p className="text-lg font-medium mb-2">No lists found</p>
-                    <p className="text-sm text-center">
-                      {selectedLabel
-                        ? "No lists with this label"
-                        : "Add your first list to get started"}
-                    </p>
-                  </div>
-                ) : (
-                  sortedLists.map((list) => (
-                    <ListCard
-                      key={list.id}
-                      list={list}
-                      onComplete={handleListComplete}
-                      onDelete={handleListDelete}
-                      onUpdate={handleListUpdate}
-                      onLabelClick={handleListLabelClick}
-                      selectedLabel={selectedLabel}
-                    />
-                  ))
-                )
-              ) : sortedAndFilteredTasks.length === 0 ? (
+          </div>
+          <div className="space-y-6">
+            {view === "lists" ? (
+              sortedLists.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                  <p className="text-lg font-medium mb-2">No tasks found</p>
+                  <p className="text-lg font-medium mb-2">No lists found</p>
                   <p className="text-sm text-center">
-                    {view === "archive" ? (
-                      "No archived tasks yet"
-                    ) : getLabelState(
-                        labelFilters.find(
-                          (f) => f.state === LabelState.SHOW_ONLY
-                        )?.label || ""
-                      ) === LabelState.SHOW_ONLY ? (
-                      "No tasks with this label"
-                    ) : searchQuery ? (
-                      <>
-                        No tasks match your search.{" "}
-                        <button
-                          onClick={() => setSearchQuery("")}
-                          className="text-blue-400 hover:text-blue-300 underline"
-                        >
-                          Clear your search
-                        </button>
-                      </>
-                    ) : (
-                      "Add your first task to get started"
-                    )}
+                    {selectedLabel
+                      ? "No lists with this label"
+                      : "Add your first list to get started"}
                   </p>
                 </div>
               ) : (
-                sortedAndFilteredTasks.map((task) => (
-                  <TaskCard
-                    key={task.id}
-                    task={task}
-                    onPriorityChange={handlePriorityChange}
-                    onComplete={handleComplete}
-                    onDelete={handleDelete}
-                    onArchive={handleArchive}
-                    onUpdate={handleUpdate}
-                    totalTasks={tasks.length}
-                    isAnimating={animatingTaskId === task.id}
-                    isCollapsed={isCollapsed && animatingTaskId === task.id}
-                    onHeightChange={handleTaskHeight}
-                    onLabelClick={handleLabelClick}
-                    selectedLabel={
-                      labelFilters.find((f) => f.state === LabelState.SHOW_ONLY)
-                        ?.label
-                    }
-                    disablePriorityControls={sortField !== "priority"}
+                sortedLists.map((list) => (
+                  <ListCard
+                    key={list.id}
+                    list={list}
+                    onComplete={handleListComplete}
+                    onDelete={handleListDelete}
+                    onUpdate={handleListUpdate}
+                    onLabelClick={handleListLabelClick}
+                    selectedLabel={selectedLabel}
                   />
                 ))
-              )}
-              {animatingTaskHeight !== null && isCollapsed && (
-                <div
-                  className="w-full bg-transparent"
-                  style={{ height: `${animatingTaskHeight}px` }}
+              )
+            ) : sortedAndFilteredTasks.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                <p className="text-lg font-medium mb-2">No tasks found</p>
+                <p className="text-sm text-center">
+                  {view === "archive" ? (
+                    "No archived tasks yet"
+                  ) : getLabelState(
+                      labelFilters.find((f) => f.state === LabelState.SHOW_ONLY)
+                        ?.label || ""
+                    ) === LabelState.SHOW_ONLY ? (
+                    "No tasks with this label"
+                  ) : searchQuery ? (
+                    <>
+                      No tasks match your search.{" "}
+                      <button
+                        onClick={() => setSearchQuery("")}
+                        className="text-blue-400 hover:text-blue-300 underline"
+                      >
+                        Clear your search
+                      </button>
+                    </>
+                  ) : (
+                    "Add your first task to get started"
+                  )}
+                </p>
+              </div>
+            ) : (
+              sortedAndFilteredTasks.map((task) => (
+                <TaskCard
+                  key={task.id}
+                  task={task}
+                  onPriorityChange={handlePriorityChange}
+                  onComplete={handleComplete}
+                  onDelete={handleDelete}
+                  onArchive={handleArchive}
+                  onUpdate={handleUpdate}
+                  totalTasks={tasks.length}
+                  isAnimating={animatingTaskId === task.id}
+                  isCollapsed={isCollapsed && animatingTaskId === task.id}
+                  onHeightChange={handleTaskHeight}
+                  onLabelClick={handleLabelClick}
+                  selectedLabel={
+                    labelFilters.find((f) => f.state === LabelState.SHOW_ONLY)
+                      ?.label
+                  }
+                  disablePriorityControls={sortField !== "priority"}
                 />
-              )}
-            </div>
+              ))
+            )}
+            {animatingTaskHeight !== null && isCollapsed && (
+              <div
+                className="w-full bg-transparent"
+                style={{ height: `${animatingTaskHeight}px` }}
+              />
+            )}
           </div>
         </div>
       </div>
