@@ -2,6 +2,18 @@ import { useEffect, useRef, useState } from "react";
 
 import { Task } from "../types/Task";
 
+const AVAILABLE_LABELS = [
+  "work",
+  "personal",
+  "family",
+  "planning",
+  "communication",
+  "daily",
+  "shopping",
+  "entertainment",
+  "project",
+];
+
 interface AddTaskPanelProps {
   isOpen: boolean;
   onClose: () => void;
@@ -19,6 +31,7 @@ const AddTaskPanel = ({
     title: "",
     description: "",
     priority: 1,
+    labels: [] as string[],
   });
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -31,6 +44,7 @@ const AddTaskPanel = ({
         title: "",
         description: "",
         priority: totalTasks + 1,
+        labels: [],
       }));
       // Focus the title input when panel opens
       setTimeout(() => titleInputRef.current?.focus(), 100);
@@ -52,6 +66,8 @@ const AddTaskPanel = ({
       author: "Sebastian Uddén",
       createdAt: new Date(),
       completed: false,
+      archived: false,
+      labels: formData.labels,
       updates: [
         {
           author: "Sebastian Uddén",
@@ -61,6 +77,15 @@ const AddTaskPanel = ({
     };
     onAddTask(newTask);
     onClose();
+  };
+
+  const toggleLabel = (label: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      labels: prev.labels.includes(label)
+        ? prev.labels.filter((l) => l !== label)
+        : [...prev.labels, label],
+    }));
   };
 
   return (
@@ -137,6 +162,28 @@ const AddTaskPanel = ({
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Enter task description"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Labels
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {AVAILABLE_LABELS.map((label) => (
+                  <button
+                    key={label}
+                    type="button"
+                    onClick={() => toggleLabel(label)}
+                    className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                      formData.labels.includes(label)
+                        ? "bg-blue-500 text-white"
+                        : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div>
