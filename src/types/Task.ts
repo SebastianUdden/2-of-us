@@ -1,5 +1,5 @@
 export interface TaskUpdate {
-  timestamp: Date;
+  updatedAt: Date;
   description: string;
   author: string;
 }

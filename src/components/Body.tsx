@@ -339,9 +339,9 @@ const Body = () => {
           return multiplier * (a.createdAt.getTime() - b.createdAt.getTime());
         case "updatedAt": {
           const aLatest =
-            a.updates[a.updates.length - 1]?.timestamp || a.createdAt;
+            a.updates[a.updates.length - 1]?.updatedAt || a.createdAt;
           const bLatest =
-            b.updates[b.updates.length - 1]?.timestamp || b.createdAt;
+            b.updates[b.updates.length - 1]?.updatedAt || b.createdAt;
           return multiplier * (aLatest.getTime() - bLatest.getTime());
         }
         case "title":
