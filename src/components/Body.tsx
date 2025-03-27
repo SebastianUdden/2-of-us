@@ -13,9 +13,6 @@ import { Task } from "../types/Task";
 import TaskCard from "./task-card/TaskCard";
 import { ViewToggle } from "./ViewToggle";
 
-type SortField = "priority" | "dueDate" | "updatedAt" | "title";
-type SortDirection = "asc" | "desc";
-
 const Body = () => {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [lists, setLists] = useState<List[]>(mockLists);
@@ -30,13 +27,16 @@ const Body = () => {
     taskId: string;
     newPosition: number;
   } | null>(null);
-  const [sortField, setSortField] = useState<SortField>("priority");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
+  const [sortField, setSortField] = useState<keyof Task>("priority");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [isHeaderMinimized, setIsHeaderMinimized] = useState(false);
   const [isSortMinimized, setIsSortMinimized] = useState(false);
   const [labelFilters, setLabelFilters] = useState<LabelFilter[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [isAddTaskPanelOpen, setIsAddTaskPanelOpen] = useState(false);
+  const [parentTaskId, setParentTaskId] = useState<string | undefined>();
+  const [parentTaskTitle, setParentTaskTitle] = useState<string | undefined>();
+  const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   // Get all unique labels from tasks and lists
@@ -59,7 +59,7 @@ const Body = () => {
   // Get count of tasks with due dates
   const tasksWithDueDate = tasks.filter((task) => task.dueDate).length;
 
-  const sortTasks = (tasks: Task[]): Task[] => {
+  const sortTasks = useCallback((tasks: Task[]): Task[] => {
     // First sort by completion status (completed tasks go to bottom)
     const sortedByCompletion = [...tasks].sort((a, b) => {
       if (a.completed === b.completed) return 0;
@@ -71,10 +71,43 @@ const Body = () => {
       ...task,
       priority: index + 1,
     }));
-  };
+  }, []); // Empty dependency array since it doesn't depend on any external values
 
   const handleAddTask = (newTask: Task) => {
-    setTasks((prevTasks) => [...prevTasks, newTask]);
+    if (parentTaskId) {
+      // Add as subtask
+      setTasks((prevTasks) => {
+        return prevTasks.map((task) => {
+          if (task.id === parentTaskId) {
+            return {
+              ...task,
+              subtasks: [...task.subtasks, newTask],
+            };
+          }
+          return task;
+        });
+      });
+      // Automatically expand the parent task
+      setExpandedTaskId(parentTaskId);
+    } else {
+      // Add as main task
+      setTasks((prevTasks) => {
+        const updatedTasks = [...prevTasks, newTask];
+        return sortTasks(updatedTasks);
+      });
+    }
+    setIsAddTaskPanelOpen(false);
+    setParentTaskId(undefined);
+    setParentTaskTitle(undefined);
+  };
+
+  const handleAddSubtask = (taskId: string) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (task) {
+      setParentTaskId(taskId);
+      setParentTaskTitle(task.title);
+      setIsAddTaskPanelOpen(true);
+    }
   };
 
   const handlePriorityChange = (taskId: string, newPosition: number) => {
@@ -335,7 +368,7 @@ const Body = () => {
     setLabelFilters([]);
   };
 
-  const handleSort = (field: SortField) => {
+  const handleSort = (field: keyof Task) => {
     if (sortField === field && field !== "priority") {
       // Only toggle direction if it's not priority
       setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -380,7 +413,7 @@ const Body = () => {
     field,
     label,
   }: {
-    field: SortField;
+    field: keyof Task;
     label: string;
   }) => (
     <button
@@ -441,6 +474,14 @@ const Body = () => {
     const multiplier = sortDirection === "asc" ? 1 : -1;
     return multiplier * (a.createdAt.getTime() - b.createdAt.getTime());
   });
+
+  const handleListConvertToTask = (task: Task) => {
+    // Add the task to the tasks list
+    setTasks((prevTasks) => {
+      const updatedTasks = [...prevTasks, task];
+      return sortTasks(updatedTasks);
+    });
+  };
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -569,6 +610,7 @@ const Body = () => {
                     onUpdate={handleListUpdate}
                     onLabelClick={handleListLabelClick}
                     selectedLabel={selectedLabel}
+                    onConvertToTask={handleListConvertToTask}
                   />
                 ))
               )
@@ -576,26 +618,9 @@ const Body = () => {
               <div className="flex flex-col items-center justify-center h-full text-gray-400">
                 <p className="text-lg font-medium mb-2">No tasks found</p>
                 <p className="text-sm text-center">
-                  {view === "archive" ? (
-                    "No archived tasks yet"
-                  ) : getLabelState(
-                      labelFilters.find((f) => f.state === LabelState.SHOW_ONLY)
-                        ?.label || ""
-                    ) === LabelState.SHOW_ONLY ? (
-                    "No tasks with this label"
-                  ) : searchQuery ? (
-                    <>
-                      No tasks match your search.{" "}
-                      <button
-                        onClick={() => setSearchQuery("")}
-                        className="text-blue-400 hover:text-blue-300 underline"
-                      >
-                        Clear your search
-                      </button>
-                    </>
-                  ) : (
-                    "Add your first task to get started"
-                  )}
+                  {selectedLabel
+                    ? "No tasks with this label"
+                    : "Add your first task to get started"}
                 </p>
               </div>
             ) : (
@@ -609,15 +634,14 @@ const Body = () => {
                   onArchive={handleArchive}
                   onUpdate={handleUpdate}
                   totalTasks={tasks.length}
-                  isAnimating={animatingTaskId === task.id}
-                  isCollapsed={isCollapsed && animatingTaskId === task.id}
+                  isAnimating={task.id === animatingTaskId}
+                  isCollapsed={isCollapsed}
                   onHeightChange={handleTaskHeight}
                   onLabelClick={handleLabelClick}
-                  selectedLabel={
-                    labelFilters.find((f) => f.state === LabelState.SHOW_ONLY)
-                      ?.label
-                  }
-                  disablePriorityControls={sortField !== "priority"}
+                  selectedLabel={selectedLabel}
+                  onAddSubtask={handleAddSubtask}
+                  expandedTaskId={expandedTaskId}
+                  setExpandedTaskId={setExpandedTaskId}
                 />
               ))
             )}
@@ -632,9 +656,15 @@ const Body = () => {
       </div>
       <AddTaskPanel
         isOpen={isAddTaskPanelOpen}
-        onClose={() => setIsAddTaskPanelOpen(false)}
+        onClose={() => {
+          setIsAddTaskPanelOpen(false);
+          setParentTaskId(undefined);
+          setParentTaskTitle(undefined);
+        }}
         onAddTask={handleAddTask}
         totalTasks={tasks.length}
+        parentTaskId={parentTaskId}
+        parentTaskTitle={parentTaskTitle}
       />
     </div>
   );

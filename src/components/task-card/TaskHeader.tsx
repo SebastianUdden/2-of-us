@@ -69,7 +69,7 @@ export const TaskHeader = ({
           type="checkbox"
           checked={task.completed}
           onChange={() => onComplete(task.id)}
-          className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500"
+          className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer"
         />
         <button
           onClick={() => onArchive(task.id)}

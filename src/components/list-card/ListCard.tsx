@@ -2,6 +2,7 @@ import { List, ListItem } from "../../types/List";
 
 import { LabelPill } from "../LabelPill";
 import { LabelState } from "../../types/LabelState";
+import { Task } from "../../types/Task";
 import { formatDistanceToNow } from "date-fns";
 
 interface ListCardProps {
@@ -11,6 +12,7 @@ interface ListCardProps {
   onUpdate: (updatedList: List) => void;
   onLabelClick: (label: string) => void;
   selectedLabel?: string;
+  onConvertToTask?: (task: Task) => void;
 }
 
 const ListCard = ({
@@ -20,6 +22,7 @@ const ListCard = ({
   onUpdate,
   onLabelClick,
   selectedLabel,
+  onConvertToTask,
 }: ListCardProps) => {
   const handleItemComplete = (itemId: string) => {
     onComplete(list.id, itemId);
@@ -65,6 +68,41 @@ const ListCard = ({
     onUpdate({ ...list, items: updatedItems });
   };
 
+  const handleConvertToTask = () => {
+    if (!onConvertToTask) return;
+
+    const task: Task = {
+      id: crypto.randomUUID(),
+      title: list.title,
+      description: list.description || "",
+      author: list.author,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      completed: false,
+      priority: 1, // This will be updated by the parent component
+      labels: list.labels || [],
+      archived: false,
+      updates: [],
+      subtasks: list.items.map((item) => ({
+        id: crypto.randomUUID(),
+        title: item.content,
+        description: "",
+        author: list.author,
+        createdAt: item.createdAt,
+        updatedAt: item.updatedAt,
+        completed: item.completed,
+        priority: 1,
+        labels: [],
+        archived: false,
+        updates: [],
+        subtasks: [],
+        parentTaskId: list.id,
+      })),
+    };
+
+    onConvertToTask(task);
+  };
+
   const completedCount = list.items.filter((item) => item.completed).length;
   const totalCount = list.items.length;
 
@@ -100,6 +138,14 @@ const ListCard = ({
               }
             />
           ))}
+          {onConvertToTask && (
+            <button
+              onClick={handleConvertToTask}
+              className="text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              Clone to Task
+            </button>
+          )}
           <button
             onClick={handleDelete}
             className="text-gray-400 hover:text-red-400 transition-colors"

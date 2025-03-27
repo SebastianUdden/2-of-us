@@ -25,6 +25,9 @@ interface TaskCardProps {
   onLabelClick?: (label: string) => void;
   selectedLabel?: string;
   disablePriorityControls?: boolean;
+  onAddSubtask?: (parentTaskId: string) => void;
+  expandedTaskId: string | null;
+  setExpandedTaskId: (id: string | null) => void;
 }
 
 const TaskCard = ({
@@ -41,12 +44,20 @@ const TaskCard = ({
   onLabelClick,
   selectedLabel,
   disablePriorityControls = false,
+  onAddSubtask,
+  expandedTaskId,
+  setExpandedTaskId,
 }: TaskCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description);
+  const [showSubtasks, setShowSubtasks] = useState(expandedTaskId === task.id);
+
+  useEffect(() => {
+    setShowSubtasks(expandedTaskId === task.id);
+  }, [expandedTaskId, task.id]);
 
   useEffect(() => {
     if (!isAnimating && cardRef.current && onHeightChange) {
@@ -73,12 +84,37 @@ const TaskCard = ({
   };
 
   const handleDueDateChange = (date: Date | undefined) => {
-    const isOverdue = date ? new Date() > date : false;
     onUpdate({
       ...task,
       dueDate: date,
-      isOverdue,
     });
+  };
+
+  const handleSubtaskComplete = (subtaskId: string) => {
+    const updatedSubtasks = task.subtasks.map((subtask) =>
+      subtask.id === subtaskId
+        ? { ...subtask, completed: !subtask.completed }
+        : subtask
+    );
+    onUpdate({
+      ...task,
+      subtasks: updatedSubtasks,
+    });
+  };
+
+  const handleSubtaskDelete = (subtaskId: string) => {
+    const updatedSubtasks = task.subtasks.filter(
+      (subtask) => subtask.id !== subtaskId
+    );
+    onUpdate({
+      ...task,
+      subtasks: updatedSubtasks,
+    });
+  };
+
+  const toggleSubtasks = () => {
+    setShowSubtasks(!showSubtasks);
+    setExpandedTaskId(showSubtasks ? null : task.id);
   };
 
   return (
@@ -122,7 +158,6 @@ const TaskCard = ({
             <div className="flex items-center gap-2 mt-2">
               <TaskDueDate
                 dueDate={task.dueDate}
-                isOverdue={task.isOverdue}
                 onDueDateChange={handleDueDateChange}
               />
               {task.labels && task.labels.length > 0 && (
@@ -201,6 +236,73 @@ const TaskCard = ({
             </select>
           </div>
         </div>
+
+        {/* Subtasks Section */}
+        {task.subtasks && task.subtasks.length > 0 && (
+          <div className="mt-4 border-t border-gray-700 pt-4">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="text-sm font-medium text-gray-300">
+                Subtasks (
+                {task.subtasks.filter((subtask) => subtask.completed).length}/
+                {task.subtasks.length})
+              </h3>
+              <button
+                onClick={toggleSubtasks}
+                className="text-sm text-gray-400 hover:text-gray-300"
+              >
+                {showSubtasks ? "Hide" : "Show"}
+              </button>
+            </div>
+            {showSubtasks && (
+              <div className="space-y-2">
+                {task.subtasks.map((subtask) => (
+                  <div
+                    key={subtask.id}
+                    onClick={() => handleSubtaskComplete(subtask.id)}
+                    className="flex items-center gap-2 p-2 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={subtask.completed}
+                      onChange={() => handleSubtaskComplete(subtask.id)}
+                      className="rounded border-gray-600 text-blue-500 focus:ring-blue-500"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <span
+                      className={`flex-1 text-sm ${
+                        subtask.completed
+                          ? "text-gray-400 line-through"
+                          : "text-gray-200"
+                      }`}
+                    >
+                      {subtask.title}
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleSubtaskDelete(subtask.id);
+                      }}
+                      className="text-gray-400 hover:text-gray-300"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Add Subtask Button */}
+        {onAddSubtask && (
+          <button
+            onClick={() => onAddSubtask(task.id)}
+            className="mt-4 text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
+          >
+            <span>+</span>
+            <span>Add Subtask</span>
+          </button>
+        )}
       </div>
       <DeleteConfirmDialog
         isOpen={showDeleteConfirm}

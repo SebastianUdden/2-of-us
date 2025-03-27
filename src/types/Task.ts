@@ -7,13 +7,19 @@ export interface Task {
   id: string;
   title: string;
   description: string;
-  priority: number;
-  completed: boolean;
-  archived: boolean;
   author: string;
   createdAt: Date;
-  updates: TaskUpdate[];
-  labels: string[];
+  updatedAt: Date;
+  completed: boolean;
+  priority: number;
   dueDate?: Date;
-  isOverdue?: boolean;
+  labels?: string[];
+  archived: boolean;
+  updates: TaskUpdate[];
+  subtasks: {
+    id: string;
+    title: string;
+    completed: boolean;
+  }[];
+  parentTaskId?: string;
 }
