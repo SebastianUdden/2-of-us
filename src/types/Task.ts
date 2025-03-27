@@ -1,6 +1,5 @@
 export interface TaskUpdate {
   updatedAt: Date;
-  description: string;
   author: string;
 }
 
