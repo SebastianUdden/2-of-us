@@ -447,7 +447,7 @@ const Body = () => {
       <div className="bg-gray-900 border-b border-gray-800">
         {/* Header Section */}
         <div
-          className={`flex items-center justify-between ${
+          className={`flex items-start justify-between ${
             isHeaderMinimized ? "py-1" : "p-4"
           } transition-all duration-200`}
         >
@@ -486,7 +486,7 @@ const Body = () => {
                 isSortMinimized ? "h-6 overflow-hidden opacity-0" : ""
               }`}
             >
-              <div className="flex gap-2 overflow-x-auto pb-2 max-w-[calc(100vw-2rem)]">
+              <div className="flex gap-2 overflow-x-auto pb-2 max-w-[calc(100vw-2rem)] items-center">
                 <span className="text-xs sm:text-sm text-gray-400 mr-2 whitespace-nowrap">
                   Sort:
                 </span>
@@ -510,8 +510,8 @@ const Body = () => {
           </div>
         </div>
       </div>
-      <div ref={scrollContainerRef} className="flex-1 p-6">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <div ref={scrollContainerRef} className="flex-1 p-3 sm:p-6">
+        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
           <div className="flex flex-col gap-6">
             <ViewToggle view={view} onViewChange={setView} />
             <div className="flex flex-wrap gap-2">
