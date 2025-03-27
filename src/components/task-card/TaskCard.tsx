@@ -182,7 +182,7 @@ const TaskCard = ({
         </div>
         <div className="flex justify-between items-end mt-4 border-t border-gray-700">
           <TaskUpdates task={task} />
-          <div className="flex flex-col items-end gap-1">
+          <div className="flex flex-col items-start gap-1">
             <span className="text-sm text-gray-400">Position</span>
             <select
               value={task.priority}

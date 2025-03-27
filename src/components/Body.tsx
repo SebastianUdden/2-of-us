@@ -1,6 +1,6 @@
 import { LabelFilter, LabelState } from "../types/LabelState";
 import { mockLists, mockTasks } from "../data/mock";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { ANIMATION } from "./task-card/constants";
 import AddTaskPanel from "./AddTaskPanel";
@@ -30,8 +30,8 @@ const Body = () => {
     taskId: string;
     newPosition: number;
   } | null>(null);
-  const [sortField, setSortField] = useState<SortField>("updatedAt");
-  const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
+  const [sortField, setSortField] = useState<SortField>("priority");
+  const [sortDirection, setSortDirection] = useState<SortDirection>("asc");
   const [isHeaderMinimized, setIsHeaderMinimized] = useState(false);
   const [isSortMinimized, setIsSortMinimized] = useState(false);
   const [labelFilters, setLabelFilters] = useState<LabelFilter[]>([]);
@@ -88,7 +88,7 @@ const Body = () => {
   };
 
   // Handle the actual task move after collapse animation
-  const handleTaskMove = () => {
+  const handleTaskMove = useCallback(() => {
     if (!pendingTaskMove) return;
 
     const { taskId, newPosition } = pendingTaskMove;
@@ -105,13 +105,21 @@ const Body = () => {
     // Start expand animation
     setIsCollapsed(false);
 
-    // Wait for expand animation
+    // Wait for expand animation and then scroll to the task
     setTimeout(() => {
       setAnimatingTaskId(null);
       setPendingTaskMove(null);
       setAnimatingTaskHeight(null);
+
+      // Scroll to the task
     }, ANIMATION.DURATION);
-  };
+    setTimeout(() => {
+      const taskElement = document.getElementById(`task-${taskId}`);
+      if (taskElement) {
+        taskElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, 10);
+  }, [pendingTaskMove, sortTasks]);
 
   // Start the collapse animation
   useEffect(() => {
