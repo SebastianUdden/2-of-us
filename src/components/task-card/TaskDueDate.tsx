@@ -20,16 +20,14 @@ const TaskDueDate = ({
 
     const now = new Date();
     const diff = dueDate.getTime() - now.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
 
     if (days > 0) {
-      setTimeRemaining(`${days}d ${hours}h`);
-    } else if (hours > 0) {
-      setTimeRemaining(`${hours}h ${minutes}m`);
+      setTimeRemaining(`${days}d`);
+    } else if (days === 0) {
+      setTimeRemaining("Today");
     } else {
-      setTimeRemaining(`${minutes}m`);
+      setTimeRemaining(`${Math.abs(days)}d ago`);
     }
   }, [dueDate]);
 
@@ -48,36 +46,32 @@ const TaskDueDate = ({
   }, [dueDate, updateTimeRemaining]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const date = e.target.value ? new Date(e.target.value) : undefined;
-    setSelectedDate(e.target.value);
-    onDueDateChange(date);
+    const newDate = e.target.value ? new Date(e.target.value) : undefined;
+    onDueDateChange(newDate);
     setShowDatePicker(false);
   };
 
   return (
-    <div className="relative">
+    <div className="flex items-center gap-2">
       <button
         onClick={() => setShowDatePicker(!showDatePicker)}
-        className={`text-sm px-2 py-1 rounded ${
+        className={`text-sm px-2 py-1 rounded-md transition-colors ${
           isOverdue
-            ? "bg-red-500/20 text-red-400"
+            ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
             : dueDate
-            ? "bg-blue-500/20 text-blue-400"
-            : "bg-gray-700 text-gray-400"
+            ? "bg-blue-500/20 text-blue-400 hover:bg-blue-500/30"
+            : "bg-gray-700 text-gray-400 hover:bg-gray-600"
         }`}
       >
         {dueDate ? timeRemaining : "Set due date"}
       </button>
-
       {showDatePicker && (
-        <div className="absolute z-10 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-2">
-          <input
-            type="datetime-local"
-            value={selectedDate}
-            onChange={handleDateChange}
-            className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
+        <input
+          type="date"
+          value={selectedDate}
+          onChange={handleDateChange}
+          className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
       )}
     </div>
   );
