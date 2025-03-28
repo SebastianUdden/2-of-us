@@ -9,6 +9,7 @@ import { LabelPill } from "./LabelPill";
 import { List } from "../types/List";
 import ListCard from "./list-card/ListCard";
 import { MinimizeIcon } from "./icons/MinimizeIcon";
+import { ScrollButtons } from "./ScrollButtons";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
 import TaskCard from "./task-card/TaskCard";
@@ -648,6 +649,10 @@ const Body = () => {
                 <SortButton field="dueDate" label="Förfallodatum" />
                 <SortButton field="updatedAt" label="Uppdaterad" />
                 <SortButton field="title" label="Titel" />
+                <ScrollButtons
+                  onScrollToBottom={scrollToBottom}
+                  onScrollToTop={scrollToTop}
+                />
               </div>
             </div>
             <button

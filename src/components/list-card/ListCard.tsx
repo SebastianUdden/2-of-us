@@ -23,8 +23,6 @@ interface ListCardProps {
   isAnimating?: boolean;
   isCollapsed?: boolean;
   onHeightChange?: (height: number) => void;
-  expandedListId: string | null;
-  setExpandedListId: (id: string | null) => void;
   showPriorityControls: boolean;
 }
 
@@ -176,6 +174,7 @@ const ListCard = ({
               onCancel={handleCancel}
               onCloneToTask={handleCloneToTask}
               onDelete={handleDelete}
+              priority={list.priority}
             />
             <ListMetadata
               labels={list.labels}
