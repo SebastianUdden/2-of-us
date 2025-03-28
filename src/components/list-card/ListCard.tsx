@@ -1,13 +1,14 @@
-import { List, ListItem } from "../../types/List";
+import { useEffect, useRef, useState } from "react";
 
 import { ANIMATION } from "../task-card/constants";
 import DeleteConfirmDialog from "../task-card/DeleteConfirmDialog";
-import { LabelPill } from "../LabelPill";
-import { LabelState } from "../../types/LabelState";
+import { List } from "../../types/List";
+import ListDescription from "./ListDescription";
+import ListHeader from "./ListHeader";
+import ListItems from "./ListItems";
+import ListMetadata from "./ListMetadata";
 import { Task } from "../../types/Task";
 import TaskArrows from "../task-card/TaskArrows";
-import { TrashIcon } from "../icons/TrashIcon";
-import { useState } from "react";
 
 interface ListCardProps {
   list: List;
@@ -21,6 +22,7 @@ interface ListCardProps {
   totalLists: number;
   isAnimating?: boolean;
   isCollapsed?: boolean;
+  onHeightChange?: (height: number) => void;
 }
 
 const ListCard = ({
@@ -35,13 +37,21 @@ const ListCard = ({
   totalLists,
   isAnimating = false,
   isCollapsed = false,
+  onHeightChange,
 }: ListCardProps) => {
+  const cardRef = useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(list.title);
   const [editedDescription, setEditedDescription] = useState(
     list.description || ""
   );
+
+  useEffect(() => {
+    if (!isAnimating && cardRef.current && onHeightChange) {
+      onHeightChange(cardRef.current.offsetHeight);
+    }
+  }, [isAnimating, onHeightChange]);
 
   const handleItemComplete = (itemId: string) => {
     onComplete(list.id, itemId);
@@ -74,18 +84,15 @@ const ListCard = ({
     setIsEditing(false);
   };
 
-  const handleItemContentChange = (
-    itemId: string,
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleItemContentChange = (itemId: string, value: string) => {
     const updatedItems = list.items.map((item) =>
-      item.id === itemId ? { ...item, content: e.target.value } : item
+      item.id === itemId ? { ...item, content: value } : item
     );
     onUpdate({ ...list, items: updatedItems });
   };
 
   const handleAddItem = () => {
-    const newItem: ListItem = {
+    const newItem = {
       id: `${list.id}-${list.items.length + 1}`,
       content: "",
       completed: false,
@@ -100,7 +107,7 @@ const ListCard = ({
     onUpdate({ ...list, items: updatedItems });
   };
 
-  const handleConvertToTask = () => {
+  const handleCloneToTask = () => {
     if (!onConvertToTask) return;
 
     const task: Task = {
@@ -125,18 +132,13 @@ const ListCard = ({
     onConvertToTask(task);
   };
 
-  const handlePriorityChange = (newPosition: number) => {
-    if (onPriorityChange) {
-      onPriorityChange(list.id, newPosition);
-    }
-  };
-
   const completedCount = list.items.filter((item) => item.completed).length;
   const totalCount = list.items.length;
 
   return (
     <>
       <div
+        ref={cardRef}
         id={`list-${list.id}`}
         className={`
           border border-gray-700 rounded-lg w-[90%] 
@@ -156,198 +158,59 @@ const ListCard = ({
           w-full
         `}
       >
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4  border-b border-gray-700 pb-4 mb-4">
           <div className="flex-1 space-y-2">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                {isEditing ? (
-                  <form onSubmit={handleSubmit} className="flex-1 flex gap-2">
-                    <input
-                      type="text"
-                      value={editedTitle}
-                      onChange={(e) => setEditedTitle(e.target.value)}
-                      className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Enter list title..."
-                    />
-                    <button
-                      type="button"
-                      onClick={handleCancel}
-                      className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="submit"
-                      className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                    >
-                      Save
-                    </button>
-                  </form>
-                ) : (
-                  <h3
-                    className="text-lg font-medium text-gray-200"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    {list.title}
-                  </h3>
-                )}
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleConvertToTask}
-                  className="p-1.5 text-gray-400 hover:text-gray-200"
-                  aria-label="Convert to task"
-                >
-                  Clone to Task
-                </button>
-                <button
-                  onClick={handleDelete}
-                  className="p-1.5 text-red-400 hover:text-red-300"
-                  aria-label="Delete list"
-                >
-                  <TrashIcon className="w-5 h-5" />
-                </button>
-                {onPriorityChange && (
-                  <TaskArrows
-                    taskId={list.id}
-                    priority={list.priority}
-                    totalTasks={totalLists}
-                    onPriorityChange={(_, newPosition) =>
-                      handlePriorityChange(newPosition)
-                    }
-                  />
-                )}
-              </div>
-            </div>
-            {isEditing ? (
-              <form onSubmit={handleSubmit} className="mt-2 space-y-2">
-                <textarea
-                  value={editedDescription}
-                  onChange={(e) => setEditedDescription(e.target.value)}
-                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                  placeholder="Add a description..."
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                  >
-                    Save
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <p className="text-gray-200 text-sm mt-2">{list.description}</p>
-            )}
-            <div className="flex items-center gap-2 mt-2">
-              {list.labels?.map((label) => (
-                <LabelPill
-                  key={label}
-                  label={label}
-                  onClick={() => onLabelClick(label)}
-                  state={
-                    selectedLabel === label
-                      ? LabelState.SHOW_ONLY
-                      : LabelState.SHOW_ALL
-                  }
-                />
-              ))}
-            </div>
-            <div className="flex items-center gap-4 mt-2 text-sm text-gray-400">
-              <span>
-                Created: {new Date(list.createdAt).toLocaleDateString()}
-              </span>
-              <span>
-                Updated: {new Date(list.updatedAt).toLocaleDateString()}
-              </span>
-            </div>
+            <ListHeader
+              title={list.title}
+              isEditing={isEditing}
+              editedTitle={editedTitle}
+              onTitleChange={setEditedTitle}
+              onEdit={() => setIsEditing(true)}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+              onCloneToTask={handleCloneToTask}
+              onDelete={handleDelete}
+            />
+            <ListMetadata
+              labels={list.labels}
+              selectedLabel={selectedLabel}
+              onLabelClick={onLabelClick}
+              createdAt={list.createdAt}
+              updatedAt={list.updatedAt}
+            />
+            <ListDescription
+              description={list.description || ""}
+              isEditing={isEditing}
+              editedDescription={editedDescription}
+              onDescriptionChange={setEditedDescription}
+              onSubmit={handleSubmit}
+              onCancel={handleCancel}
+            />
           </div>
-        </div>
-
-        <div className="space-y-2">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-medium text-gray-400">
-              Items ({completedCount}/{totalCount})
-            </h3>
-            <button
-              onClick={handleAddItem}
-              className="text-sm text-blue-400 hover:text-blue-300 transition-colors"
-            >
-              + Add Item
-            </button>
-          </div>
-          {list.type === "ordered" ? (
-            <ol className="list-decimal list-inside space-y-2">
-              {list.items.map((item, index) => (
-                <li
-                  key={item.id}
-                  className="flex items-center gap-2 p-2 hover:bg-gray-700 rounded-md transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={item.completed}
-                    onChange={() => handleItemComplete(item.id)}
-                    className="rounded border-gray-600 text-blue-500 focus:ring-blue-500 cursor-pointer"
-                  />
-                  <input
-                    type="text"
-                    value={item.content}
-                    onChange={(e) => handleItemContentChange(item.id, e)}
-                    className={`flex-1 bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${
-                      item.completed ? "line-through text-gray-400" : ""
-                    }`}
-                    placeholder={`Item ${index + 1}`}
-                  />
-                  <button
-                    onClick={() => handleDeleteItem(item.id)}
-                    className="text-gray-400 hover:text-red-400 transition-colors"
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ol>
-          ) : (
-            <ul className="list-disc list-inside space-y-2">
-              {list.items.map((item, index) => (
-                <li
-                  key={item.id}
-                  className="flex items-center gap-2 p-2 hover:bg-gray-700 rounded-md transition-colors"
-                >
-                  <input
-                    type="checkbox"
-                    checked={item.completed}
-                    onChange={() => handleItemComplete(item.id)}
-                    className="rounded border-gray-600 text-blue-500 focus:ring-blue-500 cursor-pointer"
-                  />
-                  <input
-                    type="text"
-                    value={item.content}
-                    onChange={(e) => handleItemContentChange(item.id, e)}
-                    className={`flex-1 bg-transparent text-white focus:outline-none focus:ring-2 focus:ring-blue-500 rounded px-2 ${
-                      item.completed ? "line-through text-gray-400" : ""
-                    }`}
-                    placeholder={`Item ${index + 1}`}
-                  />
-                  <button
-                    onClick={() => handleDeleteItem(item.id)}
-                    className="text-gray-400 hover:text-red-400 transition-colors"
-                  >
-                    ×
-                  </button>
-                </li>
-              ))}
-            </ul>
+          {onPriorityChange && (
+            <div className="flex items-start pt-2">
+              <TaskArrows
+                taskId={list.id}
+                priority={list.priority}
+                totalTasks={totalLists}
+                onPriorityChange={(_, newPosition) =>
+                  onPriorityChange(list.id, newPosition)
+                }
+              />
+            </div>
           )}
         </div>
+
+        <ListItems
+          type={list.type}
+          items={list.items}
+          completedCount={completedCount}
+          totalCount={totalCount}
+          onItemComplete={handleItemComplete}
+          onItemContentChange={handleItemContentChange}
+          onItemDelete={handleDeleteItem}
+          onAddItem={handleAddItem}
+        />
       </div>
       <DeleteConfirmDialog
         isOpen={showDeleteConfirm}

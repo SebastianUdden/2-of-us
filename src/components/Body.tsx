@@ -562,13 +562,21 @@ const Body = () => {
       setPendingListMove(null);
       setAnimatingListHeight(null);
 
-      // Scroll to the list
+      // Scroll to the list with offset based on the list's height
       const listElement = document.getElementById(`list-${listId}`);
-      if (listElement) {
+      if (listElement && animatingListHeight) {
+        const offset = animatingListHeight / 2;
+        const elementPosition = listElement.getBoundingClientRect().top;
+        const offsetPosition = elementPosition + window.pageYOffset - offset;
+        window.scrollTo({
+          top: offsetPosition,
+          behavior: "smooth",
+        });
+      } else if (listElement) {
         listElement.scrollIntoView({ behavior: "smooth", block: "center" });
       }
     }, ANIMATION.DURATION);
-  }, [pendingListMove, sortLists]);
+  }, [pendingListMove, sortLists, animatingListHeight]);
 
   // Start the collapse animation for lists
   useEffect(() => {
@@ -712,6 +720,7 @@ const Body = () => {
                     totalLists={sortedLists.length}
                     isAnimating={animatingListId === list.id}
                     isCollapsed={isCollapsed}
+                    onHeightChange={handleListHeight}
                   />
                 ))
               )
