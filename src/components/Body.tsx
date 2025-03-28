@@ -805,7 +805,7 @@ const Body = () => {
                       isCollapsed={isCollapsed}
                       onHeightChange={handleTaskHeight}
                       onLabelClick={handleLabelClick}
-                      selectedLabel={selectedLabel}
+                      selectedLabel={selectedLabel || ""}
                       onAddSubtask={handleAddSubtask}
                       expandedTaskId={expandedTaskId}
                       setExpandedTaskId={setExpandedTaskId}
