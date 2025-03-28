@@ -235,7 +235,7 @@ const AddTaskPanel = ({
                     htmlFor="priority"
                     className="block text-sm font-medium text-gray-300 mb-1"
                   >
-                    Position
+                    Priority
                   </label>
                   <select
                     id="priority"

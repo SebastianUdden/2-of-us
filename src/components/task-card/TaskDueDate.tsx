@@ -2,34 +2,36 @@ import { useCallback, useEffect, useState } from "react";
 
 interface TaskDueDateProps {
   dueDate?: Date;
-  isOverdue?: boolean;
   onDueDateChange: (date: Date | undefined) => void;
 }
 
-const TaskDueDate = ({
-  dueDate,
-  isOverdue,
-  onDueDateChange,
-}: TaskDueDateProps) => {
+const TaskDueDate = ({ dueDate, onDueDateChange }: TaskDueDateProps) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [timeRemaining, setTimeRemaining] = useState<string>("");
+  const [days, setDays] = useState<number>(0);
 
   const updateTimeRemaining = useCallback(() => {
     if (!dueDate) return;
 
     const now = new Date();
-    const diff = dueDate.getTime() - now.getTime();
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    // Set both dates to start of day for accurate day comparison
+    const dueDateStart = new Date(
+      dueDate.getFullYear(),
+      dueDate.getMonth(),
+      dueDate.getDate()
+    );
+    const nowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diff = dueDateStart.getTime() - nowStart.getTime();
+    const daysDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
+    setDays(daysDiff);
 
-    if (days > 0) {
-      setTimeRemaining(`${days}d ${hours}h`);
-    } else if (hours > 0) {
-      setTimeRemaining(`${hours}h ${minutes}m`);
+    if (daysDiff > 0) {
+      setTimeRemaining(`${daysDiff}d`);
+    } else if (daysDiff < 0) {
+      setTimeRemaining(`${Math.abs(daysDiff)}d overdue`);
     } else {
-      setTimeRemaining(`${minutes}m`);
+      setTimeRemaining("Due today");
     }
   }, [dueDate]);
 
@@ -59,11 +61,11 @@ const TaskDueDate = ({
       <button
         onClick={() => setShowDatePicker(!showDatePicker)}
         className={`text-sm px-2 py-1 rounded ${
-          isOverdue
+          days < 0
             ? "bg-red-500/20 text-red-400"
-            : dueDate
-            ? "bg-blue-500/20 text-blue-400"
-            : "bg-gray-700 text-gray-400"
+            : days === 0
+            ? "bg-yellow-500/20 text-yellow-400"
+            : "bg-blue-500/20 text-blue-400"
         }`}
       >
         {dueDate ? timeRemaining : "Set due date"}

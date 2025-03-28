@@ -33,8 +33,10 @@ const ListMetadata = ({
         ))}
       </div>
       <div className="flex items-center gap-4 mt-2 text-sm text-gray-400">
-        <span>Created: {new Date(createdAt).toLocaleDateString()}</span>
-        <span>Updated: {new Date(updatedAt).toLocaleDateString()}</span>
+        <span>Skapad: {new Date(createdAt).toLocaleDateString()}</span>
+        <span>
+          Senast uppdaterad: {new Date(updatedAt).toLocaleDateString()}
+        </span>
       </div>
     </>
   );

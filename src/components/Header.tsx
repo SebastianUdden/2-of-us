@@ -1,28 +1,19 @@
-import AddTaskButton from "./AddTaskButton";
-import { ScrollButtons } from "./ScrollButtons";
-import SearchInput from "./SearchInput";
-import { Task } from "../types/Task";
+import { PlusIcon } from "./icons/PlusIcon";
+import { SearchIcon } from "./icons/SearchIcon";
+import { useState } from "react";
 
 interface HeaderProps {
-  onAddTask: (task: Task) => void;
-  totalTasks: number;
-  onScrollToTop: () => void;
-  onScrollToBottom: () => void;
+  onAddTask: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
 }
 
-const Header = ({
-  onAddTask,
-  totalTasks,
-  onScrollToTop,
-  onScrollToBottom,
-  searchQuery,
-  onSearchChange,
-}: HeaderProps) => {
+const Header = ({ onAddTask, searchQuery, onSearchChange }: HeaderProps) => {
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
+
   return (
-    <header className="bg-gray-900">
-      <div className="max-w-4xl mx-auto py-4 flex items-center justify-between">
+    <div className="flex flex-col gap-4">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <img
             src="/src/assets/heart.svg"
@@ -31,27 +22,36 @@ const Header = ({
           />
           <h1 className="text-xl font-semibold text-white">2 of Us</h1>
         </div>
-        <div className="flex items-center gap-4">
-          <div className=" hidden md:block">
-            <SearchInput
-              searchQuery={searchQuery}
-              onSearchChange={onSearchChange}
-            />
-          </div>
-          <ScrollButtons
-            onScrollToTop={onScrollToTop}
-            onScrollToBottom={onScrollToBottom}
-          />
-          <AddTaskButton onAddTask={onAddTask} totalTasks={totalTasks} />
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsSearchVisible(!isSearchVisible)}
+            className="p-2 text-gray-400 hover:text-gray-300 transition-colors sm:hidden"
+            aria-label={isSearchVisible ? "Hide search" : "Show search"}
+          >
+            <SearchIcon className="w-5 h-5" />
+          </button>
+          <button
+            onClick={onAddTask}
+            className="p-2 text-gray-400 hover:text-gray-300 transition-colors"
+            aria-label="Add task"
+          >
+            <PlusIcon className="w-5 h-5" />
+          </button>
         </div>
       </div>
-      <div className="md:hidden">
-        <SearchInput
-          searchQuery={searchQuery}
-          onSearchChange={onSearchChange}
-        />
+      <div className={`${isSearchVisible ? "block" : "hidden"} sm:block`}>
+        <div className="relative">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => onSearchChange(e.target.value)}
+            placeholder="Search tasks..."
+            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
+          />
+          <SearchIcon className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        </div>
       </div>
-    </header>
+    </div>
   );
 };
 

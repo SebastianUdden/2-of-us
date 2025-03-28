@@ -1,6 +1,6 @@
 import { LabelFilter, LabelState } from "../types/LabelState";
 import { mockLists, mockTasks } from "../data/mock";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { ANIMATION } from "./task-card/constants";
 import AddTaskPanel from "./AddTaskPanel";
@@ -9,9 +9,9 @@ import { LabelPill } from "./LabelPill";
 import { List } from "../types/List";
 import ListCard from "./list-card/ListCard";
 import { MinimizeIcon } from "./icons/MinimizeIcon";
+import Tabs from "./Tabs";
 import { Task } from "../types/Task";
 import TaskCard from "./task-card/TaskCard";
-import { ViewToggle } from "./ViewToggle";
 
 const Body = () => {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
@@ -37,7 +37,6 @@ const Body = () => {
   } | null>(null);
   const [sortField, setSortField] = useState<keyof Task>("priority");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
-  const [isHeaderMinimized, setIsHeaderMinimized] = useState(false);
   const [isSortMinimized, setIsSortMinimized] = useState(false);
   const [labelFilters, setLabelFilters] = useState<LabelFilter[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -45,7 +44,9 @@ const Body = () => {
   const [parentTaskId, setParentTaskId] = useState<string | undefined>();
   const [parentTaskTitle, setParentTaskTitle] = useState<string | undefined>();
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [lastScrollY, setLastScrollY] = useState(0);
+  const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
 
   // Get all unique labels from tasks and lists
   const allLabels = Array.from(
@@ -206,21 +207,17 @@ const Body = () => {
   };
 
   const scrollToTop = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
-    }
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   const scrollToBottom = () => {
-    if (scrollContainerRef.current) {
-      scrollContainerRef.current.scrollTo({
-        top: scrollContainerRef.current.scrollHeight,
-        behavior: "smooth",
-      });
-    }
+    window.scrollTo({
+      top: document.documentElement.scrollHeight,
+      behavior: "smooth",
+    });
   };
 
   const handleLabelClick = (label: string) => {
@@ -588,36 +585,47 @@ const Body = () => {
     }
   }, [pendingListMove, isCollapsed, handleListMove]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollPercentage = (currentScrollY + windowHeight) / documentHeight;
+
+      // If we're in the last 10% of the page, keep header hidden
+      if (scrollPercentage > 0.9) {
+        setIsHeaderVisible(false);
+        return;
+      }
+
+      // Otherwise, show header when:
+      // 1. Scrolling up
+      // 2. At the top of the page
+      setIsHeaderVisible(currentScrollY < lastScrollY || currentScrollY < 10);
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
   return (
     <div className="flex flex-col min-h-screen">
-      <div className="bg-gray-900 border-b border-gray-800">
+      <div
+        className={`bg-gray-900 border-b border-gray-800 fixed w-full transition-all duration-200 z-40 ${
+          isHeaderVisible ? "translate-y-0" : "-translate-y-full"
+        }`}
+      >
         {/* Header Section */}
-        <div
-          className={`flex items-start justify-between ${
-            isHeaderMinimized ? "py-1" : "p-4"
-          } transition-all duration-200`}
-        >
-          <div
-            className={`flex-1 transition-all duration-200 ${
-              isHeaderMinimized ? "h-6 overflow-hidden opacity-0" : ""
-            }`}
-          >
+        <div className="flex items-start justify-between p-4">
+          <div className="flex-1">
             <Header
               onAddTask={() => setIsAddTaskPanelOpen(true)}
-              totalTasks={tasks.length}
-              onScrollToTop={scrollToTop}
-              onScrollToBottom={scrollToBottom}
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
             />
           </div>
-          <button
-            onClick={() => setIsHeaderMinimized(!isHeaderMinimized)}
-            className="ml-4 p-1 text-gray-400 hover:text-gray-300 transition-colors"
-            aria-label={isHeaderMinimized ? "Expand header" : "Minimize header"}
-          >
-            <MinimizeIcon isMinimized={isHeaderMinimized} className="w-5 h-5" />
-          </button>
         </div>
 
         {/* Sort Section */}
@@ -634,16 +642,21 @@ const Body = () => {
             >
               <div className="flex gap-2 overflow-x-auto pb-2 max-w-[calc(100vw-2rem)] items-center">
                 <span className="text-xs sm:text-sm text-gray-400 mr-2 whitespace-nowrap">
-                  Sort:
+                  Sortera efter:
                 </span>
-                <SortButton field="priority" label="Priority" />
-                <SortButton field="dueDate" label="Due" />
-                <SortButton field="updatedAt" label="Updated" />
-                <SortButton field="title" label="Title" />
+                <SortButton field="priority" label="Prioritet" />
+                <SortButton field="dueDate" label="Förfallodatum" />
+                <SortButton field="updatedAt" label="Uppdaterad" />
+                <SortButton field="title" label="Titel" />
               </div>
             </div>
             <button
-              onClick={() => setIsSortMinimized(!isSortMinimized)}
+              onClick={() => {
+                setIsSortMinimized(!isSortMinimized);
+                if (!isSortMinimized) {
+                  setIsHeaderVisible(false);
+                }
+              }}
               className="ml-4 p-1 text-gray-400 hover:text-gray-300 transition-colors"
               aria-label={
                 isSortMinimized
@@ -656,111 +669,151 @@ const Body = () => {
           </div>
         </div>
       </div>
-      <div ref={scrollContainerRef} className="flex-1 p-3 sm:p-6">
-        <div className="max-w-4xl mx-auto space-y-4 sm:space-y-6">
-          <div className="flex flex-col gap-6">
-            <ViewToggle view={view} onViewChange={setView} />
-            <div className="flex flex-wrap gap-2">
-              <LabelPill
-                label="Show all"
-                onClick={clearAllFilters}
-                state={
-                  labelFilters.length === 0
-                    ? LabelState.SHOW_ONLY
-                    : LabelState.SHOW_ALL
-                }
-                count={tasks.length}
-              />
-              <LabelPill
-                label="Completed"
-                onClick={handleCompletedClick}
-                state={getCompletedState()}
-                count={completedCount}
-              />
-              <LabelPill
-                label="Due date"
-                onClick={handleDueDateClick}
-                state={getDueDateState()}
-                count={tasksWithDueDate}
-              />
-              {allLabels.map((label) => (
-                <LabelPill
-                  key={label}
-                  label={label}
-                  onClick={() => handleLabelClick(label)}
-                  state={getLabelState(label)}
-                  count={labelCounts[label]}
+      <div
+        className={`flex-1 overflow-y-auto ${
+          isHeaderVisible ? "mt-[120px]" : "mt-0"
+        }`}
+      >
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="pt-4 sm:pt-20 pb-8">
+            <div className="space-y-4">
+              <div className="flex flex-col gap-6">
+                <Tabs
+                  view={view}
+                  onViewChange={setView}
+                  counts={{
+                    todos: tasks.length,
+                    archive: tasks.filter((task) => task.archived).length,
+                    lists: lists.length,
+                  }}
                 />
-              ))}
-            </div>
-          </div>
-          <div className="space-y-6">
-            {view === "lists" ? (
-              sortedLists.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                  <p className="text-lg font-medium mb-2">No lists found</p>
-                  <p className="text-sm text-center">
-                    {selectedLabel
-                      ? "No lists with this label"
-                      : "Add your first list to get started"}
-                  </p>
+                <div className="flex flex-wrap gap-2">
+                  <div className="w-full">
+                    <button
+                      onClick={() =>
+                        setIsCategoriesExpanded(!isCategoriesExpanded)
+                      }
+                      className="flex items-center gap-2 text-gray-400 hover:text-gray-300 transition-colors mb-2"
+                    >
+                      <span className="text-xs sm:text-sm">
+                        Filterkategorier
+                      </span>
+                      <MinimizeIcon
+                        isMinimized={!isCategoriesExpanded}
+                        className="w-4 h-4"
+                      />
+                    </button>
+                    <div
+                      className={`flex flex-wrap gap-2 transition-all duration-200 ${
+                        isCategoriesExpanded
+                          ? "opacity-100 max-h-[500px]"
+                          : "opacity-0 max-h-0 overflow-hidden"
+                      }`}
+                    >
+                      <LabelPill
+                        label="Avklarade"
+                        onClick={handleCompletedClick}
+                        state={getCompletedState()}
+                        count={completedCount}
+                      />
+                      <LabelPill
+                        label="Förfallodatum"
+                        onClick={handleDueDateClick}
+                        state={getDueDateState()}
+                        count={tasksWithDueDate}
+                      />
+                      {allLabels.map((label) => (
+                        <LabelPill
+                          key={label}
+                          label={label}
+                          onClick={() => handleLabelClick(label)}
+                          state={getLabelState(label)}
+                          count={labelCounts[label]}
+                        />
+                      ))}
+                      <LabelPill
+                        label="Rensa filter"
+                        onClick={clearAllFilters}
+                        state={
+                          labelFilters.length === 0
+                            ? LabelState.SHOW_ONLY
+                            : LabelState.SHOW_ALL
+                        }
+                        count={tasks.length}
+                      />
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                sortedLists.map((list) => (
-                  <ListCard
-                    key={list.id}
-                    list={list}
-                    onComplete={handleListComplete}
-                    onDelete={handleListDelete}
-                    onUpdate={handleListUpdate}
-                    onLabelClick={handleListLabelClick}
-                    selectedLabel={selectedLabel}
-                    onConvertToTask={handleListConvertToTask}
-                    onPriorityChange={handleListPriorityChange}
-                    totalLists={sortedLists.length}
-                    isAnimating={animatingListId === list.id}
-                    isCollapsed={isCollapsed}
-                    onHeightChange={handleListHeight}
-                  />
-                ))
-              )
-            ) : sortedAndFilteredTasks.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                <p className="text-lg font-medium mb-2">No tasks found</p>
-                <p className="text-sm text-center">
-                  {selectedLabel
-                    ? "No tasks with this label"
-                    : "Add your first task to get started"}
-                </p>
               </div>
-            ) : (
-              sortedAndFilteredTasks.map((task) => (
-                <TaskCard
-                  key={task.id}
-                  task={task}
-                  onPriorityChange={handlePriorityChange}
-                  onComplete={handleComplete}
-                  onDelete={handleDelete}
-                  onArchive={handleArchive}
-                  onUpdate={handleUpdate}
-                  totalTasks={tasks.length}
-                  isAnimating={task.id === animatingTaskId}
-                  isCollapsed={isCollapsed}
-                  onHeightChange={handleTaskHeight}
-                  onLabelClick={handleLabelClick}
-                  selectedLabel={selectedLabel}
-                  onAddSubtask={handleAddSubtask}
-                  expandedTaskId={expandedTaskId}
-                  setExpandedTaskId={setExpandedTaskId}
-                />
-              ))
-            )}
-            {animatingTaskHeight !== null && isCollapsed && (
-              <div
-                className="w-full bg-transparent"
-                style={{ height: `${animatingTaskHeight}px` }}
-              />
-            )}
+              <div className="space-y-6">
+                {view === "lists" ? (
+                  sortedLists.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                      <p className="text-lg font-medium mb-2">No lists found</p>
+                      <p className="text-sm text-center">
+                        {selectedLabel
+                          ? "No lists with this label"
+                          : "Add your first list to get started"}
+                      </p>
+                    </div>
+                  ) : (
+                    sortedLists.map((list) => (
+                      <ListCard
+                        key={list.id}
+                        list={list}
+                        onComplete={handleListComplete}
+                        onDelete={handleListDelete}
+                        onUpdate={handleListUpdate}
+                        onLabelClick={handleListLabelClick}
+                        selectedLabel={selectedLabel}
+                        onConvertToTask={handleListConvertToTask}
+                        onPriorityChange={handleListPriorityChange}
+                        totalLists={sortedLists.length}
+                        isAnimating={animatingListId === list.id}
+                        isCollapsed={isCollapsed}
+                        onHeightChange={handleListHeight}
+                      />
+                    ))
+                  )
+                ) : sortedAndFilteredTasks.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center h-full text-gray-400">
+                    <p className="text-lg font-medium mb-2">No tasks found</p>
+                    <p className="text-sm text-center">
+                      {selectedLabel
+                        ? "No tasks with this label"
+                        : "Add your first task to get started"}
+                    </p>
+                  </div>
+                ) : (
+                  sortedAndFilteredTasks.map((task) => (
+                    <TaskCard
+                      key={task.id}
+                      task={task}
+                      onPriorityChange={handlePriorityChange}
+                      onComplete={handleComplete}
+                      onDelete={handleDelete}
+                      onArchive={handleArchive}
+                      onUpdate={handleUpdate}
+                      totalTasks={tasks.length}
+                      isAnimating={task.id === animatingTaskId}
+                      isCollapsed={isCollapsed}
+                      onHeightChange={handleTaskHeight}
+                      onLabelClick={handleLabelClick}
+                      selectedLabel={selectedLabel}
+                      onAddSubtask={handleAddSubtask}
+                      expandedTaskId={expandedTaskId}
+                      setExpandedTaskId={setExpandedTaskId}
+                    />
+                  ))
+                )}
+                {animatingTaskHeight !== null && isCollapsed && (
+                  <div
+                    className="w-full bg-transparent"
+                    style={{ height: `${animatingTaskHeight}px` }}
+                  />
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

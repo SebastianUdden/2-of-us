@@ -192,13 +192,13 @@ const TaskCard = ({
                     onClick={handleCancel}
                     className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
                   >
-                    Cancel
+                    Avbryt
                   </button>
                   <button
                     type="submit"
                     className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
                   >
-                    Save
+                    Spara
                   </button>
                 </div>
               </form>
@@ -218,7 +218,7 @@ const TaskCard = ({
         <div className="flex justify-between items-end mt-4 border-t border-gray-700">
           <TaskUpdates task={task} />
           <div className="flex flex-col items-start gap-1">
-            <span className="text-sm text-gray-400">Position</span>
+            <span className="text-sm text-gray-400">Prioritet</span>
             <select
               value={task.priority}
               onChange={(e) =>

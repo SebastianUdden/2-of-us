@@ -22,7 +22,7 @@ export const LabelPill = ({ label, onClick, state, count }: LabelPillProps) => {
   return (
     <button
       onClick={onClick}
-      className={`px-2 py-1 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 ${getStateStyles()}`}
+      className={`px-2 py-1 text-xs font-medium rounded-lg transition-colors flex items-center gap-1 ${getStateStyles()} capitalize`}
     >
       {label}
       {count !== undefined && (
