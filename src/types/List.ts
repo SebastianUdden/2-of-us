@@ -1,21 +1,20 @@
-export type ListItem = {
+export interface ListItem {
   id: string;
   content: string;
   completed: boolean;
   createdAt: Date;
   updatedAt: Date;
-};
+}
 
-export type ListType = "ordered" | "unordered";
-
-export type List = {
+export interface List {
   id: string;
   title: string;
   description?: string;
-  type: ListType;
-  items: ListItem[];
+  author: string;
   createdAt: Date;
   updatedAt: Date;
-  author: string;
+  type: "ordered" | "unordered";
+  items: ListItem[];
   labels?: string[];
-};
+  priority: number;
+}

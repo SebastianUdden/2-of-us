@@ -140,6 +140,7 @@ export const mockLists: List[] = [
     title: "Shopping List",
     description: "Items to buy for the weekend",
     type: "unordered",
+    priority: 1,
     items: [
       {
         id: "1-1",
@@ -173,6 +174,7 @@ export const mockLists: List[] = [
     title: "Project Setup Steps",
     description: "Steps to set up the new project",
     type: "ordered",
+    priority: 2,
     items: [
       {
         id: "2-1",
@@ -210,9 +212,10 @@ export const mockLists: List[] = [
   },
   {
     id: "3",
-    title: "Movie Watchlist",
-    description: "Movies to watch this month",
+    title: "Reading List",
+    description: "Books to read this month",
     type: "unordered",
+    priority: 3,
     items: [
       {
         id: "3-1",
@@ -239,6 +242,6 @@ export const mockLists: List[] = [
     createdAt: new Date("2024-03-18"),
     updatedAt: new Date("2024-03-18"),
     author: "John Doe",
-    labels: ["entertainment", "movies"],
+    labels: ["reading", "hobby"],
   },
 ];

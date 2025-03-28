@@ -21,10 +21,18 @@ const Body = () => {
   const [animatingTaskHeight, setAnimatingTaskHeight] = useState<number | null>(
     null
   );
+  const [animatingListId, setAnimatingListId] = useState<string | null>(null);
+  const [animatingListHeight, setAnimatingListHeight] = useState<number | null>(
+    null
+  );
   const [selectedLabel, setSelectedLabel] = useState<string | undefined>();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [pendingTaskMove, setPendingTaskMove] = useState<{
     taskId: string;
+    newPosition: number;
+  } | null>(null);
+  const [pendingListMove, setPendingListMove] = useState<{
+    listId: string;
     newPosition: number;
   } | null>(null);
   const [sortField, setSortField] = useState<keyof Task>("priority");
@@ -452,7 +460,20 @@ const Body = () => {
   };
 
   const handleListDelete = (listId: string) => {
-    setLists((prevLists) => prevLists.filter((list) => list.id !== listId));
+    setAnimatingListId(listId);
+    setIsCollapsed(true);
+
+    // Wait for collapse animation
+    setTimeout(() => {
+      setLists((prevLists) => {
+        const filteredLists = prevLists.filter((list) => list.id !== listId);
+        // Sort remaining lists and update priorities
+        return sortLists(filteredLists);
+      });
+      setAnimatingListId(null);
+      setAnimatingListHeight(null);
+      setIsCollapsed(false);
+    }, ANIMATION.DURATION * 2);
   };
 
   const handleListUpdate = (updatedList: List) => {
@@ -471,8 +492,14 @@ const Body = () => {
   });
 
   const sortedLists = [...filteredLists].sort((a, b) => {
-    const multiplier = sortDirection === "asc" ? 1 : -1;
-    return multiplier * (a.createdAt.getTime() - b.createdAt.getTime());
+    // First sort by completion status (completed lists go to bottom)
+    const aCompleted = a.items.every((item) => item.completed);
+    const bCompleted = b.items.every((item) => item.completed);
+    if (aCompleted !== bCompleted) {
+      return aCompleted ? 1 : -1;
+    }
+    // Then sort by priority
+    return a.priority - b.priority;
   });
 
   const handleListConvertToTask = (task: Task) => {
@@ -482,6 +509,76 @@ const Body = () => {
       return sortTasks(updatedTasks);
     });
   };
+
+  const sortLists = useCallback((lists: List[]): List[] => {
+    // First sort by completion status (completed lists go to bottom)
+    const sortedByCompletion = [...lists].sort((a, b) => {
+      const aCompleted = a.items.every((item) => item.completed);
+      const bCompleted = b.items.every((item) => item.completed);
+      if (aCompleted !== bCompleted) {
+        return aCompleted ? 1 : -1;
+      }
+      return 0;
+    });
+
+    // Then sort by priority within each group (completed/uncompleted)
+    return sortedByCompletion.map((list, index) => ({
+      ...list,
+      priority: index + 1,
+    }));
+  }, []);
+
+  const handleListPriorityChange = (listId: string, newPosition: number) => {
+    setAnimatingListId(listId);
+    setPendingListMove({ listId, newPosition });
+    setIsCollapsed(true);
+  };
+
+  const handleListHeight = (height: number) => {
+    setAnimatingListHeight(height);
+  };
+
+  // Handle the actual list move after collapse animation
+  const handleListMove = useCallback(() => {
+    if (!pendingListMove) return;
+
+    const { listId, newPosition } = pendingListMove;
+    setLists((prevLists) => {
+      const listIndex = prevLists.findIndex((list) => list.id === listId);
+      const newLists = [...prevLists];
+      const [movedList] = newLists.splice(listIndex, 1);
+      newLists.splice(newPosition - 1, 0, movedList);
+
+      // Sort lists and update priorities
+      return sortLists(newLists);
+    });
+
+    // Start expand animation
+    setIsCollapsed(false);
+
+    // Wait for expand animation and then scroll to the list
+    setTimeout(() => {
+      setAnimatingListId(null);
+      setPendingListMove(null);
+      setAnimatingListHeight(null);
+
+      // Scroll to the list
+      const listElement = document.getElementById(`list-${listId}`);
+      if (listElement) {
+        listElement.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+    }, ANIMATION.DURATION);
+  }, [pendingListMove, sortLists]);
+
+  // Start the collapse animation for lists
+  useEffect(() => {
+    if (pendingListMove) {
+      const timer = setTimeout(() => {
+        handleListMove();
+      }, 300);
+      return () => clearTimeout(timer);
+    }
+  }, [pendingListMove, isCollapsed, handleListMove]);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -611,6 +708,10 @@ const Body = () => {
                     onLabelClick={handleListLabelClick}
                     selectedLabel={selectedLabel}
                     onConvertToTask={handleListConvertToTask}
+                    onPriorityChange={handleListPriorityChange}
+                    totalLists={sortedLists.length}
+                    isAnimating={animatingListId === list.id}
+                    isCollapsed={isCollapsed}
                   />
                 ))
               )
