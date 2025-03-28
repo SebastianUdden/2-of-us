@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ANIMATION } from "./constants";
-import { ChevronDownIcon } from "../icons/ChevronDownIcon";
-import { ChevronUpIcon } from "../icons/ChevronUpIcon";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import { LabelPill } from "../LabelPill";
 import { LabelState } from "../../types/LabelState";
@@ -27,6 +25,10 @@ interface TaskCardProps {
   setExpandedTaskId: (id: string | null) => void;
   showPriorityControls: boolean;
   currentSortField: string;
+  onHeightChange: (height: number) => void;
+  onLabelClick: (label: string) => void;
+  selectedLabel: string;
+  onAddSubtask: (taskId: string) => void;
 }
 
 const TaskCard = ({
@@ -42,12 +44,10 @@ const TaskCard = ({
   onHeightChange,
   onLabelClick,
   selectedLabel,
-  disablePriorityControls = false,
   onAddSubtask,
   expandedTaskId,
   setExpandedTaskId,
   showPriorityControls,
-  currentSortField,
 }: TaskCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -118,18 +118,6 @@ const TaskCard = ({
   const toggleSubtasks = () => {
     setShowSubtasks(!showSubtasks);
     setExpandedTaskId(showSubtasks ? null : task.id);
-  };
-
-  const handleComplete = (taskId: string) => {
-    onComplete(taskId);
-  };
-
-  const handlePriorityChange = (taskId: string, newPosition: number) => {
-    onPriorityChange(taskId, newPosition);
-  };
-
-  const handleUpdate = (updatedTask: Task) => {
-    onUpdate(updatedTask);
   };
 
   return (
