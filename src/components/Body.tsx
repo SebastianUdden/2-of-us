@@ -810,6 +810,7 @@ const Body = () => {
                       expandedTaskId={expandedTaskId}
                       setExpandedTaskId={setExpandedTaskId}
                       showPriorityControls={sortField === "priority"}
+                      currentSortField={sortField}
                     />
                   ))
                 )}
