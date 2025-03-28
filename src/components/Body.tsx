@@ -601,7 +601,7 @@ const Body = () => {
       // Otherwise, show header when:
       // 1. Scrolling up
       // 2. At the top of the page
-      setIsHeaderVisible(currentScrollY < lastScrollY || currentScrollY < 10);
+      setIsHeaderVisible(currentScrollY < lastScrollY || currentScrollY < 200);
 
       setLastScrollY(currentScrollY);
     };
@@ -772,6 +772,7 @@ const Body = () => {
                         isAnimating={animatingListId === list.id}
                         isCollapsed={isCollapsed}
                         onHeightChange={handleListHeight}
+                        showPriorityControls={sortField === "priority"}
                       />
                     ))
                   )
@@ -803,6 +804,7 @@ const Body = () => {
                       onAddSubtask={handleAddSubtask}
                       expandedTaskId={expandedTaskId}
                       setExpandedTaskId={setExpandedTaskId}
+                      showPriorityControls={sortField === "priority"}
                     />
                   ))
                 )}

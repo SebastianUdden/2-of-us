@@ -29,7 +29,7 @@ const ConfirmDialog = ({
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
           >
-            Cancel
+            Avbryt
           </button>
           <button
             onClick={() => {
@@ -38,7 +38,7 @@ const ConfirmDialog = ({
             }}
             className="px-4 py-2 text-sm font-medium text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors"
           >
-            Delete
+            Ta bort
           </button>
         </div>
       </div>

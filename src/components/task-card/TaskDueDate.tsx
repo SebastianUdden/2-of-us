@@ -27,11 +27,15 @@ const TaskDueDate = ({ dueDate, onDueDateChange }: TaskDueDateProps) => {
     setDays(daysDiff);
 
     if (daysDiff > 0) {
-      setTimeRemaining(`${daysDiff}d`);
+      setTimeRemaining(`${daysDiff} ${daysDiff === 1 ? "dag" : "dagar"}`);
     } else if (daysDiff < 0) {
-      setTimeRemaining(`${Math.abs(daysDiff)}d overdue`);
+      setTimeRemaining(
+        `${Math.abs(daysDiff)} ${
+          Math.abs(daysDiff) === 1 ? "dag" : "dagar"
+        } försenad`
+      );
     } else {
-      setTimeRemaining("Due today");
+      setTimeRemaining("Förfaller idag");
     }
   }, [dueDate]);
 

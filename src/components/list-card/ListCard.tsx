@@ -23,6 +23,9 @@ interface ListCardProps {
   isAnimating?: boolean;
   isCollapsed?: boolean;
   onHeightChange?: (height: number) => void;
+  expandedListId: string | null;
+  setExpandedListId: (id: string | null) => void;
+  showPriorityControls: boolean;
 }
 
 const ListCard = ({
@@ -38,6 +41,7 @@ const ListCard = ({
   isAnimating = false,
   isCollapsed = false,
   onHeightChange,
+  showPriorityControls,
 }: ListCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -46,6 +50,8 @@ const ListCard = ({
   const [editedDescription, setEditedDescription] = useState(
     list.description || ""
   );
+  const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
+    useState(false);
 
   useEffect(() => {
     if (!isAnimating && cardRef.current && onHeightChange) {
@@ -187,16 +193,50 @@ const ListCard = ({
               onCancel={handleCancel}
             />
           </div>
-          {onPriorityChange && (
-            <div className="flex items-start pt-2">
-              <TaskArrows
-                taskId={list.id}
-                priority={list.priority}
-                totalTasks={totalLists}
-                onPriorityChange={(_, newPosition) =>
-                  onPriorityChange(list.id, newPosition)
-                }
-              />
+          {onPriorityChange && showPriorityControls && (
+            <div className="flex flex-col items-end gap-2">
+              {!isPriorityControlsVisible ? (
+                <button
+                  onClick={() => setIsPriorityControlsVisible(true)}
+                  className="text-sm text-blue-400 hover:text-blue-300"
+                >
+                  Omprioritera
+                </button>
+              ) : (
+                <div className="flex flex-col items-end gap-1">
+                  <button
+                    onClick={() => setIsPriorityControlsVisible(false)}
+                    className="text-sm text-gray-400 hover:text-gray-300"
+                  >
+                    Stäng
+                  </button>
+                  <div className="flex items-center gap-1">
+                    <TaskArrows
+                      taskId={list.id}
+                      priority={list.priority}
+                      totalTasks={totalLists}
+                      onPriorityChange={(_, newPosition) =>
+                        onPriorityChange(list.id, newPosition)
+                      }
+                    />
+                    <select
+                      value={list.priority}
+                      onChange={(e) =>
+                        onPriorityChange(list.id, Number(e.target.value))
+                      }
+                      className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {Array.from({ length: totalLists }, (_, i) => i + 1).map(
+                        (position) => (
+                          <option key={position} value={position}>
+                            {position}
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </div>

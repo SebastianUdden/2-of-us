@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 
 import { ANIMATION } from "./constants";
+import { ChevronDownIcon } from "../icons/ChevronDownIcon";
+import { ChevronUpIcon } from "../icons/ChevronUpIcon";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import { LabelPill } from "../LabelPill";
 import { LabelState } from "../../types/LabelState";
@@ -17,17 +19,14 @@ interface TaskCardProps {
   onComplete: (taskId: string) => void;
   onDelete: (taskId: string) => void;
   onArchive: (taskId: string) => void;
-  onUpdate: (task: Task) => void;
+  onUpdate: (updatedTask: Task) => void;
   totalTasks: number;
-  isAnimating?: boolean;
-  isCollapsed?: boolean;
-  onHeightChange?: (height: number) => void;
-  onLabelClick?: (label: string) => void;
-  selectedLabel?: string;
-  disablePriorityControls?: boolean;
-  onAddSubtask?: (parentTaskId: string) => void;
+  isAnimating: boolean;
+  isCollapsed: boolean;
   expandedTaskId: string | null;
   setExpandedTaskId: (id: string | null) => void;
+  showPriorityControls: boolean;
+  currentSortField: string;
 }
 
 const TaskCard = ({
@@ -47,6 +46,8 @@ const TaskCard = ({
   onAddSubtask,
   expandedTaskId,
   setExpandedTaskId,
+  showPriorityControls,
+  currentSortField,
 }: TaskCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -54,6 +55,8 @@ const TaskCard = ({
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description);
   const [showSubtasks, setShowSubtasks] = useState(expandedTaskId === task.id);
+  const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
+    useState(false);
 
   useEffect(() => {
     setShowSubtasks(expandedTaskId === task.id);
@@ -115,6 +118,18 @@ const TaskCard = ({
   const toggleSubtasks = () => {
     setShowSubtasks(!showSubtasks);
     setExpandedTaskId(showSubtasks ? null : task.id);
+  };
+
+  const handleComplete = (taskId: string) => {
+    onComplete(taskId);
+  };
+
+  const handlePriorityChange = (taskId: string, newPosition: number) => {
+    onPriorityChange(taskId, newPosition);
+  };
+
+  const handleUpdate = (updatedTask: Task) => {
+    onUpdate(updatedTask);
   };
 
   return (
@@ -207,34 +222,55 @@ const TaskCard = ({
             )}
             <TaskFooter task={task} />
           </div>
-          <TaskArrows
-            taskId={task.id}
-            priority={task.priority}
-            totalTasks={totalTasks}
-            onPriorityChange={onPriorityChange}
-            disabled={disablePriorityControls}
-          />
+          {isPriorityControlsVisible && (
+            <TaskArrows
+              taskId={task.id}
+              priority={task.priority}
+              totalTasks={totalTasks}
+              onPriorityChange={onPriorityChange}
+            />
+          )}
         </div>
         <div className="flex justify-between items-end mt-4 border-t border-gray-700">
           <TaskUpdates task={task} />
-          <div className="flex flex-col items-start gap-1">
-            <span className="text-sm text-gray-400">Prioritet</span>
-            <select
-              value={task.priority}
-              onChange={(e) =>
-                onPriorityChange(task.id, Number(e.target.value))
-              }
-              className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {Array.from({ length: totalTasks }, (_, i) => i + 1).map(
-                (position) => (
-                  <option key={position} value={position}>
-                    {position}
-                  </option>
-                )
+          {showPriorityControls && (
+            <div className="flex flex-col items-end gap-2 mt-2">
+              {!isPriorityControlsVisible ? (
+                <button
+                  onClick={() => setIsPriorityControlsVisible(true)}
+                  className="text-sm text-blue-400 hover:text-blue-300"
+                >
+                  Omprioritera
+                </button>
+              ) : (
+                <div className="flex flex-col items-start gap-1">
+                  <button
+                    onClick={() => setIsPriorityControlsVisible(false)}
+                    className="text-sm text-gray-400 hover:text-gray-300"
+                  >
+                    Färdigprioriterat
+                  </button>
+                  <div className="flex items-center gap-1">
+                    <select
+                      value={task.priority}
+                      onChange={(e) =>
+                        onPriorityChange(task.id, Number(e.target.value))
+                      }
+                      className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      {Array.from({ length: totalTasks }, (_, i) => i + 1).map(
+                        (position) => (
+                          <option key={position} value={position}>
+                            {position}
+                          </option>
+                        )
+                      )}
+                    </select>
+                  </div>
+                </div>
               )}
-            </select>
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Subtasks Section */}
@@ -300,7 +336,7 @@ const TaskCard = ({
             className="mt-4 text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
           >
             <span>+</span>
-            <span>Add Subtask</span>
+            <span>Lägg till deluppgift</span>
           </button>
         )}
       </div>
