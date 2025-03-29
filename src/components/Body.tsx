@@ -683,7 +683,7 @@ const Body = () => {
         }`}
       >
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="pt-4 sm:pt-20 pb-8">
+          <div className="pt-8 sm:pt-20 pb-8">
             <div className="space-y-4">
               <div className="flex flex-col gap-6">
                 <Tabs
