@@ -27,7 +27,6 @@ export const TaskHeader = ({
   editedTitle,
   setEditedTitle,
   onSubmit,
-  onCancel,
   expandedTaskId,
   setExpandedTaskId,
 }: TaskHeaderProps) => {
@@ -35,7 +34,7 @@ export const TaskHeader = ({
     <div className="flex items-start w-full justify-between">
       <div className="flex-1">
         {isEditing ? (
-          <form onSubmit={onSubmit} className="flex-1 flex gap-2">
+          <form onSubmit={onSubmit} className="flex-1 flex gap-2 mr-4">
             <input
               type="text"
               value={editedTitle}
@@ -43,19 +42,6 @@ export const TaskHeader = ({
               className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter task title..."
             />
-            <button
-              type="button"
-              onClick={onCancel}
-              className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
-            >
-              Avbryt
-            </button>
-            <button
-              type="submit"
-              className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
-            >
-              Spara
-            </button>
           </form>
         ) : (
           <div className="flex items-center gap-2">
@@ -81,6 +67,7 @@ export const TaskHeader = ({
               onClick={() => {
                 setIsEditing(true);
                 setEditedTitle(task.title);
+                setExpandedTaskId(task.id);
               }}
             >
               {task.title}
@@ -108,9 +95,10 @@ export const TaskHeader = ({
           <ArchiveIcon className="w-4 h-4" />
         </button>
         <button
-          onClick={() =>
-            setExpandedTaskId(expandedTaskId === task.id ? null : task.id)
-          }
+          onClick={() => {
+            setExpandedTaskId(expandedTaskId === task.id ? null : task.id);
+            setIsEditing(false);
+          }}
           className="p-1 text-gray-400 hover:text-gray-300 transition-colors"
         >
           <svg

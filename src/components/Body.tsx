@@ -402,7 +402,6 @@ const Body = () => {
 
   const clearAllFilters = () => {
     setLabelFilters([]);
-    setSearchQuery("");
   };
 
   const handleSort = (field: keyof Task) => {
