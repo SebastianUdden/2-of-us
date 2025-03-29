@@ -736,45 +736,45 @@ const Body = () => {
                         className="w-4 h-4"
                       />
                     </button>
-                    <div
-                      className={`flex flex-wrap gap-2 transition-all duration-200 ${
-                        isCategoriesExpanded
-                          ? "opacity-100 max-h-[500px]"
-                          : "opacity-0 max-h-0 overflow-hidden"
-                      }`}
-                    >
+                  </div>
+                  <div
+                    className={`flex flex-wrap gap-2 transition-all duration-200 ${
+                      isCategoriesExpanded
+                        ? "opacity-100 max-h-[500px]"
+                        : "opacity-0 max-h-0 overflow-hidden"
+                    }`}
+                  >
+                    <LabelPill
+                      label="Avklarade"
+                      onClick={handleCompletedClick}
+                      state={getCompletedState()}
+                      count={completedCount}
+                    />
+                    <LabelPill
+                      label="Förfallodatum"
+                      onClick={handleDueDateClick}
+                      state={getDueDateState()}
+                      count={tasksWithDueDate}
+                    />
+                    {allLabels.map((label) => (
                       <LabelPill
-                        label="Avklarade"
-                        onClick={handleCompletedClick}
-                        state={getCompletedState()}
-                        count={completedCount}
+                        key={label}
+                        label={label}
+                        onClick={() => handleLabelClick(label)}
+                        state={getLabelState(label)}
+                        count={labelCounts[label]}
                       />
-                      <LabelPill
-                        label="Förfallodatum"
-                        onClick={handleDueDateClick}
-                        state={getDueDateState()}
-                        count={tasksWithDueDate}
-                      />
-                      {allLabels.map((label) => (
-                        <LabelPill
-                          key={label}
-                          label={label}
-                          onClick={() => handleLabelClick(label)}
-                          state={getLabelState(label)}
-                          count={labelCounts[label]}
-                        />
-                      ))}
-                      <LabelPill
-                        label="Rensa filter"
-                        onClick={clearAllFilters}
-                        state={
-                          labelFilters.length === 0
-                            ? LabelState.SHOW_ONLY
-                            : LabelState.SHOW_ALL
-                        }
-                        count={tasks.length}
-                      />
-                    </div>
+                    ))}
+                    <LabelPill
+                      label="Rensa filter"
+                      onClick={clearAllFilters}
+                      state={
+                        labelFilters.length === 0
+                          ? LabelState.SHOW_ONLY
+                          : LabelState.SHOW_ALL
+                      }
+                      count={tasks.length}
+                    />
                   </div>
                 </div>
               </div>
