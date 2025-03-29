@@ -60,59 +60,59 @@ const AddTaskPanel = ({
     };
   }, [isOpen, totalTasks]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (parentTaskId) {
-      // Adding a subtask
-      const subtask = {
-        id: crypto.randomUUID(),
-        title: formData.title,
-        completed: false,
-      };
-      onAddTask({
-        id: crypto.randomUUID(),
-        title: formData.title,
-        description: formData.description,
-        priority: formData.priority,
-        author: "Sebastian Uddén",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        completed: false,
-        archived: false,
-        labels: formData.labels,
-        updates: [
-          {
-            author: "Sebastian Uddén",
-            updatedAt: new Date(),
-          },
-        ],
-        subtasks: [subtask],
-        parentTaskId,
-      });
-    } else {
-      // Adding a main task
-      const newTask: Task = {
-        id: crypto.randomUUID(),
-        title: formData.title,
-        description: formData.description,
-        priority: formData.priority,
-        author: "Sebastian Uddén",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        completed: false,
-        archived: false,
-        labels: formData.labels,
-        updates: [
-          {
-            author: "Sebastian Uddén",
-            updatedAt: new Date(),
-          },
-        ],
-        subtasks: [],
-      };
-      onAddTask(newTask);
+  const handleSubmitClick = () => {
+    if (formData.title.trim()) {
+      if (parentTaskId) {
+        // Adding a subtask
+        const subtask = {
+          id: crypto.randomUUID(),
+          title: formData.title,
+          completed: false,
+        };
+        onAddTask({
+          id: crypto.randomUUID(),
+          title: formData.title,
+          description: formData.description,
+          priority: formData.priority,
+          author: "Sebastian Uddén",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          completed: false,
+          archived: false,
+          labels: formData.labels,
+          updates: [
+            {
+              author: "Sebastian Uddén",
+              updatedAt: new Date(),
+            },
+          ],
+          subtasks: [subtask],
+          parentTaskId,
+        });
+      } else {
+        // Adding a main task
+        onAddTask({
+          id: crypto.randomUUID(),
+          title: formData.title.trim(),
+          description: formData.description.trim(),
+          priority: formData.priority,
+          author: "Sebastian Uddén",
+          createdAt: new Date(),
+          updatedAt: new Date(),
+          completed: false,
+          archived: false,
+          labels: formData.labels,
+          updates: [
+            {
+              author: "Sebastian Uddén",
+              updatedAt: new Date(),
+            },
+          ],
+          subtasks: [],
+        });
+      }
+      onClose();
     }
-    onClose();
   };
 
   const toggleLabel = (label: string) => {
@@ -138,8 +138,8 @@ const AddTaskPanel = ({
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
           <h2 className="text-xl font-semibold text-white">
             {parentTaskId
-              ? `Add Subtask to "${parentTaskTitle}"`
-              : "Add New Task"}
+              ? `Lägg till deluppgift till "${parentTaskTitle}"`
+              : "Lägg till uppgift"}
           </h2>
           <button
             onClick={onClose}
@@ -161,14 +161,14 @@ const AddTaskPanel = ({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
+        <div className="flex-1 flex flex-col">
           <div className="space-y-4 p-4">
             <div>
               <label
                 htmlFor="title"
                 className="block text-sm font-medium text-gray-300 mb-1"
               >
-                Title
+                Titel
               </label>
               <input
                 ref={titleInputRef}
@@ -193,7 +193,7 @@ const AddTaskPanel = ({
                     htmlFor="description"
                     className="block text-sm font-medium text-gray-300 mb-1"
                   >
-                    Description
+                    Beskrivning
                   </label>
                   <textarea
                     id="description"
@@ -210,7 +210,7 @@ const AddTaskPanel = ({
 
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
-                    Labels
+                    Etiketter
                   </label>
                   <div className="flex flex-wrap gap-2">
                     {AVAILABLE_LABELS.map((label) => (
@@ -235,7 +235,7 @@ const AddTaskPanel = ({
                     htmlFor="priority"
                     className="block text-sm font-medium text-gray-300 mb-1"
                   >
-                    Priority
+                    Prioritet
                   </label>
                   <select
                     id="priority"
@@ -271,13 +271,14 @@ const AddTaskPanel = ({
               Avbryt
             </button>
             <button
-              type="submit"
-              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors"
+              type="button"
+              onClick={handleSubmitClick}
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
-              {parentTaskId ? "Lägg till deluppgift" : "Lägg till uppgift"}
+              Lägg till uppgift
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
