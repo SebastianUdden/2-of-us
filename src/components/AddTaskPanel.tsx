@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 
 import { Task } from "../types/Task";
+import { generateUUID } from "../utils/uuid";
 
 const AVAILABLE_LABELS = [
   "work",
@@ -60,59 +61,49 @@ const AddTaskPanel = ({
     };
   }, [isOpen, totalTasks]);
 
-  const handleSubmitClick = () => {
-    if (formData.title.trim()) {
-      if (parentTaskId) {
-        // Adding a subtask
-        const subtask = {
-          id: crypto.randomUUID(),
-          title: formData.title,
-          completed: false,
-        };
-        onAddTask({
-          id: crypto.randomUUID(),
-          title: formData.title,
-          description: formData.description,
-          priority: formData.priority,
-          author: "Sebastian Uddén",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          completed: false,
-          archived: false,
-          labels: formData.labels,
-          updates: [
-            {
-              author: "Sebastian Uddén",
-              updatedAt: new Date(),
-            },
-          ],
-          subtasks: [subtask],
-          parentTaskId,
-        });
-      } else {
-        // Adding a main task
-        onAddTask({
-          id: crypto.randomUUID(),
-          title: formData.title.trim(),
-          description: formData.description.trim(),
-          priority: formData.priority,
-          author: "Sebastian Uddén",
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          completed: false,
-          archived: false,
-          labels: formData.labels,
-          updates: [
-            {
-              author: "Sebastian Uddén",
-              updatedAt: new Date(),
-            },
-          ],
-          subtasks: [],
-        });
-      }
-      onClose();
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!formData.title.trim()) return;
+
+    const newTask: Task = {
+      id: generateUUID(),
+      title: formData.title.trim(),
+      description: formData.description.trim(),
+      completed: false,
+      archived: false,
+      priority: formData.priority,
+      labels: formData.labels,
+      author: "Sebastian",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      updates: [],
+      subtasks: [],
+      dueDate: undefined,
+    };
+
+    if (parentTaskId) {
+      // Adding a subtask
+      const subtask: Task = {
+        id: generateUUID(),
+        title: formData.title,
+        description: formData.description,
+        completed: false,
+        archived: false,
+        priority: formData.priority,
+        labels: formData.labels,
+        author: "Sebastian",
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        updates: [],
+        subtasks: [],
+        dueDate: undefined,
+      };
+      newTask.subtasks = [subtask];
+      newTask.parentTaskId = parentTaskId;
     }
+
+    onAddTask(newTask);
+    onClose();
   };
 
   const toggleLabel = (label: string) => {
@@ -272,7 +263,7 @@ const AddTaskPanel = ({
             </button>
             <button
               type="button"
-              onClick={handleSubmitClick}
+              onClick={handleSubmit}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               Lägg till uppgift

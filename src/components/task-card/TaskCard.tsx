@@ -105,6 +105,15 @@ const TaskCard = ({
       ...task,
       subtasks: updatedSubtasks,
     });
+
+    // Check if all subtasks are now completed
+    const allCompleted = updatedSubtasks.every((subtask) => subtask.completed);
+    if (allCompleted) {
+      // Wait 1 second before hiding subtasks
+      setTimeout(() => {
+        setShowSubtasks(false);
+      }, 1000);
+    }
   };
 
   const handleSubtaskDelete = (subtaskId: string) => {
@@ -119,7 +128,6 @@ const TaskCard = ({
 
   const toggleSubtasks = () => {
     setShowSubtasks(!showSubtasks);
-    setExpandedTaskId(showSubtasks ? null : task.id);
   };
 
   // Calculate subtask progress
@@ -259,12 +267,14 @@ const TaskCard = ({
                   <span>Lägg till deluppgift</span>
                 </button>
               )}
-              <button
-                onClick={toggleSubtasks}
-                className="text-sm text-gray-400 hover:text-gray-300"
-              >
-                {showSubtasks ? "Göm deluppgifter" : "Visa deluppgifter"}
-              </button>
+              {task.subtasks && task.subtasks.length > 0 && (
+                <button
+                  onClick={toggleSubtasks}
+                  className="text-sm text-gray-400 hover:text-gray-300"
+                >
+                  {showSubtasks ? "Göm deluppgifter" : "Visa deluppgifter"}
+                </button>
+              )}
             </div>
             {/* Subtasks Section */}
             {task.subtasks && task.subtasks.length > 0 && (
