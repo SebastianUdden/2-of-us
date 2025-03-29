@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { ANIMATION } from "./constants";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
+import { EditIcon } from "../common/EditIcon";
 import { LabelPill } from "../LabelPill";
 import { LabelState } from "../../types/LabelState";
 import { Task } from "../../types/Task";
@@ -160,6 +161,7 @@ const TaskCard = ({
                 onCancel={handleCancel}
                 expandedTaskId={expandedTaskId}
                 setExpandedTaskId={setExpandedTaskId}
+                setIsPriorityControlsVisible={setIsPriorityControlsVisible}
               />
             </div>
             <div className="flex items-center gap-2 mt-2">
@@ -191,7 +193,7 @@ const TaskCard = ({
                     <textarea
                       value={editedDescription}
                       onChange={(e) => setEditedDescription(e.target.value)}
-                      className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
                       rows={3}
                       placeholder="Add a description..."
                     />
@@ -212,9 +214,15 @@ const TaskCard = ({
                     </div>
                   </form>
                 ) : (
-                  <p className="text-gray-200 text-sm mt-2">
-                    {task.description}
-                  </p>
+                  <div
+                    className="group flex items-start gap-1"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <p className="text-gray-200 text-sm mt-2">
+                      {task.description}
+                    </p>
+                    <EditIcon className="mt-2" />
+                  </div>
                 )}
                 <TaskFooter task={task} />
               </>

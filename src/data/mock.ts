@@ -10,7 +10,7 @@ export const mockTasks: Task[] = [
     completed: false,
     createdAt: new Date("2025-03-25"),
     updatedAt: new Date("2025-03-25"),
-    dueDate: new Date("2025-03-28"),
+    dueDate: new Date(),
     author: "Anna",
     labels: ["inköp", "mat"],
     updates: [],

@@ -181,7 +181,7 @@ const AddTaskPanel = ({
                 }
                 className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 placeholder={
-                  parentTaskId ? "Enter subtask title" : "Enter task title"
+                  parentTaskId ? "Skriv en deluppgift" : "Skriv en uppgift"
                 }
               />
             </div>
@@ -204,7 +204,7 @@ const AddTaskPanel = ({
                     }
                     rows={4}
                     className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter task description"
+                    placeholder="Skriv en beskrivning"
                   />
                 </div>
 
