@@ -127,7 +127,7 @@ const TaskCard = ({
         ref={cardRef}
         id={`task-${task.id}`}
         className={`
-          border border-gray-700 rounded-lg w-[90%] 
+          border border-gray-700 rounded-lg 
           transition-all duration-${ANIMATION.DURATION} ${ANIMATION.EASING}
           ${task.completed ? "opacity-75" : ""}
           ${isAnimating ? "bg-gray-700" : "bg-gray-800"}
@@ -139,7 +139,7 @@ const TaskCard = ({
               : ""
           }
           ${isCollapsed ? "opacity-0" : "opacity-100"}
-          mx-auto px-4 py-4
+          mx-auto pl-3 py-4
           origin-top
           overflow-hidden
           w-full

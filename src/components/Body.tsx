@@ -13,11 +13,12 @@ import { ScrollButtons } from "./ScrollButtons";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
 import TaskCard from "./task-card/TaskCard";
+import { useLabelsAndCounts } from "../data/hooks";
 
 const Body = () => {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [lists, setLists] = useState<List[]>(mockLists);
-  const [view, setView] = useState<"todos" | "archive" | "lists">("todos");
+  const [tab, setTab] = useState<"todos" | "archive" | "lists">("todos");
   const [animatingTaskId, setAnimatingTaskId] = useState<string | null>(null);
   const [animatingTaskHeight, setAnimatingTaskHeight] = useState<number | null>(
     null
@@ -52,32 +53,7 @@ const Body = () => {
   const [isAllExpanded, setIsAllExpanded] = useState(false);
   const [isAllExpandedMode, setIsAllExpandedMode] = useState(false);
 
-  // Get all unique labels from tasks and lists
-  const allLabels = Array.from(
-    new Set([
-      ...tasks.flatMap((task) => task.labels || []),
-      ...lists.flatMap((list) => list.labels || []),
-    ])
-  );
-
-  // Calculate label counts based on search query
-  const labelCounts = allLabels.reduce((acc, label) => {
-    const count = tasks.filter((task) => {
-      // First check if task matches search query
-      const matchesSearch = searchQuery
-        ? task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          task.author.toLowerCase().includes(searchQuery.toLowerCase())
-        : true;
-
-      // Then check if task has the label
-      const hasLabel = task.labels?.includes(label);
-
-      return matchesSearch && hasLabel;
-    }).length;
-
-    return { ...acc, [label]: count };
-  }, {} as Record<string, number>);
+  const { labels, counts } = useLabelsAndCounts(tasks, lists, tab, searchQuery);
 
   // Calculate tasks with due date count based on search query
   const tasksWithDueDate = tasks.filter((task) => {
@@ -364,8 +340,8 @@ const Body = () => {
 
   const filteredTasks = tasks.filter((task) => {
     // First filter by view (todos/archive)
-    if (view === "todos" && task.archived) return false;
-    if (view === "archive" && !task.archived) return false;
+    if (tab === "todos" && task.archived) return false;
+    if (tab === "archive" && !task.archived) return false;
 
     // Then apply search filter
     if (searchQuery) {
@@ -714,8 +690,8 @@ const Body = () => {
             <div className="space-y-4">
               <div className="flex flex-col gap-6">
                 <Tabs
-                  view={view}
-                  onViewChange={setView}
+                  view={tab}
+                  onViewChange={setTab}
                   counts={{
                     todos: tasks.length,
                     archive: tasks.filter((task) => task.archived).length,
@@ -787,15 +763,15 @@ const Body = () => {
                         count={tasksWithDueDate}
                       />
                     )}
-                    {allLabels
-                      .filter((label) => labelCounts[label] > 0)
+                    {Array.from(labels)
+                      .filter((label) => counts[label] > 0)
                       .map((label) => (
                         <LabelPill
                           key={label}
                           label={label}
                           onClick={() => handleLabelClick(label)}
                           state={getLabelState(label)}
-                          count={labelCounts[label]}
+                          count={counts[label]}
                         />
                       ))}
                     <LabelPill
@@ -812,7 +788,7 @@ const Body = () => {
                 </div>
               </div>
               <div className="space-y-2">
-                {view === "lists" ? (
+                {tab === "lists" ? (
                   sortedLists.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
                       <p className="text-lg font-medium mb-2">No lists found</p>

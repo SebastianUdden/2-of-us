@@ -25,8 +25,8 @@ const ListItems = ({
   const listClassName = type === "ordered" ? "list-decimal" : "list-disc";
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
+    <div className="mt-4">
+      <div className="flex items-center justify-between mb-1">
         <h3 className="text-sm font-medium text-gray-400">
           Items ({completedCount}/{totalCount})
         </h3>
@@ -37,11 +37,11 @@ const ListItems = ({
           + Add Item
         </button>
       </div>
-      <ListComponent className={`${listClassName} list-inside space-y-2`}>
+      <ListComponent className={`${listClassName} list-inside`}>
         {items.map((item, index) => (
           <li
             key={item.id}
-            className="flex items-center gap-2 p-2 hover:bg-gray-700 rounded-md transition-colors"
+            className="flex items-center gap-2 p-1 hover:bg-gray-700 rounded-md transition-colors"
           >
             <input
               type="checkbox"

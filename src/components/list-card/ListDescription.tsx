@@ -1,8 +1,10 @@
+import { EditIcon } from "../common/EditIcon";
+
 interface ListDescriptionProps {
   description: string;
   isEditing: boolean;
   editedDescription: string;
-  onDescriptionChange: (value: string) => void;
+  setEditedDescription: (description: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
 }
@@ -11,7 +13,7 @@ const ListDescription = ({
   description,
   isEditing,
   editedDescription,
-  onDescriptionChange,
+  setEditedDescription,
   onSubmit,
   onCancel,
 }: ListDescriptionProps) => {
@@ -21,8 +23,8 @@ const ListDescription = ({
         <form onSubmit={onSubmit} className="mt-2 space-y-2">
           <textarea
             value={editedDescription}
-            onChange={(e) => onDescriptionChange(e.target.value)}
-            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            onChange={(e) => setEditedDescription(e.target.value)}
+            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
             rows={3}
             placeholder="Add a description..."
           />
@@ -43,7 +45,15 @@ const ListDescription = ({
           </div>
         </form>
       ) : (
-        <p className="text-gray-200 text-sm mt-2">{description}</p>
+        <div
+          className="group flex items-start gap-1"
+          onClick={() => {
+            setEditedDescription(description);
+          }}
+        >
+          <p className="text-gray-200 text-sm mt-2">{description}</p>
+          <EditIcon className="mt-2" />
+        </div>
       )}
     </>
   );

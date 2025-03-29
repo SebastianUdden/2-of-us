@@ -7,7 +7,6 @@ import ListDescription from "./ListDescription";
 import ListHeader from "./ListHeader";
 import ListItems from "./ListItems";
 import ListMetadata from "./ListMetadata";
-import { Task } from "../../types/Task";
 import TaskArrows from "../task-card/TaskArrows";
 
 interface ListCardProps {
@@ -17,7 +16,6 @@ interface ListCardProps {
   onUpdate: (updatedList: List) => void;
   onLabelClick: (label: string) => void;
   selectedLabel?: string;
-  onConvertToTask?: (task: Task) => void;
   onPriorityChange?: (listId: string, newPosition: number) => void;
   totalLists: number;
   isAnimating?: boolean;
@@ -35,7 +33,6 @@ const ListCard = ({
   onUpdate,
   onLabelClick,
   selectedLabel,
-  onConvertToTask,
   onPriorityChange,
   totalLists,
   isAnimating = false,
@@ -63,10 +60,6 @@ const ListCard = ({
 
   const handleItemComplete = (itemId: string) => {
     onComplete(list.id, itemId);
-  };
-
-  const handleDelete = () => {
-    setShowDeleteConfirm(true);
   };
 
   const handleConfirmDelete = () => {
@@ -99,6 +92,11 @@ const ListCard = ({
     onUpdate({ ...list, items: updatedItems });
   };
 
+  const handleDeleteItem = (itemId: string) => {
+    const updatedItems = list.items.filter((item) => item.id !== itemId);
+    onUpdate({ ...list, items: updatedItems });
+  };
+
   const handleAddItem = () => {
     const newItem = {
       id: `${list.id}-${list.items.length + 1}`,
@@ -109,39 +107,6 @@ const ListCard = ({
     };
     onUpdate({ ...list, items: [...list.items, newItem] });
   };
-
-  const handleDeleteItem = (itemId: string) => {
-    const updatedItems = list.items.filter((item) => item.id !== itemId);
-    onUpdate({ ...list, items: updatedItems });
-  };
-
-  const handleCloneToTask = () => {
-    if (!onConvertToTask) return;
-
-    const task: Task = {
-      id: crypto.randomUUID(),
-      title: list.title,
-      description: list.description || "",
-      author: list.author,
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      completed: false,
-      priority: 1,
-      labels: list.labels || [],
-      archived: false,
-      updates: [],
-      subtasks: list.items.map((item) => ({
-        id: crypto.randomUUID(),
-        title: item.content,
-        completed: item.completed,
-      })),
-    };
-
-    onConvertToTask(task);
-  };
-
-  const completedCount = list.items.filter((item) => item.completed).length;
-  const totalCount = list.items.length;
 
   return (
     <>
@@ -178,54 +143,44 @@ const ListCard = ({
                 setEditedTitle={setEditedTitle}
                 onSubmit={handleSubmit}
                 onCancel={handleCancel}
+                expandedListId={expandedListId}
+                setExpandedListId={setExpandedListId}
+                setIsPriorityControlsVisible={setIsPriorityControlsVisible}
               />
-              <button
-                onClick={() =>
-                  setExpandedListId(expandedListId === list.id ? null : list.id)
-                }
-                className="p-1 text-gray-400 hover:text-gray-300 transition-colors"
-              >
-                <svg
-                  className={`w-5 h-5 transform transition-transform ${
-                    expandedListId === list.id ? "rotate-180" : ""
-                  }`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </svg>
-              </button>
             </div>
             {expandedListId === list.id && (
               <>
                 <ListDescription
-                  list={list}
+                  description={list.description || ""}
                   isEditing={isEditing}
                   editedDescription={editedDescription}
                   setEditedDescription={setEditedDescription}
+                  onSubmit={handleSubmit}
+                  onCancel={handleCancel}
                 />
                 <ListItems
-                  list={list}
-                  onComplete={handleItemComplete}
-                  onContentChange={handleItemContentChange}
-                  onDelete={handleDeleteItem}
+                  type={list.type}
+                  items={list.items}
+                  completedCount={
+                    list.items.filter((item) => item.completed).length
+                  }
+                  totalCount={list.items.length}
+                  onItemComplete={handleItemComplete}
+                  onItemContentChange={handleItemContentChange}
+                  onItemDelete={handleDeleteItem}
+                  onAddItem={handleAddItem}
                 />
                 <ListMetadata
-                  list={list}
-                  onLabelClick={onLabelClick}
+                  labels={list.labels}
                   selectedLabel={selectedLabel}
-                  onConvertToTask={handleCloneToTask}
+                  onLabelClick={onLabelClick}
+                  createdAt={list.createdAt}
+                  updatedAt={list.updatedAt}
                 />
               </>
             )}
           </div>
-          {showPriorityControls && onPriorityChange && (
+          {isPriorityControlsVisible && onPriorityChange && (
             <TaskArrows
               taskId={list.id}
               priority={list.priority}
@@ -234,6 +189,29 @@ const ListCard = ({
             />
           )}
         </div>
+        {expandedListId === list.id && (
+          <div className="flex justify-between items-end mt-4 border-t border-gray-700">
+            {showPriorityControls && (
+              <div className="flex flex-col items-end gap-2 mt-2">
+                {!isPriorityControlsVisible ? (
+                  <button
+                    onClick={() => setIsPriorityControlsVisible(true)}
+                    className="text-sm text-blue-400 hover:text-blue-300"
+                  >
+                    Omprioritera
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => setIsPriorityControlsVisible(false)}
+                    className="text-sm text-blue-400 hover:text-blue-300"
+                  >
+                    Stäng
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
       </div>
       <DeleteConfirmDialog
         isOpen={showDeleteConfirm}
