@@ -5,7 +5,6 @@ import { EditIcon } from "../common/EditIcon";
 import { List } from "../../types/List";
 import { PriorityIndicator } from "../common/PriorityIndicator";
 import { TitleEditForm } from "../common/TitleEditForm";
-import { TrashIcon } from "../common/TrashIcon";
 
 interface ListHeaderProps {
   list: List;
