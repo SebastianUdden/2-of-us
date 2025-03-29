@@ -54,23 +54,52 @@ const Body = () => {
 
   // Get all unique labels from tasks and lists
   const allLabels = Array.from(
-    new Set(
-      tasks
-        .filter((task) => !task.archived) // Only include labels from non-archived tasks
-        .flatMap((task) => task.labels || [])
-    )
-  ).sort();
+    new Set([
+      ...tasks.flatMap((task) => task.labels || []),
+      ...lists.flatMap((list) => list.labels || []),
+    ])
+  );
 
-  // Get task counts for each label
+  // Calculate label counts based on search query
   const labelCounts = allLabels.reduce((acc, label) => {
-    acc[label] = tasks.filter(
-      (task) => !task.archived && task.labels?.includes(label)
-    ).length;
-    return acc;
+    const count = tasks.filter((task) => {
+      // First check if task matches search query
+      const matchesSearch = searchQuery
+        ? task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          task.author.toLowerCase().includes(searchQuery.toLowerCase())
+        : true;
+
+      // Then check if task has the label
+      const hasLabel = task.labels?.includes(label);
+
+      return matchesSearch && hasLabel;
+    }).length;
+
+    return { ...acc, [label]: count };
   }, {} as Record<string, number>);
 
-  // Get count of tasks with due dates
-  const tasksWithDueDate = tasks.filter((task) => task.dueDate).length;
+  // Calculate tasks with due date count based on search query
+  const tasksWithDueDate = tasks.filter((task) => {
+    const matchesSearch = searchQuery
+      ? task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.author.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+
+    return matchesSearch && task.dueDate;
+  }).length;
+
+  // Calculate completed tasks count based on search query
+  const completedCount = tasks.filter((task) => {
+    const matchesSearch = searchQuery
+      ? task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        task.author.toLowerCase().includes(searchQuery.toLowerCase())
+      : true;
+
+    return matchesSearch && task.completed;
+  }).length;
 
   const sortTasks = useCallback((tasks: Task[]): Task[] => {
     // First sort by completion status (completed tasks go to bottom)
@@ -371,10 +400,9 @@ const Body = () => {
     return true;
   });
 
-  const completedCount = tasks.filter((task) => task.completed).length;
-
   const clearAllFilters = () => {
     setLabelFilters([]);
+    setSearchQuery("");
   };
 
   const handleSort = (field: keyof Task) => {
@@ -744,27 +772,33 @@ const Body = () => {
                         : "opacity-0 max-h-0 overflow-hidden"
                     }`}
                   >
-                    <LabelPill
-                      label="Avklarade"
-                      onClick={handleCompletedClick}
-                      state={getCompletedState()}
-                      count={completedCount}
-                    />
-                    <LabelPill
-                      label="Förfallodatum"
-                      onClick={handleDueDateClick}
-                      state={getDueDateState()}
-                      count={tasksWithDueDate}
-                    />
-                    {allLabels.map((label) => (
+                    {completedCount > 0 && (
                       <LabelPill
-                        key={label}
-                        label={label}
-                        onClick={() => handleLabelClick(label)}
-                        state={getLabelState(label)}
-                        count={labelCounts[label]}
+                        label="Avklarade"
+                        onClick={handleCompletedClick}
+                        state={getCompletedState()}
+                        count={completedCount}
                       />
-                    ))}
+                    )}
+                    {tasksWithDueDate > 0 && (
+                      <LabelPill
+                        label="Förfallodatum"
+                        onClick={handleDueDateClick}
+                        state={getDueDateState()}
+                        count={tasksWithDueDate}
+                      />
+                    )}
+                    {allLabels
+                      .filter((label) => labelCounts[label] > 0)
+                      .map((label) => (
+                        <LabelPill
+                          key={label}
+                          label={label}
+                          onClick={() => handleLabelClick(label)}
+                          state={getLabelState(label)}
+                          count={labelCounts[label]}
+                        />
+                      ))}
                     <LabelPill
                       label="Rensa filter"
                       onClick={clearAllFilters}
