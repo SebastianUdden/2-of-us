@@ -138,7 +138,7 @@ const TaskCard = ({
               : ""
           }
           ${isCollapsed ? "opacity-0" : "opacity-100"}
-          mx-auto my-4 px-4 py-4
+          mx-auto px-4 py-4
           origin-top
           overflow-hidden
           w-full
@@ -146,18 +146,22 @@ const TaskCard = ({
       >
         <div className="flex items-start justify-between">
           <div className="flex flex-col h-full justify-between flex-1 pr-2">
-            <TaskHeader
-              task={task}
-              onComplete={onComplete}
-              onDelete={() => setShowDeleteConfirm(true)}
-              onArchive={onArchive}
-              isEditing={isEditing}
-              setIsEditing={setIsEditing}
-              editedTitle={editedTitle}
-              setEditedTitle={setEditedTitle}
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-            />
+            <div className="flex items-start justify-between w-full">
+              <TaskHeader
+                task={task}
+                onComplete={onComplete}
+                onDelete={() => setShowDeleteConfirm(true)}
+                onArchive={onArchive}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+                editedTitle={editedTitle}
+                setEditedTitle={setEditedTitle}
+                onSubmit={handleSubmit}
+                onCancel={handleCancel}
+                expandedTaskId={expandedTaskId}
+                setExpandedTaskId={setExpandedTaskId}
+              />
+            </div>
             <div className="flex items-center gap-2 mt-2">
               <TaskDueDate
                 dueDate={task.dueDate}
@@ -180,35 +184,41 @@ const TaskCard = ({
                 </div>
               )}
             </div>
-            {isEditing ? (
-              <form onSubmit={handleSubmit} className="mt-2 space-y-2">
-                <textarea
-                  value={editedDescription}
-                  onChange={(e) => setEditedDescription(e.target.value)}
-                  className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={3}
-                  placeholder="Add a description..."
-                />
-                <div className="flex justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
-                  >
-                    Avbryt
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                  >
-                    Spara
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <p className="text-gray-200 text-sm mt-2">{task.description}</p>
+            {expandedTaskId === task.id && (
+              <>
+                {isEditing ? (
+                  <form onSubmit={handleSubmit} className="mt-2 space-y-2">
+                    <textarea
+                      value={editedDescription}
+                      onChange={(e) => setEditedDescription(e.target.value)}
+                      className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={3}
+                      placeholder="Add a description..."
+                    />
+                    <div className="flex justify-end gap-2">
+                      <button
+                        type="button"
+                        onClick={handleCancel}
+                        className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
+                      >
+                        Avbryt
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
+                      >
+                        Spara
+                      </button>
+                    </div>
+                  </form>
+                ) : (
+                  <p className="text-gray-200 text-sm mt-2">
+                    {task.description}
+                  </p>
+                )}
+                <TaskFooter task={task} />
+              </>
             )}
-            <TaskFooter task={task} />
           </div>
           {isPriorityControlsVisible && (
             <TaskArrows
@@ -219,113 +229,121 @@ const TaskCard = ({
             />
           )}
         </div>
-        <div className="flex justify-between items-end mt-4 border-t border-gray-700">
-          <TaskUpdates task={task} />
-          {showPriorityControls && (
-            <div className="flex flex-col items-end gap-2 mt-2">
-              {!isPriorityControlsVisible ? (
-                <button
-                  onClick={() => setIsPriorityControlsVisible(true)}
-                  className="text-sm text-blue-400 hover:text-blue-300"
-                >
-                  Omprioritera
-                </button>
-              ) : (
-                <div className="flex flex-col items-start gap-1">
-                  <button
-                    onClick={() => setIsPriorityControlsVisible(false)}
-                    className="text-sm text-gray-400 hover:text-gray-300"
-                  >
-                    Färdigprioriterat
-                  </button>
-                  <div className="flex items-center gap-1">
-                    <select
-                      value={task.priority}
-                      onChange={(e) =>
-                        onPriorityChange(task.id, Number(e.target.value))
-                      }
-                      className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        {expandedTaskId === task.id && (
+          <>
+            <div className="flex justify-between items-end mt-4 border-t border-gray-700">
+              <TaskUpdates task={task} />
+              {showPriorityControls && (
+                <div className="flex flex-col items-end gap-2 mt-2">
+                  {!isPriorityControlsVisible ? (
+                    <button
+                      onClick={() => setIsPriorityControlsVisible(true)}
+                      className="text-sm text-blue-400 hover:text-blue-300"
                     >
-                      {Array.from({ length: totalTasks }, (_, i) => i + 1).map(
-                        (position) => (
-                          <option key={position} value={position}>
-                            {position}
-                          </option>
-                        )
-                      )}
-                    </select>
-                  </div>
+                      Omprioritera
+                    </button>
+                  ) : (
+                    <div className="flex flex-col items-start gap-1">
+                      <button
+                        onClick={() => setIsPriorityControlsVisible(false)}
+                        className="text-sm text-gray-400 hover:text-gray-300"
+                      >
+                        Färdigprioriterat
+                      </button>
+                      <div className="flex items-center gap-1">
+                        <select
+                          value={task.priority}
+                          onChange={(e) =>
+                            onPriorityChange(task.id, Number(e.target.value))
+                          }
+                          className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          {Array.from(
+                            { length: totalTasks },
+                            (_, i) => i + 1
+                          ).map((position) => (
+                            <option key={position} value={position}>
+                              {position}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
-          )}
-        </div>
 
-        {/* Subtasks Section */}
-        {task.subtasks && task.subtasks.length > 0 && (
-          <div className="mt-4 border-t border-gray-700 pt-4">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="text-sm font-medium text-gray-300">
-                Subtasks (
-                {task.subtasks.filter((subtask) => subtask.completed).length}/
-                {task.subtasks.length})
-              </h3>
-              <button
-                onClick={toggleSubtasks}
-                className="text-sm text-gray-400 hover:text-gray-300"
-              >
-                {showSubtasks ? "Hide" : "Show"}
-              </button>
-            </div>
-            {showSubtasks && (
-              <div className="space-y-2">
-                {task.subtasks.map((subtask) => (
-                  <div
-                    key={subtask.id}
-                    onClick={() => handleSubtaskComplete(subtask.id)}
-                    className="flex items-center gap-2 p-2 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition-colors"
+            {/* Subtasks Section */}
+            {task.subtasks && task.subtasks.length > 0 && (
+              <div className="mt-4 border-t border-gray-700 pt-4">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium text-gray-300">
+                    Subtasks (
+                    {
+                      task.subtasks.filter((subtask) => subtask.completed)
+                        .length
+                    }
+                    /{task.subtasks.length})
+                  </h3>
+                  <button
+                    onClick={toggleSubtasks}
+                    className="text-sm text-gray-400 hover:text-gray-300"
                   >
-                    <input
-                      type="checkbox"
-                      checked={subtask.completed}
-                      onChange={() => handleSubtaskComplete(subtask.id)}
-                      className="rounded border-gray-600 text-blue-500 focus:ring-blue-500"
-                      onClick={(e) => e.stopPropagation()}
-                    />
-                    <span
-                      className={`flex-1 text-sm ${
-                        subtask.completed
-                          ? "text-gray-400 line-through"
-                          : "text-gray-200"
-                      }`}
-                    >
-                      {subtask.title}
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleSubtaskDelete(subtask.id);
-                      }}
-                      className="text-gray-400 hover:text-gray-300"
-                    >
-                      ×
-                    </button>
+                    {showSubtasks ? "Hide" : "Show"}
+                  </button>
+                </div>
+                {showSubtasks && (
+                  <div className="space-y-2">
+                    {task.subtasks.map((subtask) => (
+                      <div
+                        key={subtask.id}
+                        onClick={() => handleSubtaskComplete(subtask.id)}
+                        className="flex items-center gap-2 p-2 bg-gray-700 rounded cursor-pointer hover:bg-gray-600 transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={subtask.completed}
+                          onChange={() => handleSubtaskComplete(subtask.id)}
+                          className="rounded border-gray-600 text-blue-500 focus:ring-blue-500"
+                          onClick={(e) => e.stopPropagation()}
+                        />
+                        <span
+                          className={`flex-1 text-sm ${
+                            subtask.completed
+                              ? "text-gray-400 line-through"
+                              : "text-gray-200"
+                          }`}
+                        >
+                          {subtask.title}
+                        </span>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleSubtaskDelete(subtask.id);
+                          }}
+                          className="text-gray-400 hover:text-gray-300"
+                        >
+                          ×
+                        </button>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                )}
               </div>
             )}
-          </div>
-        )}
 
-        {/* Add Subtask Button */}
-        {onAddSubtask && (
-          <button
-            onClick={() => onAddSubtask(task.id)}
-            className="mt-4 text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
-          >
-            <span>+</span>
-            <span>Lägg till deluppgift</span>
-          </button>
+            {/* Add Subtask Button */}
+            {onAddSubtask && (
+              <button
+                onClick={() => onAddSubtask(task.id)}
+                className="mt-4 text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
+              >
+                <span>+</span>
+                <span>Lägg till deluppgift</span>
+              </button>
+            )}
+          </>
         )}
       </div>
       <DeleteConfirmDialog

@@ -13,6 +13,8 @@ interface TaskHeaderProps {
   setEditedTitle: (title: string) => void;
   onSubmit: (e: React.FormEvent) => void;
   onCancel: () => void;
+  expandedTaskId: string | null;
+  setExpandedTaskId: (id: string | null) => void;
 }
 
 export const TaskHeader = ({
@@ -26,9 +28,11 @@ export const TaskHeader = ({
   setEditedTitle,
   onSubmit,
   onCancel,
+  expandedTaskId,
+  setExpandedTaskId,
 }: TaskHeaderProps) => {
   return (
-    <div className="flex items-start justify-between">
+    <div className="flex items-start w-full justify-between">
       <div className="flex-1">
         {isEditing ? (
           <form onSubmit={onSubmit} className="flex-1 flex gap-2">
@@ -74,33 +78,56 @@ export const TaskHeader = ({
               className={`text-lg font-medium ${
                 task.completed ? "line-through text-gray-400" : "text-gray-200"
               }`}
-              onClick={() => setIsEditing(true)}
+              onClick={() => {
+                setIsEditing(true);
+                setEditedTitle(task.title);
+              }}
             >
               {task.title}
             </h3>
           </div>
         )}
       </div>
-      <div className="flex items-center gap-2 ml-4">
+      <div className="flex items-center gap-2">
         <input
           type="checkbox"
           checked={task.completed}
           onChange={() => onComplete(task.id)}
-          className="w-5 h-5 rounded border-gray-300 text-blue-500 focus:ring-blue-500 cursor-pointer"
+          className="w-4 h-4 rounded border-gray-600 text-blue-500 focus:ring-blue-500 focus:ring-offset-gray-800"
         />
         <button
-          onClick={() => onArchive(task.id)}
-          className="p-1.5 text-gray-400 hover:text-gray-200"
-          aria-label="Archive task"
+          onClick={() => onDelete(task.id)}
+          className="p-1 text-gray-400 hover:text-red-400 transition-colors"
         >
-          <ArchiveIcon className="w-7 h-7" />
+          <TrashIcon className="w-4 h-4" />
         </button>
         <button
-          onClick={() => onDelete(task.id)}
-          className="-ml-2 p-1.5 text-red-400 hover:text-red-300"
-          aria-label="Delete task"
+          onClick={() => onArchive(task.id)}
+          className="p-1 text-gray-400 hover:text-gray-300 transition-colors"
         >
-          <TrashIcon className="w-5 h-5" />
+          <ArchiveIcon className="w-4 h-4" />
+        </button>
+        <button
+          onClick={() =>
+            setExpandedTaskId(expandedTaskId === task.id ? null : task.id)
+          }
+          className="p-1 text-gray-400 hover:text-gray-300 transition-colors"
+        >
+          <svg
+            className={`w-4 h-4 transform transition-transform ${
+              expandedTaskId === task.id ? "rotate-180" : ""
+            }`}
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
         </button>
       </div>
     </div>

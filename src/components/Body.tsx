@@ -48,6 +48,7 @@ const Body = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
+  const [expandedListId, setExpandedListId] = useState<string | null>(null);
 
   // Get all unique labels from tasks and lists
   const allLabels = Array.from(
@@ -750,7 +751,7 @@ const Body = () => {
                   </div>
                 </div>
               </div>
-              <div className="space-y-6">
+              <div className="space-y-2">
                 {view === "lists" ? (
                   sortedLists.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
@@ -778,6 +779,8 @@ const Body = () => {
                         isCollapsed={isCollapsed}
                         onHeightChange={handleListHeight}
                         showPriorityControls={sortField === "priority"}
+                        expandedListId={expandedListId}
+                        setExpandedListId={setExpandedListId}
                       />
                     ))
                   )

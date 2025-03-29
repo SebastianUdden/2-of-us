@@ -24,6 +24,8 @@ interface ListCardProps {
   isCollapsed?: boolean;
   onHeightChange?: (height: number) => void;
   showPriorityControls: boolean;
+  expandedListId: string | null;
+  setExpandedListId: (id: string | null) => void;
 }
 
 const ListCard = ({
@@ -40,6 +42,8 @@ const ListCard = ({
   isCollapsed = false,
   onHeightChange,
   showPriorityControls,
+  expandedListId,
+  setExpandedListId,
 }: ListCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -162,94 +166,74 @@ const ListCard = ({
           w-full
         `}
       >
-        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4  border-b border-gray-700 pb-4 mb-4">
-          <div className="flex-1 space-y-2">
-            <ListHeader
-              title={list.title}
-              isEditing={isEditing}
-              editedTitle={editedTitle}
-              onTitleChange={setEditedTitle}
-              onEdit={() => setIsEditing(true)}
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-              onCloneToTask={handleCloneToTask}
-              onDelete={handleDelete}
-              priority={list.priority}
-            />
-            <ListMetadata
-              labels={list.labels}
-              selectedLabel={selectedLabel}
-              onLabelClick={onLabelClick}
-              createdAt={list.createdAt}
-              updatedAt={list.updatedAt}
-            />
-            <ListDescription
-              description={list.description || ""}
-              isEditing={isEditing}
-              editedDescription={editedDescription}
-              onDescriptionChange={setEditedDescription}
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-            />
-          </div>
-          {onPriorityChange && showPriorityControls && (
-            <div className="flex flex-col items-end gap-2">
-              {!isPriorityControlsVisible ? (
-                <button
-                  onClick={() => setIsPriorityControlsVisible(true)}
-                  className="text-sm text-blue-400 hover:text-blue-300"
+        <div className="flex items-start justify-between">
+          <div className="flex flex-col h-full justify-between flex-1 pr-2">
+            <div className="flex items-start justify-between w-full">
+              <ListHeader
+                list={list}
+                onDelete={() => setShowDeleteConfirm(true)}
+                isEditing={isEditing}
+                setIsEditing={setIsEditing}
+                editedTitle={editedTitle}
+                setEditedTitle={setEditedTitle}
+                onSubmit={handleSubmit}
+                onCancel={handleCancel}
+              />
+              <button
+                onClick={() =>
+                  setExpandedListId(expandedListId === list.id ? null : list.id)
+                }
+                className="p-1 text-gray-400 hover:text-gray-300 transition-colors"
+              >
+                <svg
+                  className={`w-5 h-5 transform transition-transform ${
+                    expandedListId === list.id ? "rotate-180" : ""
+                  }`}
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
                 >
-                  Omprioritera
-                </button>
-              ) : (
-                <div className="flex flex-col items-end gap-1">
-                  <button
-                    onClick={() => setIsPriorityControlsVisible(false)}
-                    className="text-sm text-gray-400 hover:text-gray-300"
-                  >
-                    Stäng
-                  </button>
-                  <div className="flex items-center gap-1">
-                    <TaskArrows
-                      taskId={list.id}
-                      priority={list.priority}
-                      totalTasks={totalLists}
-                      onPriorityChange={(_, newPosition) =>
-                        onPriorityChange(list.id, newPosition)
-                      }
-                    />
-                    <select
-                      value={list.priority}
-                      onChange={(e) =>
-                        onPriorityChange(list.id, Number(e.target.value))
-                      }
-                      className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      {Array.from({ length: totalLists }, (_, i) => i + 1).map(
-                        (position) => (
-                          <option key={position} value={position}>
-                            {position}
-                          </option>
-                        )
-                      )}
-                    </select>
-                  </div>
-                </div>
-              )}
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
             </div>
+            {expandedListId === list.id && (
+              <>
+                <ListDescription
+                  list={list}
+                  isEditing={isEditing}
+                  editedDescription={editedDescription}
+                  setEditedDescription={setEditedDescription}
+                />
+                <ListItems
+                  list={list}
+                  onComplete={handleItemComplete}
+                  onContentChange={handleItemContentChange}
+                  onDelete={handleDeleteItem}
+                />
+                <ListMetadata
+                  list={list}
+                  onLabelClick={onLabelClick}
+                  selectedLabel={selectedLabel}
+                  onConvertToTask={handleCloneToTask}
+                />
+              </>
+            )}
+          </div>
+          {showPriorityControls && onPriorityChange && (
+            <TaskArrows
+              taskId={list.id}
+              priority={list.priority}
+              totalTasks={totalLists}
+              onPriorityChange={onPriorityChange}
+            />
           )}
         </div>
-
-        <ListItems
-          type={list.type}
-          items={list.items}
-          completedCount={completedCount}
-          totalCount={totalCount}
-          onItemComplete={handleItemComplete}
-          onItemContentChange={handleItemContentChange}
-          onItemDelete={handleDeleteItem}
-          onAddItem={handleAddItem}
-        />
       </div>
       <DeleteConfirmDialog
         isOpen={showDeleteConfirm}
