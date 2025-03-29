@@ -5,6 +5,7 @@ import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import { EditIcon } from "../common/EditIcon";
 import { LabelPill } from "../LabelPill";
 import { LabelState } from "../../types/LabelState";
+import { ProgressBar } from "../common/ProgressBar";
 import { Task } from "../../types/Task";
 import TaskArrows from "./TaskArrows";
 import TaskDueDate from "./TaskDueDate";
@@ -121,6 +122,12 @@ const TaskCard = ({
     setExpandedTaskId(showSubtasks ? null : task.id);
   };
 
+  // Calculate subtask progress
+  const completedSubtasks = task.subtasks.filter(
+    (subtask) => subtask.completed
+  ).length;
+  const totalSubtasks = task.subtasks.length;
+
   return (
     <>
       <div
@@ -139,7 +146,7 @@ const TaskCard = ({
               : ""
           }
           ${isCollapsed ? "opacity-0" : "opacity-100"}
-          mx-auto pl-3 py-4
+          mx-auto pl-3 px-4 py-4
           origin-top
           overflow-hidden
           w-full
@@ -241,65 +248,48 @@ const TaskCard = ({
           <>
             <div className="flex justify-between items-end mt-4 border-t border-gray-700">
               <TaskUpdates task={task} />
-              {showPriorityControls && (
-                <div className="flex flex-col items-end gap-2 mt-2">
-                  {!isPriorityControlsVisible ? (
-                    <button
-                      onClick={() => setIsPriorityControlsVisible(true)}
-                      className="text-sm text-blue-400 hover:text-blue-300"
-                    >
-                      Omprioritera
-                    </button>
-                  ) : (
-                    <div className="flex flex-col items-start gap-1">
-                      <button
-                        onClick={() => setIsPriorityControlsVisible(false)}
-                        className="text-sm text-gray-400 hover:text-gray-300"
-                      >
-                        Färdigprioriterat
-                      </button>
-                      <div className="flex items-center gap-1">
-                        <select
-                          value={task.priority}
-                          onChange={(e) =>
-                            onPriorityChange(task.id, Number(e.target.value))
-                          }
-                          className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                          {Array.from(
-                            { length: totalTasks },
-                            (_, i) => i + 1
-                          ).map((position) => (
-                            <option key={position} value={position}>
-                              {position}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
             </div>
-
+            <div className="flex justify-between">
+              {onAddSubtask && (
+                <button
+                  onClick={() => onAddSubtask(task.id)}
+                  className="mt-4 text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
+                >
+                  <span>+</span>
+                  <span>Lägg till deluppgift</span>
+                </button>
+              )}
+              <button
+                onClick={toggleSubtasks}
+                className="text-sm text-gray-400 hover:text-gray-300"
+              >
+                {showSubtasks ? "Göm deluppgifter" : "Visa deluppgifter"}
+              </button>
+            </div>
             {/* Subtasks Section */}
             {task.subtasks && task.subtasks.length > 0 && (
-              <div className="mt-4 border-t border-gray-700 pt-4">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-sm font-medium text-gray-300">
-                    Subtasks (
-                    {
-                      task.subtasks.filter((subtask) => subtask.completed)
-                        .length
-                    }
-                    /{task.subtasks.length})
-                  </h3>
-                  <button
-                    onClick={toggleSubtasks}
-                    className="text-sm text-gray-400 hover:text-gray-300"
-                  >
-                    {showSubtasks ? "Hide" : "Show"}
-                  </button>
+              <div className="mt-1 border-t border-gray-700 pt-2">
+                <div className="flex items-center justify-between">
+                  {task.subtasks.length > 0 && (
+                    <div className="w-full">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-400">
+                          {completedSubtasks} av {totalSubtasks} underuppgifter
+                        </span>
+                        <span className="text-sm text-gray-400">
+                          {Math.round(
+                            (completedSubtasks / totalSubtasks) * 100
+                          )}
+                          %
+                        </span>
+                      </div>
+                      <ProgressBar
+                        completed={completedSubtasks}
+                        total={totalSubtasks}
+                        className="mb-2"
+                      />
+                    </div>
+                  )}
                 </div>
                 {showSubtasks && (
                   <div className="space-y-2">
@@ -338,18 +328,46 @@ const TaskCard = ({
                     ))}
                   </div>
                 )}
+                {showPriorityControls && (
+                  <div className="flex flex-col items-start gap-2 mt-2">
+                    {!isPriorityControlsVisible ? (
+                      <button
+                        onClick={() => setIsPriorityControlsVisible(true)}
+                        className="text-sm text-blue-400 hover:text-blue-300"
+                      >
+                        Omprioritera
+                      </button>
+                    ) : (
+                      <div className="flex flex-col items-start gap-1">
+                        <button
+                          onClick={() => setIsPriorityControlsVisible(false)}
+                          className="text-sm text-gray-400 hover:text-gray-300"
+                        >
+                          Färdigprioriterat
+                        </button>
+                        <div className="flex items-center gap-1">
+                          <select
+                            value={task.priority}
+                            onChange={(e) =>
+                              onPriorityChange(task.id, Number(e.target.value))
+                            }
+                            className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          >
+                            {Array.from(
+                              { length: totalTasks },
+                              (_, i) => i + 1
+                            ).map((position) => (
+                              <option key={position} value={position}>
+                                {position}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
-            )}
-
-            {/* Add Subtask Button */}
-            {onAddSubtask && (
-              <button
-                onClick={() => onAddSubtask(task.id)}
-                className="mt-4 text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
-              >
-                <span>+</span>
-                <span>Lägg till deluppgift</span>
-              </button>
             )}
           </>
         )}

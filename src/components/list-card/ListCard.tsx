@@ -15,12 +15,13 @@ interface ListCardProps {
   onDelete: (listId: string) => void;
   onUpdate: (updatedList: List) => void;
   onLabelClick: (label: string) => void;
-  selectedLabel?: string;
-  onPriorityChange?: (listId: string, newPosition: number) => void;
+  selectedLabel: string;
+  onCloneToTask: (list: List) => void;
+  onPriorityChange: (listId: string, newPosition: number) => void;
   totalLists: number;
-  isAnimating?: boolean;
-  isCollapsed?: boolean;
-  onHeightChange?: (height: number) => void;
+  isAnimating: boolean;
+  isCollapsed: boolean;
+  onHeightChange: (height: number) => void;
   showPriorityControls: boolean;
   expandedListId: string | null;
   setExpandedListId: (id: string | null) => void;
@@ -33,10 +34,11 @@ const ListCard = ({
   onUpdate,
   onLabelClick,
   selectedLabel,
+  onCloneToTask,
   onPriorityChange,
   totalLists,
-  isAnimating = false,
-  isCollapsed = false,
+  isAnimating,
+  isCollapsed,
   onHeightChange,
   showPriorityControls,
   expandedListId,
@@ -146,6 +148,7 @@ const ListCard = ({
                 expandedListId={expandedListId}
                 setExpandedListId={setExpandedListId}
                 setIsPriorityControlsVisible={setIsPriorityControlsVisible}
+                onCloneToTask={() => onCloneToTask(list)}
               />
             </div>
             {expandedListId === list.id && (

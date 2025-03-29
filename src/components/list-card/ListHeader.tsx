@@ -1,8 +1,11 @@
 import { ChevronButton } from "../common/ChevronButton";
+import { CloneIcon } from "../common/CloneIcon";
 import { DeleteButton } from "../common/DeleteButton";
+import { EditIcon } from "../common/EditIcon";
 import { List } from "../../types/List";
 import { PriorityIndicator } from "../common/PriorityIndicator";
 import { TitleEditForm } from "../common/TitleEditForm";
+import { TrashIcon } from "../common/TrashIcon";
 
 interface ListHeaderProps {
   list: List;
@@ -16,6 +19,7 @@ interface ListHeaderProps {
   expandedListId: string | null;
   setExpandedListId: (id: string | null) => void;
   setIsPriorityControlsVisible: (visible: boolean) => void;
+  onCloneToTask: () => void;
 }
 
 const ListHeader = ({
@@ -30,6 +34,7 @@ const ListHeader = ({
   expandedListId,
   setExpandedListId,
   setIsPriorityControlsVisible,
+  onCloneToTask,
 }: ListHeaderProps) => {
   return (
     <div className="flex items-start w-full justify-between">
@@ -56,11 +61,19 @@ const ListHeader = ({
               <h3 className="text-lg font-medium text-gray-200">
                 {list.title}
               </h3>
+              <EditIcon />
             </div>
           </div>
         )}
       </div>
       <div className="flex items-center gap-2">
+        <button
+          onClick={onCloneToTask}
+          className="text-gray-400 hover:text-gray-300 transition-colors"
+          title="Clone to task"
+        >
+          <CloneIcon className="w-4 h-4" />
+        </button>
         <DeleteButton onClick={onDelete} />
         <ChevronButton
           isExpanded={expandedListId === list.id}

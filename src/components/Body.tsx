@@ -491,8 +491,41 @@ const Body = () => {
   };
 
   const filteredLists = lists.filter((list) => {
-    if (!selectedLabel) return true;
-    return list.labels?.includes(selectedLabel);
+    // Apply search filter
+    if (searchQuery) {
+      const searchLower = searchQuery.toLowerCase();
+      const matchesSearch =
+        list.title.toLowerCase().includes(searchLower) ||
+        (list.description?.toLowerCase() || "").includes(searchLower) ||
+        list.author.toLowerCase().includes(searchLower) ||
+        list.items.some((item) =>
+          item.content.toLowerCase().includes(searchLower)
+        );
+      if (!matchesSearch) return false;
+    }
+
+    // Apply label filters
+    if (labelFilters.length > 0) {
+      return labelFilters.every((filter) => {
+        if (filter.label === "completed") {
+          const isCompleted = list.items.every((item) => item.completed);
+          if (filter.state === LabelState.SHOW_ONLY) return isCompleted;
+          if (filter.state === LabelState.SHOW_OTHERS) return !isCompleted;
+          return true;
+        }
+        const hasLabel = list.labels?.includes(filter.label);
+        if (filter.state === LabelState.SHOW_ONLY) return hasLabel;
+        if (filter.state === LabelState.SHOW_OTHERS) return !hasLabel;
+        return true;
+      });
+    }
+
+    // Apply selected label filter
+    if (selectedLabel) {
+      return list.labels?.includes(selectedLabel);
+    }
+
+    return true;
   });
 
   const sortedLists = [...filteredLists].sort((a, b) => {
@@ -506,10 +539,36 @@ const Body = () => {
     return a.priority - b.priority;
   });
 
-  const handleListConvertToTask = (task: Task) => {
+  const handleListCloneToTask = (list: List) => {
+    // Create subtasks from list items
+    const subtasks = list.items.map((item) => ({
+      id: `subtask-${Date.now()}-${item.id}`,
+      title: item.content,
+      completed: item.completed,
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+    }));
+
+    // Create a new task from the list
+    const newTask: Task = {
+      id: `task-${Date.now()}`,
+      title: list.title,
+      description: list.description || "",
+      completed: false,
+      archived: false,
+      priority: tasks.length + 1,
+      labels: list.labels || [],
+      author: list.author,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+      updates: [],
+      subtasks: subtasks,
+      dueDate: undefined, // You might want to add a due date field to lists if needed
+    };
+
     // Add the task to the tasks list
     setTasks((prevTasks) => {
-      const updatedTasks = [...prevTasks, task];
+      const updatedTasks = [...prevTasks, newTask];
       return sortTasks(updatedTasks);
     });
   };
@@ -808,7 +867,7 @@ const Body = () => {
                         onUpdate={handleListUpdate}
                         onLabelClick={handleListLabelClick}
                         selectedLabel={selectedLabel || ""}
-                        onConvertToTask={handleListConvertToTask}
+                        onCloneToTask={() => handleListCloneToTask(list)}
                         onPriorityChange={handleListPriorityChange}
                         totalLists={sortedLists.length}
                         isAnimating={animatingListId === list.id}
