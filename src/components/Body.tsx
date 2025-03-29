@@ -49,6 +49,8 @@ const Body = () => {
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
   const [expandedListId, setExpandedListId] = useState<string | null>(null);
+  const [isAllExpanded, setIsAllExpanded] = useState(false);
+  const [isAllExpandedMode, setIsAllExpandedMode] = useState(false);
 
   // Get all unique labels from tasks and lists
   const allLabels = Array.from(
@@ -693,8 +695,8 @@ const Body = () => {
                     lists: lists.length,
                   }}
                 />
-                <div className="flex flex-wrap gap-2">
-                  <div className="w-full">
+                <div className="flex flex-wrap gap-2 w-full">
+                  <div className="flex flex-row w-full justify-between">
                     <button
                       onClick={() =>
                         setIsCategoriesExpanded(!isCategoriesExpanded)
@@ -706,6 +708,31 @@ const Body = () => {
                       </span>
                       <MinimizeIcon
                         isMinimized={!isCategoriesExpanded}
+                        className="w-4 h-4"
+                      />
+                    </button>
+                    <button
+                      onClick={() => {
+                        setIsAllExpandedMode(!isAllExpandedMode);
+                        setIsAllExpanded(!isAllExpanded);
+                        if (isAllExpanded) {
+                          setExpandedTaskId(null);
+                          setExpandedListId(null);
+                        } else {
+                          // Expand all tasks and lists
+                          const allTaskIds = tasks.map((task) => task.id);
+                          const allListIds = lists.map((list) => list.id);
+                          setExpandedTaskId(allTaskIds[0] || null);
+                          setExpandedListId(allListIds[0] || null);
+                        }
+                      }}
+                      className="flex items-center gap-2 text-gray-400 hover:text-gray-300 transition-colors mb-2 ml-4"
+                    >
+                      <span className="text-xs sm:text-sm whitespace-nowrap">
+                        {isAllExpanded ? "Minimera alla" : "Expandera alla"}
+                      </span>
+                      <MinimizeIcon
+                        isMinimized={isAllExpanded}
                         className="w-4 h-4"
                       />
                     </button>
@@ -771,7 +798,7 @@ const Body = () => {
                         onDelete={handleListDelete}
                         onUpdate={handleListUpdate}
                         onLabelClick={handleListLabelClick}
-                        selectedLabel={selectedLabel}
+                        selectedLabel={selectedLabel || ""}
                         onConvertToTask={handleListConvertToTask}
                         onPriorityChange={handleListPriorityChange}
                         totalLists={sortedLists.length}
@@ -779,7 +806,9 @@ const Body = () => {
                         isCollapsed={isCollapsed}
                         onHeightChange={handleListHeight}
                         showPriorityControls={sortField === "priority"}
-                        expandedListId={expandedListId}
+                        expandedListId={
+                          isAllExpandedMode ? list.id : expandedListId
+                        }
                         setExpandedListId={setExpandedListId}
                       />
                     ))
@@ -810,7 +839,9 @@ const Body = () => {
                       onLabelClick={handleLabelClick}
                       selectedLabel={selectedLabel || ""}
                       onAddSubtask={handleAddSubtask}
-                      expandedTaskId={expandedTaskId}
+                      expandedTaskId={
+                        isAllExpandedMode ? task.id : expandedTaskId
+                      }
                       setExpandedTaskId={setExpandedTaskId}
                       showPriorityControls={sortField === "priority"}
                       currentSortField={sortField}
