@@ -16,22 +16,16 @@ export const SortSection = ({
   return (
     <div className="flex items-center gap-2">
       <SortButton
-        label="Priority"
+        label="Prioritet"
         isActive={sortField === "priority"}
         onClick={() => onSortFieldChange("priority")}
         direction={"asc"}
       />
       <SortButton
-        label="Due Date"
+        label="Tid kvar"
         isActive={sortField === "dueDate"}
         onClick={() => onSortFieldChange("dueDate")}
         direction={sortField === "dueDate" ? sortDirection : "asc"}
-      />
-      <SortButton
-        label="Created"
-        isActive={sortField === "createdAt"}
-        onClick={() => onSortFieldChange("createdAt")}
-        direction={sortField === "createdAt" ? sortDirection : "asc"}
       />
       <SortButton
         label="Updated"
