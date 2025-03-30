@@ -4,16 +4,16 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ANIMATION } from "./task-card/constants";
 import AddTaskPanel from "./AddTaskPanel";
-import { FilterSection } from "./common/FilterSection";
+import { FilterSection } from "./sections/FilterSection";
 import Header from "./Header";
 import { List } from "../types/List";
 import { ListSection } from "./sections/ListSection";
-import { MinimizeIcon } from "./icons/MinimizeIcon";
-import { ScrollButtons } from "./ScrollButtons";
-import { SortSection } from "./common/SortSection";
+import { SortControls } from "./sections/SortControls";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
 import { TaskSection } from "./sections/TaskSection";
+import { useFilteredLists } from "../data/hooks/useFilteredItems";
+import { useFilteredTasks } from "../data/hooks/useFilteredItems";
 import { useLabelsAndCounts } from "../data/hooks/useLabelsAndCounts";
 
 const Body = () => {
@@ -56,7 +56,8 @@ const Body = () => {
   const [isAllExpanded, setIsAllExpanded] = useState(false);
   const [isAllExpandedMode, setIsAllExpandedMode] = useState(false);
 
-  const { labels, counts } = useLabelsAndCounts(tasks, lists, tab, searchQuery);
+  const { labels: labelsAndCountsLabels, counts: labelsAndCountsCounts } =
+    useLabelsAndCounts(tasks, lists, tab, searchQuery);
 
   // Calculate tasks with due date count based on search query
   const tasksWithDueDate = tasks.filter((task) => {
@@ -341,42 +342,19 @@ const Body = () => {
     return filter?.state || LabelState.SHOW_ALL;
   };
 
-  const filteredTasks = tasks.filter((task) => {
-    // First filter by view (todos/archive)
-    if (tab === "todos" && task.archived) return false;
-    if (tab === "archive" && !task.archived) return false;
+  const filteredTasks = useFilteredTasks({
+    tasks,
+    searchQuery,
+    labelFilters,
+    selectedLabel,
+    tab,
+  });
 
-    // Then apply search filter
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch =
-        task.title.toLowerCase().includes(searchLower) ||
-        task.description.toLowerCase().includes(searchLower) ||
-        task.author.toLowerCase().includes(searchLower);
-      if (!matchesSearch) return false;
-    }
-
-    // Then apply label filters
-    if (labelFilters.length > 0) {
-      return labelFilters.every((filter) => {
-        if (filter.label === "completed") {
-          if (filter.state === LabelState.SHOW_ONLY) return task.completed;
-          if (filter.state === LabelState.SHOW_OTHERS) return !task.completed;
-          return true;
-        }
-        if (filter.label === "due-date") {
-          if (filter.state === LabelState.SHOW_ONLY) return !!task.dueDate;
-          if (filter.state === LabelState.SHOW_OTHERS) return !task.dueDate;
-          return true;
-        }
-        const hasLabel = task.labels?.includes(filter.label);
-        if (filter.state === LabelState.SHOW_ONLY) return hasLabel;
-        if (filter.state === LabelState.SHOW_OTHERS) return !hasLabel;
-        return true;
-      });
-    }
-
-    return true;
+  const filteredLists = useFilteredLists({
+    lists,
+    searchQuery,
+    labelFilters,
+    selectedLabel,
   });
 
   const clearAllFilters = () => {
@@ -464,44 +442,6 @@ const Body = () => {
   const handleListLabelClick = (label: string) => {
     setSelectedLabel(selectedLabel === label ? null : label);
   };
-
-  const filteredLists = lists.filter((list) => {
-    // Apply search filter
-    if (searchQuery) {
-      const searchLower = searchQuery.toLowerCase();
-      const matchesSearch =
-        list.title.toLowerCase().includes(searchLower) ||
-        (list.description?.toLowerCase() || "").includes(searchLower) ||
-        list.author.toLowerCase().includes(searchLower) ||
-        list.items.some((item) =>
-          item.content.toLowerCase().includes(searchLower)
-        );
-      if (!matchesSearch) return false;
-    }
-
-    // Apply label filters
-    if (labelFilters.length > 0) {
-      return labelFilters.every((filter) => {
-        if (filter.label === "completed") {
-          const isCompleted = list.items.every((item) => item.completed);
-          if (filter.state === LabelState.SHOW_ONLY) return isCompleted;
-          if (filter.state === LabelState.SHOW_OTHERS) return !isCompleted;
-          return true;
-        }
-        const hasLabel = list.labels?.includes(filter.label);
-        if (filter.state === LabelState.SHOW_ONLY) return hasLabel;
-        if (filter.state === LabelState.SHOW_OTHERS) return !hasLabel;
-        return true;
-      });
-    }
-
-    // Apply selected label filter
-    if (selectedLabel) {
-      return list.labels?.includes(selectedLabel);
-    }
-
-    return true;
-  });
 
   const sortedLists = [...filteredLists].sort((a, b) => {
     // First sort by completion status (completed lists go to bottom)
@@ -667,48 +607,20 @@ const Body = () => {
           </div>
         </div>
 
-        {/* Sort Section */}
-        <div className="border-t border-gray-800">
-          <div
-            className={`flex items-center justify-between ${
-              isSortMinimized ? "py-1" : "p-4"
-            } transition-all duration-200`}
-          >
-            <div
-              className={`flex-1 transition-all duration-200 max-w-4xl mx-auto ${
-                isSortMinimized ? "h-6 overflow-hidden opacity-0" : ""
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <SortSection
-                  sortField={sortField}
-                  sortDirection={sortDirection}
-                  onSortFieldChange={handleSort}
-                />
-                <ScrollButtons
-                  onScrollToBottom={scrollToBottom}
-                  onScrollToTop={scrollToTop}
-                />
-              </div>
-            </div>
-            <button
-              onClick={() => {
-                setIsSortMinimized(!isSortMinimized);
-                if (!isSortMinimized) {
-                  setIsHeaderVisible(false);
-                }
-              }}
-              className="ml-4 p-1 text-gray-400 hover:text-gray-300 transition-colors"
-              aria-label={
-                isSortMinimized
-                  ? "Expand sort options"
-                  : "Minimize sort options"
-              }
-            >
-              <MinimizeIcon isMinimized={isSortMinimized} className="w-5 h-5" />
-            </button>
-          </div>
-        </div>
+        <SortControls
+          sortField={sortField}
+          sortDirection={sortDirection}
+          isSortMinimized={isSortMinimized}
+          onSortFieldChange={handleSort}
+          onMinimizeToggle={() => {
+            setIsSortMinimized(!isSortMinimized);
+            if (!isSortMinimized) {
+              setIsHeaderVisible(false);
+            }
+          }}
+          onScrollToTop={scrollToTop}
+          onScrollToBottom={scrollToBottom}
+        />
       </div>
       <div
         className={`flex-1 overflow-y-auto ${
@@ -740,8 +652,8 @@ const Body = () => {
                   lists={lists}
                   completedCount={completedCount}
                   tasksWithDueDate={tasksWithDueDate}
-                  labels={labels}
-                  counts={counts}
+                  labels={labelsAndCountsLabels}
+                  counts={labelsAndCountsCounts}
                   labelFilters={labelFilters}
                   handleCompletedClick={handleCompletedClick}
                   handleDueDateClick={handleDueDateClick}

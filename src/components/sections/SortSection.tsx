@@ -1,6 +1,4 @@
-import { MinimizeIcon } from "../icons/MinimizeIcon";
-import { SortButton } from "./SortButton";
-import { useState } from "react";
+import { SortButton } from "../common/SortButton";
 
 interface SortSectionProps {
   sortField: "dueDate" | "createdAt" | "title" | "updatedAt" | "priority";
@@ -15,15 +13,13 @@ export const SortSection = ({
   sortDirection,
   onSortFieldChange,
 }: SortSectionProps) => {
-  const [isSortMinimized, setIsSortMinimized] = useState(false);
-
   return (
     <div className="flex items-center gap-2">
       <SortButton
         label="Priority"
         isActive={sortField === "priority"}
         onClick={() => onSortFieldChange("priority")}
-        direction={sortField === "priority" ? sortDirection : "asc"}
+        direction={"asc"}
       />
       <SortButton
         label="Due Date"
@@ -49,15 +45,6 @@ export const SortSection = ({
         onClick={() => onSortFieldChange("title")}
         direction={sortField === "title" ? sortDirection : "asc"}
       />
-      <button
-        onClick={() => setIsSortMinimized(!isSortMinimized)}
-        className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-      >
-        <MinimizeIcon
-          className="w-4 h-4 text-gray-500"
-          isMinimized={isSortMinimized}
-        />
-      </button>
     </div>
   );
 };
