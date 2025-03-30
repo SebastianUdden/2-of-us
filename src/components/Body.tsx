@@ -4,8 +4,9 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ANIMATION } from "./task-card/constants";
 import AddTaskPanel from "./AddTaskPanel";
+import { EmptyState } from "./common/EmptyState";
+import { FilterSection } from "./common/FilterSection";
 import Header from "./Header";
-import { LabelPill } from "./LabelPill";
 import { List } from "../types/List";
 import ListCard from "./list-card/ListCard";
 import { MinimizeIcon } from "./icons/MinimizeIcon";
@@ -755,106 +756,34 @@ const Body = () => {
                     lists: lists.length,
                   }}
                 />
-                <div className="flex flex-wrap gap-2 w-full">
-                  <div className="flex flex-row w-full justify-between">
-                    <button
-                      onClick={() =>
-                        setIsCategoriesExpanded(!isCategoriesExpanded)
-                      }
-                      className="flex items-center gap-2 text-gray-400 hover:text-gray-300 transition-colors mb-2"
-                    >
-                      <span className="text-xs sm:text-sm">
-                        Filterkategorier
-                      </span>
-                      <MinimizeIcon
-                        isMinimized={!isCategoriesExpanded}
-                        className="w-4 h-4"
-                      />
-                    </button>
-                    <button
-                      onClick={() => {
-                        setIsAllExpandedMode(!isAllExpandedMode);
-                        setIsAllExpanded(!isAllExpanded);
-                        if (isAllExpanded) {
-                          setExpandedTaskId(null);
-                          setExpandedListId(null);
-                        } else {
-                          // Expand all tasks and lists
-                          const allTaskIds = tasks.map((task) => task.id);
-                          const allListIds = lists.map((list) => list.id);
-                          setExpandedTaskId(allTaskIds[0] || null);
-                          setExpandedListId(allListIds[0] || null);
-                        }
-                      }}
-                      className="flex items-center gap-2 text-gray-400 hover:text-gray-300 transition-colors mb-2 ml-4"
-                    >
-                      <span className="text-xs sm:text-sm whitespace-nowrap">
-                        {isAllExpanded ? "Minimera alla" : "Expandera alla"}
-                      </span>
-                      <MinimizeIcon
-                        isMinimized={isAllExpanded}
-                        className="w-4 h-4"
-                      />
-                    </button>
-                  </div>
-                  <div
-                    className={`flex flex-wrap gap-2 transition-all duration-200 ${
-                      isCategoriesExpanded
-                        ? "opacity-100 max-h-[500px]"
-                        : "opacity-0 max-h-0 overflow-hidden"
-                    }`}
-                  >
-                    {completedCount > 0 && (
-                      <LabelPill
-                        label="Avklarade"
-                        onClick={handleCompletedClick}
-                        state={getCompletedState()}
-                        count={completedCount}
-                      />
-                    )}
-                    {tasksWithDueDate > 0 && (
-                      <LabelPill
-                        label="Förfallodatum"
-                        onClick={handleDueDateClick}
-                        state={getDueDateState()}
-                        count={tasksWithDueDate}
-                      />
-                    )}
-                    {Array.from(labels)
-                      .filter((label) => counts[label] > 0)
-                      .map((label) => (
-                        <LabelPill
-                          key={label}
-                          label={label}
-                          onClick={() => handleLabelClick(label)}
-                          state={getLabelState(label)}
-                          count={counts[label]}
-                        />
-                      ))}
-                    <LabelPill
-                      label="Rensa filter"
-                      onClick={clearAllFilters}
-                      state={
-                        labelFilters.length === 0
-                          ? LabelState.SHOW_ONLY
-                          : LabelState.SHOW_ALL
-                      }
-                      count={tasks.length}
-                    />
-                  </div>
-                </div>
+                <FilterSection
+                  isCategoriesExpanded={isCategoriesExpanded}
+                  setIsCategoriesExpanded={setIsCategoriesExpanded}
+                  isAllExpanded={isAllExpanded}
+                  setIsAllExpanded={setIsAllExpanded}
+                  setIsAllExpandedMode={setIsAllExpandedMode}
+                  setExpandedTaskId={setExpandedTaskId}
+                  setExpandedListId={setExpandedListId}
+                  tasks={tasks}
+                  lists={lists}
+                  completedCount={completedCount}
+                  tasksWithDueDate={tasksWithDueDate}
+                  labels={labels}
+                  counts={counts}
+                  labelFilters={labelFilters}
+                  handleCompletedClick={handleCompletedClick}
+                  handleDueDateClick={handleDueDateClick}
+                  handleLabelClick={handleLabelClick}
+                  clearAllFilters={clearAllFilters}
+                  getCompletedState={getCompletedState}
+                  getDueDateState={getDueDateState}
+                  getLabelState={getLabelState}
+                />
               </div>
               <div className="space-y-2">
                 {tab === "lists" ? (
                   sortedLists.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                      <p className="text-lg font-medium mb-2">No lists found</p>
-                      <p className="text-sm text-center">
-                        {selectedLabel
-                          ? "No lists with this label"
-                          : "Add your first list to get started"}
-                      </p>
-                    </div>
+                    <EmptyState type="lists" selectedLabel={selectedLabel} />
                   ) : (
                     sortedLists.map((list) => (
                       <ListCard
@@ -880,14 +809,7 @@ const Body = () => {
                     ))
                   )
                 ) : sortedAndFilteredTasks.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                    <p className="text-lg font-medium mb-2">No tasks found</p>
-                    <p className="text-sm text-center">
-                      {selectedLabel
-                        ? "No tasks with this label"
-                        : "Add your first task to get started"}
-                    </p>
-                  </div>
+                  <EmptyState type="tasks" selectedLabel={selectedLabel} />
                 ) : (
                   sortedAndFilteredTasks.map((task) => (
                     <TaskCard
