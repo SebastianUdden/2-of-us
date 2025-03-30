@@ -1,7 +1,15 @@
-import { List } from "../types/List";
-import { Task } from "../types/Task";
+import { List } from "../../types/List";
+import { Task } from "../../types/Task";
 import { useMemo } from "react";
 
+/**
+ * Hook to calculate unique labels and their counts from tasks or lists
+ * @param tasks - Array of tasks
+ * @param lists - Array of lists
+ * @param tab - Current tab ('todos' or 'lists')
+ * @param searchQuery - Current search query
+ * @returns Object containing unique labels and their counts
+ */
 export const useLabelsAndCounts = (
   tasks: Task[],
   lists: List[],

@@ -13,8 +13,7 @@ import { ScrollButtons } from "./ScrollButtons";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
 import TaskCard from "./task-card/TaskCard";
-import { generateUUID } from "../utils/uuid";
-import { useLabelsAndCounts } from "../data/hooks";
+import { useLabelsAndCounts } from "../data/hooks/useLabelsAndCounts";
 
 const Body = () => {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
