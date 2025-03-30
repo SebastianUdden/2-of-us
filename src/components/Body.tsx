@@ -10,6 +10,7 @@ import { List } from "../types/List";
 import ListCard from "./list-card/ListCard";
 import { MinimizeIcon } from "./icons/MinimizeIcon";
 import { ScrollButtons } from "./ScrollButtons";
+import { SortButton } from "./common/SortButton";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
 import TaskCard from "./task-card/TaskCard";
@@ -420,29 +421,6 @@ const Body = () => {
     });
   };
 
-  // Add sort buttons to the UI
-  const SortButton = ({
-    field,
-    label,
-  }: {
-    field: keyof Task;
-    label: string;
-  }) => (
-    <button
-      onClick={() => handleSort(field)}
-      className={`px-2 py-1 text-xs sm:text-sm rounded-md transition-colors ${
-        sortField === field
-          ? "bg-blue-500 text-white"
-          : "bg-gray-700 text-gray-300 hover:bg-gray-600"
-      }`}
-    >
-      {label}
-      {sortField === field && field !== "priority" && (
-        <span className="ml-1">{sortDirection === "asc" ? "↑" : "↓"}</span>
-      )}
-    </button>
-  );
-
   // Modify the existing filtered tasks to include sorting
   const sortedAndFilteredTasks = getSortedTasks(filteredTasks);
 
@@ -710,10 +688,30 @@ const Body = () => {
                 <span className="text-xs sm:text-sm text-gray-400 mr-2 whitespace-nowrap">
                   Sortera efter:
                 </span>
-                <SortButton field="priority" label="Prioritet" />
-                <SortButton field="dueDate" label="Förfallodatum" />
-                <SortButton field="updatedAt" label="Uppdaterad" />
-                <SortButton field="title" label="Titel" />
+                <SortButton
+                  label="Prioritet"
+                  isActive={sortField === "priority"}
+                  direction={sortDirection}
+                  onClick={() => handleSort("priority")}
+                />
+                <SortButton
+                  label="Förfallodatum"
+                  isActive={sortField === "dueDate"}
+                  direction={sortDirection}
+                  onClick={() => handleSort("dueDate")}
+                />
+                <SortButton
+                  label="Uppdaterad"
+                  isActive={sortField === "updatedAt"}
+                  direction={sortDirection}
+                  onClick={() => handleSort("updatedAt")}
+                />
+                <SortButton
+                  label="Titel"
+                  isActive={sortField === "title"}
+                  direction={sortDirection}
+                  onClick={() => handleSort("title")}
+                />
                 <ScrollButtons
                   onScrollToBottom={scrollToBottom}
                   onScrollToTop={scrollToTop}
