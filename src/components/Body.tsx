@@ -4,17 +4,16 @@ import { useCallback, useEffect, useState } from "react";
 
 import { ANIMATION } from "./task-card/constants";
 import AddTaskPanel from "./AddTaskPanel";
-import { EmptyState } from "./common/EmptyState";
 import { FilterSection } from "./common/FilterSection";
 import Header from "./Header";
 import { List } from "../types/List";
-import ListCard from "./list-card/ListCard";
+import { ListSection } from "./sections/ListSection";
 import { MinimizeIcon } from "./icons/MinimizeIcon";
 import { ScrollButtons } from "./ScrollButtons";
-import { SortButton } from "./common/SortButton";
+import { SortSection } from "./common/SortSection";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
-import TaskCard from "./task-card/TaskCard";
+import { TaskSection } from "./sections/TaskSection";
 import { useLabelsAndCounts } from "../data/hooks/useLabelsAndCounts";
 
 const Body = () => {
@@ -29,7 +28,7 @@ const Body = () => {
   const [animatingListHeight, setAnimatingListHeight] = useState<number | null>(
     null
   );
-  const [selectedLabel, setSelectedLabel] = useState<string | undefined>();
+  const [selectedLabel, setSelectedLabel] = useState<string | null>(null);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [pendingTaskMove, setPendingTaskMove] = useState<{
     taskId: string;
@@ -39,7 +38,9 @@ const Body = () => {
     listId: string;
     newPosition: number;
   } | null>(null);
-  const [sortField, setSortField] = useState<keyof Task>("priority");
+  const [sortField, setSortField] = useState<
+    "dueDate" | "createdAt" | "title" | "updatedAt" | "priority"
+  >("priority");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [isSortMinimized, setIsSortMinimized] = useState(false);
   const [labelFilters, setLabelFilters] = useState<LabelFilter[]>([]);
@@ -382,15 +383,14 @@ const Body = () => {
     setLabelFilters([]);
   };
 
-  const handleSort = (field: keyof Task) => {
-    if (sortField === field && field !== "priority") {
-      // Only toggle direction if it's not priority
-      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+  const handleSort = (
+    field: "dueDate" | "createdAt" | "title" | "updatedAt" | "priority"
+  ) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortField(field);
-      // Force "asc" for priority (which means highest priority first),
-      // otherwise use "asc" as default
-      setSortDirection(field === "priority" ? "asc" : "asc");
+      setSortDirection("asc");
     }
   };
 
@@ -425,17 +425,13 @@ const Body = () => {
   // Modify the existing filtered tasks to include sorting
   const sortedAndFilteredTasks = getSortedTasks(filteredTasks);
 
-  const handleListComplete = (listId: string, itemId: string) => {
+  const handleListComplete = (listId: string) => {
     setLists((prevLists) =>
       prevLists.map((list) =>
         list.id === listId
           ? {
               ...list,
-              items: list.items.map((item) =>
-                item.id === itemId
-                  ? { ...item, completed: !item.completed }
-                  : item
-              ),
+              items: list.items.map((item) => ({ ...item, completed: true })),
             }
           : list
       )
@@ -466,7 +462,7 @@ const Body = () => {
   };
 
   const handleListLabelClick = (label: string) => {
-    setSelectedLabel(selectedLabel === label ? undefined : label);
+    setSelectedLabel(selectedLabel === label ? null : label);
   };
 
   const filteredLists = lists.filter((list) => {
@@ -580,18 +576,16 @@ const Body = () => {
     setAnimatingListHeight(height);
   };
 
-  // Handle the actual list move after collapse animation
+  // Fix the handleListMove function
   const handleListMove = useCallback(() => {
     if (!pendingListMove) return;
-
     const { listId, newPosition } = pendingListMove;
+
     setLists((prevLists) => {
       const listIndex = prevLists.findIndex((list) => list.id === listId);
       const newLists = [...prevLists];
       const [movedList] = newLists.splice(listIndex, 1);
       newLists.splice(newPosition - 1, 0, movedList);
-
-      // Sort lists and update priorities
       return sortLists(newLists);
     });
 
@@ -685,33 +679,11 @@ const Body = () => {
                 isSortMinimized ? "h-6 overflow-hidden opacity-0" : ""
               }`}
             >
-              <div className="flex gap-2 overflow-x-auto pb-2 max-w-[calc(100vw-2rem)] items-center">
-                <span className="text-xs sm:text-sm text-gray-400 mr-2 whitespace-nowrap">
-                  Sortera efter:
-                </span>
-                <SortButton
-                  label="Prioritet"
-                  isActive={sortField === "priority"}
-                  direction={sortDirection}
-                  onClick={() => handleSort("priority")}
-                />
-                <SortButton
-                  label="Förfallodatum"
-                  isActive={sortField === "dueDate"}
-                  direction={sortDirection}
-                  onClick={() => handleSort("dueDate")}
-                />
-                <SortButton
-                  label="Uppdaterad"
-                  isActive={sortField === "updatedAt"}
-                  direction={sortDirection}
-                  onClick={() => handleSort("updatedAt")}
-                />
-                <SortButton
-                  label="Titel"
-                  isActive={sortField === "title"}
-                  direction={sortDirection}
-                  onClick={() => handleSort("title")}
+              <div className="flex items-center gap-2">
+                <SortSection
+                  sortField={sortField}
+                  sortDirection={sortDirection}
+                  onSortFieldChange={handleSort}
                 />
                 <ScrollButtons
                   onScrollToBottom={scrollToBottom}
@@ -782,64 +754,42 @@ const Body = () => {
               </div>
               <div className="space-y-2">
                 {tab === "lists" ? (
-                  sortedLists.length === 0 ? (
-                    <EmptyState type="lists" selectedLabel={selectedLabel} />
-                  ) : (
-                    sortedLists.map((list) => (
-                      <ListCard
-                        key={list.id}
-                        list={list}
-                        onComplete={handleListComplete}
-                        onDelete={handleListDelete}
-                        onUpdate={handleListUpdate}
-                        onLabelClick={handleListLabelClick}
-                        selectedLabel={selectedLabel || ""}
-                        onCloneToTask={() => handleListCloneToTask(list)}
-                        onPriorityChange={handleListPriorityChange}
-                        totalLists={sortedLists.length}
-                        isAnimating={animatingListId === list.id}
-                        isCollapsed={isCollapsed}
-                        onHeightChange={handleListHeight}
-                        showPriorityControls={sortField === "priority"}
-                        expandedListId={
-                          isAllExpandedMode ? list.id : expandedListId
-                        }
-                        setExpandedListId={setExpandedListId}
-                      />
-                    ))
-                  )
-                ) : sortedAndFilteredTasks.length === 0 ? (
-                  <EmptyState type="tasks" selectedLabel={selectedLabel} />
+                  <ListSection
+                    lists={sortedLists}
+                    selectedLabel={selectedLabel}
+                    onComplete={handleListComplete}
+                    onDelete={handleListDelete}
+                    onUpdate={handleListUpdate}
+                    onLabelClick={handleListLabelClick}
+                    onCloneToTask={handleListCloneToTask}
+                    onPriorityChange={handleListPriorityChange}
+                    isCollapsed={isCollapsed}
+                    onHeightChange={(height) => handleListHeight(height || 0)}
+                    expandedListId={isAllExpandedMode ? "all" : expandedListId}
+                    setExpandedListId={setExpandedListId}
+                    showPriorityControls={sortField === "priority"}
+                    animatingListId={animatingListId}
+                    animatingListHeight={animatingListHeight}
+                  />
                 ) : (
-                  sortedAndFilteredTasks.map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onPriorityChange={handlePriorityChange}
-                      onComplete={handleComplete}
-                      onDelete={handleDelete}
-                      onArchive={handleArchive}
-                      onUpdate={handleUpdate}
-                      totalTasks={tasks.length}
-                      isAnimating={task.id === animatingTaskId}
-                      isCollapsed={isCollapsed}
-                      onHeightChange={handleTaskHeight}
-                      onLabelClick={handleLabelClick}
-                      selectedLabel={selectedLabel || ""}
-                      onAddSubtask={handleAddSubtask}
-                      expandedTaskId={
-                        isAllExpandedMode ? task.id : expandedTaskId
-                      }
-                      setExpandedTaskId={setExpandedTaskId}
-                      showPriorityControls={sortField === "priority"}
-                      currentSortField={sortField}
-                    />
-                  ))
-                )}
-                {animatingTaskHeight !== null && isCollapsed && (
-                  <div
-                    className="w-full bg-transparent"
-                    style={{ height: `${animatingTaskHeight}px` }}
+                  <TaskSection
+                    tasks={sortedAndFilteredTasks}
+                    selectedLabel={selectedLabel}
+                    onPriorityChange={handlePriorityChange}
+                    onComplete={handleComplete}
+                    onDelete={handleDelete}
+                    onArchive={handleArchive}
+                    onUpdate={handleUpdate}
+                    isCollapsed={isCollapsed}
+                    onHeightChange={handleTaskHeight}
+                    onLabelClick={handleLabelClick}
+                    onAddSubtask={handleAddSubtask}
+                    expandedTaskId={isAllExpandedMode ? "all" : expandedTaskId}
+                    setExpandedTaskId={setExpandedTaskId}
+                    showPriorityControls={sortField === "priority"}
+                    currentSortField={sortField}
+                    animatingTaskId={animatingTaskId}
+                    animatingTaskHeight={animatingTaskHeight}
                   />
                 )}
               </div>
