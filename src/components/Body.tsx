@@ -234,6 +234,12 @@ const Body = () => {
     );
   };
 
+  const handleTaskUpdate = (updatedTask: Task) => {
+    setTasks((prevTasks) =>
+      prevTasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
+    );
+  };
+
   const handleLabelClickWithExpand = (label: string) => {
     setIsCategoriesExpanded(true);
     handleLabelClick(label);
@@ -462,7 +468,7 @@ const Body = () => {
                     onComplete={handleComplete}
                     onDelete={handleDelete}
                     onArchive={handleArchive}
-                    onUpdate={() => {}}
+                    onUpdate={handleTaskUpdate}
                     isCollapsed={isCollapsed}
                     onHeightChange={setAnimatingTaskHeight}
                     onLabelClick={handleLabelClickWithExpand}

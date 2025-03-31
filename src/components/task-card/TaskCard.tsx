@@ -63,6 +63,7 @@ const TaskCard = ({
   const [showSubtasks, setShowSubtasks] = useState(expandedTaskId === task.id);
   const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
     useState(false);
+  const [editedSize, setEditedSize] = useState(task.size);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -73,11 +74,16 @@ const TaskCard = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (editedTitle !== task.title || editedDescription !== task.description) {
+    if (
+      editedTitle !== task.title ||
+      editedDescription !== task.description ||
+      editedSize !== task.size
+    ) {
       onUpdate({
         ...task,
         title: editedTitle,
         description: editedDescription,
+        size: editedSize,
       });
     }
     setIsEditing(false);
@@ -173,7 +179,20 @@ const TaskCard = ({
                 dueDate={task.dueDate}
                 onDueDateChange={handleDueDateChange}
               />
-              {task.size && <SizeLabel size={task.size} />}
+              {task.size &&
+                (isEditing ? (
+                  <select
+                    value={editedSize}
+                    onChange={(e) => setEditedSize(e.target.value)}
+                  >
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                  </select>
+                ) : (
+                  <SizeLabel size={task.size} />
+                ))}
               {task.labels && task.labels.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {task.labels.map((label) => (

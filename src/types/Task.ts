@@ -22,4 +22,5 @@ export interface Task {
     completed: boolean;
   }[];
   parentTaskId?: string;
+  size?: string;
 }

@@ -37,6 +37,7 @@ const AddTaskPanel = ({
     description: "",
     priority: 1,
     labels: [] as string[],
+    size: "S",
   });
   const titleInputRef = useRef<HTMLInputElement>(null);
 
@@ -50,6 +51,7 @@ const AddTaskPanel = ({
         description: "",
         priority: totalTasks + 1,
         labels: [],
+        size: "S",
       }));
       // Focus the title input when panel opens
       setTimeout(() => titleInputRef.current?.focus(), 100);
@@ -72,6 +74,7 @@ const AddTaskPanel = ({
       completed: false,
       archived: false,
       priority: formData.priority,
+      size: formData.size,
       labels: formData.labels,
       author: "Sebastian",
       createdAt: new Date(),
@@ -198,7 +201,53 @@ const AddTaskPanel = ({
                     placeholder="Skriv en beskrivning"
                   />
                 </div>
-
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-1">
+                    Storlek
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        formData.size === "S"
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                      }`}
+                      onClick={() => setFormData({ ...formData, size: "S" })}
+                    >
+                      S
+                    </button>
+                    <button
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        formData.size === "M"
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                      }`}
+                      onClick={() => setFormData({ ...formData, size: "M" })}
+                    >
+                      M
+                    </button>
+                    <button
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        formData.size === "L"
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                      }`}
+                      onClick={() => setFormData({ ...formData, size: "L" })}
+                    >
+                      L
+                    </button>
+                    <button
+                      className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                        formData.size === "XL"
+                          ? "bg-blue-500 text-white"
+                          : "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                      }`}
+                      onClick={() => setFormData({ ...formData, size: "XL" })}
+                    >
+                      XL
+                    </button>
+                  </div>
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-1">
                     Etiketter
@@ -219,35 +268,6 @@ const AddTaskPanel = ({
                       </button>
                     ))}
                   </div>
-                </div>
-
-                <div>
-                  <label
-                    htmlFor="priority"
-                    className="block text-sm font-medium text-gray-300 mb-1"
-                  >
-                    Prioritet
-                  </label>
-                  <select
-                    id="priority"
-                    value={formData.priority}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        priority: Number(e.target.value),
-                      })
-                    }
-                    className="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {Array.from(
-                      { length: totalTasks + 1 },
-                      (_, i) => i + 1
-                    ).map((position) => (
-                      <option key={position} value={position}>
-                        {position}
-                      </option>
-                    ))}
-                  </select>
                 </div>
               </>
             )}
