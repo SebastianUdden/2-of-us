@@ -24,8 +24,8 @@ export const useSortPersistence = () => {
   const loadSort = async () => {
     const sortState = await loadItem();
     return {
-      field: sortState?.field || "dueDate",
-      direction: sortState?.direction || "desc",
+      field: sortState?.field || "priority",
+      direction: sortState?.direction || "asc",
     };
   };
 

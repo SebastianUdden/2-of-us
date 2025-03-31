@@ -11,6 +11,7 @@ import { FilterSection } from "./sections/FilterSection";
 import Header from "./Header";
 import { List } from "../types/List";
 import { ListSection } from "./sections/ListSection";
+import { ResetConfirmModal } from "./common/ResetConfirmModal";
 import { SortControls } from "./sections/SortControls";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
@@ -23,15 +24,18 @@ import { usePriorityManagement } from "../data/hooks/usePriorityManagement";
 import { useSearchAndFilter } from "../data/hooks/useSearchAndFilter";
 import { useSorting } from "../data/hooks/useSorting";
 import { useTabPersistence } from "../data/hooks/useTabPersistence";
+import { useTaskPersistence } from "../data/hooks/useTaskPersistence";
 
 const Body = () => {
-  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<List[]>(mockLists);
   const [tab, setTab] = useState<"todos" | "archive" | "lists">("todos");
   const [isSortMinimized, setIsSortMinimized] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
   const { loadTab, saveTab } = useTabPersistence();
+  const { loadTasks, saveTasks } = useTaskPersistence();
 
   const {
     expandedTaskId,
@@ -360,6 +364,46 @@ const Body = () => {
     });
   }, []);
 
+  // Load saved tasks on mount
+  useEffect(() => {
+    loadTasks().then((savedTasks: Task[]) => {
+      if (savedTasks.length > 0) {
+        setTasks(savedTasks);
+      } else {
+        setTasks(mockTasks);
+      }
+    });
+  }, []);
+
+  // Save tasks whenever they change
+  useEffect(() => {
+    if (tasks.length > 0) {
+      saveTasks(tasks);
+    }
+  }, [tasks]);
+
+  const handleReset = async () => {
+    // Clear all localStorage data
+    localStorage.clear();
+
+    // Reset state to initial values
+    setTasks([]);
+    setLists(mockLists);
+    setTab("todos");
+    setIsSortMinimized(false);
+    setSearchQuery("");
+    setSelectedLabel(null);
+    setIsResetModalOpen(false);
+    setIsCategoriesExpanded(false);
+    setIsAllExpanded(false);
+    setIsAllExpandedMode(false);
+    setExpandedTaskId(null);
+    setExpandedListId(null);
+
+    // Close the modal
+    setIsResetModalOpen(false);
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <div
@@ -376,6 +420,12 @@ const Body = () => {
               onSearchChange={setSearchQuery}
             />
           </div>
+          <button
+            onClick={() => setIsResetModalOpen(true)}
+            className="ml-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+          >
+            Återställ
+          </button>
         </div>
 
         <SortControls
@@ -496,6 +546,12 @@ const Body = () => {
           parentTaskTitle={parentTaskTitle}
         />
       )}
+
+      <ResetConfirmModal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        onConfirm={handleReset}
+      />
     </div>
   );
 };

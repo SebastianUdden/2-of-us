@@ -21,7 +21,6 @@ export const SortControls = ({
   sortDirection,
   isSortMinimized,
   onSortFieldChange,
-  onMinimizeToggle,
   onScrollToTop,
   onScrollToBottom,
 }: SortControlsProps) => {
