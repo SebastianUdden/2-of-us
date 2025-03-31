@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 interface TaskDueDateProps {
-  dueDate?: Date;
+  dueDate?: Date | string;
   onDueDateChange: (date: Date | undefined) => void;
 }
 
@@ -15,11 +15,14 @@ const TaskDueDate = ({ dueDate, onDueDateChange }: TaskDueDateProps) => {
     if (!dueDate) return;
 
     const now = new Date();
+    // Convert dueDate to Date if it's a string
+    const dueDateObj =
+      typeof dueDate === "string" ? new Date(dueDate) : dueDate;
     // Set both dates to start of day for accurate day comparison
     const dueDateStart = new Date(
-      dueDate.getFullYear(),
-      dueDate.getMonth(),
-      dueDate.getDate()
+      dueDateObj.getFullYear(),
+      dueDateObj.getMonth(),
+      dueDateObj.getDate()
     );
     const nowStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
     const diff = dueDateStart.getTime() - nowStart.getTime();
@@ -41,7 +44,9 @@ const TaskDueDate = ({ dueDate, onDueDateChange }: TaskDueDateProps) => {
 
   useEffect(() => {
     if (dueDate) {
-      setSelectedDate(dueDate.toISOString().split("T")[0]);
+      const dueDateObj =
+        typeof dueDate === "string" ? new Date(dueDate) : dueDate;
+      setSelectedDate(dueDateObj.toISOString().split("T")[0]);
       updateTimeRemaining();
     }
   }, [dueDate, updateTimeRemaining]);

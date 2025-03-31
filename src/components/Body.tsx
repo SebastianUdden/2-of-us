@@ -34,6 +34,7 @@ const Body = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isListMode, setIsListMode] = useState(false);
   const { loadTab, saveTab } = useTabPersistence();
   const { loadTasks, saveTasks } = useTaskPersistence();
 
@@ -88,7 +89,8 @@ const Body = () => {
     openAddTaskPanel,
     closeAddTaskPanel,
     handleAddTask,
-  } = useAddTaskPanel(tasks, setTasks, setExpandedTaskId);
+    handleAddList,
+  } = useAddTaskPanel(tasks, setTasks, lists, setLists, setExpandedTaskId);
 
   const {
     sortTasks,
@@ -544,6 +546,9 @@ const Body = () => {
           totalTasks={tasks.length}
           parentTaskId={parentTaskId}
           parentTaskTitle={parentTaskTitle}
+          isListMode={isListMode}
+          onToggleMode={() => setIsListMode(!isListMode)}
+          onAddList={handleAddList}
         />
       )}
 

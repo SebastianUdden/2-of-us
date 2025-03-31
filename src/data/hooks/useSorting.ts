@@ -59,16 +59,33 @@ export const useSorting = (): UseSortingResult => {
             if (!a.dueDate && !b.dueDate) return 0;
             if (!a.dueDate) return 1;
             if (!b.dueDate) return -1;
-            return multiplier * (a.dueDate.getTime() - b.dueDate.getTime());
+            return (
+              multiplier *
+              (new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime())
+            );
           case "updatedAt": {
             const aLatest =
-              a.updates[a.updates.length - 1]?.updatedAt || a.createdAt;
+              a.updates && a.updates.length > 0
+                ? a.updates[a.updates.length - 1].updatedAt
+                : a.createdAt;
             const bLatest =
-              b.updates[b.updates.length - 1]?.updatedAt || b.createdAt;
-            return multiplier * (aLatest.getTime() - bLatest.getTime());
+              b.updates && b.updates.length > 0
+                ? b.updates[b.updates.length - 1].updatedAt
+                : b.createdAt;
+            return (
+              multiplier *
+              (new Date(aLatest).getTime() - new Date(bLatest).getTime())
+            );
           }
           case "title":
             return multiplier * a.title.localeCompare(b.title);
+          case "createdAt": {
+            return (
+              multiplier *
+              (new Date(a.createdAt).getTime() -
+                new Date(b.createdAt).getTime())
+            );
+          }
           default:
             return 0;
         }
@@ -88,13 +105,13 @@ export const useSorting = (): UseSortingResult => {
           case "title":
             return multiplier * a.title.localeCompare(b.title);
           case "updatedAt": {
-            const aLatest = a.updatedAt || a.createdAt;
-            const bLatest = b.updatedAt || b.createdAt;
+            const aLatest = new Date(a.updatedAt);
+            const bLatest = new Date(b.updatedAt);
             return multiplier * (aLatest.getTime() - bLatest.getTime());
           }
           case "createdAt": {
-            const aLatest = a.updatedAt || a.createdAt;
-            const bLatest = b.updatedAt || b.createdAt;
+            const aLatest = new Date(a.createdAt);
+            const bLatest = new Date(b.createdAt);
             return multiplier * (aLatest.getTime() - bLatest.getTime());
           }
           default:

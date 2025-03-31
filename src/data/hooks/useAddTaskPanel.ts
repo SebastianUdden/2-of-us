@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
 
+import { List } from "../../types/List";
 import { Task } from "../../types/Task";
 
 interface UseAddTaskPanelResult {
@@ -9,11 +10,14 @@ interface UseAddTaskPanelResult {
   openAddTaskPanel: (parentTaskId?: string, parentTaskTitle?: string) => void;
   closeAddTaskPanel: () => void;
   handleAddTask: (newTask: Task) => void;
+  handleAddList: (newList: List) => void;
 }
 
 export const useAddTaskPanel = (
   tasks: Task[],
   onTasksUpdate: (tasks: Task[]) => void,
+  lists: List[],
+  onListsUpdate: (lists: List[]) => void,
   onExpandedTaskIdChange?: (taskId: string | null) => void
 ): UseAddTaskPanelResult => {
   const [isAddTaskPanelOpen, setIsAddTaskPanelOpen] = useState(false);
@@ -74,6 +78,13 @@ export const useAddTaskPanel = (
     ]
   );
 
+  const handleAddList = useCallback(
+    (newList: List) => {
+      onListsUpdate([...lists, newList]);
+    },
+    [lists, onListsUpdate]
+  );
+
   return {
     isAddTaskPanelOpen,
     parentTaskId,
@@ -81,5 +92,6 @@ export const useAddTaskPanel = (
     openAddTaskPanel,
     closeAddTaskPanel,
     handleAddTask,
+    handleAddList,
   };
 };
