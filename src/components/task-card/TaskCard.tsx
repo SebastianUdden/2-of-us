@@ -1,6 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-
 import { ANIMATION } from "./constants";
+import Card from "../common/Card";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import { EditIcon } from "../common/EditIcon";
 import { LabelPill } from "../LabelPill";
@@ -12,6 +11,7 @@ import TaskDueDate from "./TaskDueDate";
 import TaskFooter from "./TaskFooter";
 import { TaskHeader } from "./TaskHeader";
 import TaskUpdates from "./TaskUpdates";
+import { useState } from "react";
 
 interface TaskCardProps {
   task: Task;
@@ -51,7 +51,6 @@ const TaskCard = ({
   setExpandedTaskId,
   showPriorityControls,
 }: TaskCardProps) => {
-  const cardRef = useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(task.title);
@@ -59,16 +58,6 @@ const TaskCard = ({
   const [showSubtasks, setShowSubtasks] = useState(expandedTaskId === task.id);
   const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
     useState(false);
-
-  useEffect(() => {
-    setShowSubtasks(expandedTaskId === task.id);
-  }, [expandedTaskId, task.id]);
-
-  useEffect(() => {
-    if (!isAnimating && cardRef.current && onHeightChange) {
-      onHeightChange(cardRef.current.offsetHeight);
-    }
-  }, [isAnimating, onHeightChange]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,27 +127,14 @@ const TaskCard = ({
 
   return (
     <>
-      <div
-        ref={cardRef}
+      <Card
         id={`task-${task.id}`}
-        className={`
-          border border-gray-700 rounded-lg 
-          transition-all duration-${ANIMATION.DURATION} ${ANIMATION.EASING}
-          ${task.completed ? "opacity-75" : ""}
-          ${isAnimating ? "bg-gray-700" : "bg-gray-800"}
-          ${
-            isAnimating
-              ? isCollapsed
-                ? "animate-collapse"
-                : "animate-fade-in"
-              : ""
-          }
-          ${isCollapsed ? "opacity-0" : "opacity-100"}
-          mx-auto pl-3 px-4 py-4
-          origin-top
-          overflow-hidden
-          w-full
-        `}
+        type="task"
+        isAnimating={isAnimating}
+        isCollapsed={isCollapsed}
+        onHeightChange={onHeightChange}
+        expandedId={expandedTaskId}
+        className={`${task.completed ? "opacity-75" : ""}`}
       >
         <div className="flex items-start justify-between">
           <div className="flex flex-col h-full justify-between flex-1 pr-2">
@@ -338,50 +314,50 @@ const TaskCard = ({
                     ))}
                   </div>
                 )}
-                {showPriorityControls && (
-                  <div className="flex flex-col items-start gap-2 mt-2">
-                    {!isPriorityControlsVisible ? (
-                      <button
-                        onClick={() => setIsPriorityControlsVisible(true)}
-                        className="text-sm text-blue-400 hover:text-blue-300"
+              </div>
+            )}
+            {showPriorityControls && (
+              <div className="flex flex-col items-start gap-2 mt-2">
+                {!isPriorityControlsVisible ? (
+                  <button
+                    onClick={() => setIsPriorityControlsVisible(true)}
+                    className="text-sm text-blue-400 hover:text-blue-300"
+                  >
+                    Omprioritera
+                  </button>
+                ) : (
+                  <div className="flex flex-col items-start gap-1">
+                    <button
+                      onClick={() => setIsPriorityControlsVisible(false)}
+                      className="text-sm text-gray-400 hover:text-gray-300"
+                    >
+                      Färdigprioriterat
+                    </button>
+                    <div className="flex items-center gap-1">
+                      <select
+                        value={task.priority}
+                        onChange={(e) =>
+                          onPriorityChange(task.id, Number(e.target.value))
+                        }
+                        className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                       >
-                        Omprioritera
-                      </button>
-                    ) : (
-                      <div className="flex flex-col items-start gap-1">
-                        <button
-                          onClick={() => setIsPriorityControlsVisible(false)}
-                          className="text-sm text-gray-400 hover:text-gray-300"
-                        >
-                          Färdigprioriterat
-                        </button>
-                        <div className="flex items-center gap-1">
-                          <select
-                            value={task.priority}
-                            onChange={(e) =>
-                              onPriorityChange(task.id, Number(e.target.value))
-                            }
-                            className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            {Array.from(
-                              { length: totalTasks },
-                              (_, i) => i + 1
-                            ).map((position) => (
-                              <option key={position} value={position}>
-                                {position}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-                    )}
+                        {Array.from(
+                          { length: totalTasks },
+                          (_, i) => i + 1
+                        ).map((position) => (
+                          <option key={position} value={position}>
+                            {position}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 )}
               </div>
             )}
           </>
         )}
-      </div>
+      </Card>
       <DeleteConfirmDialog
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}
@@ -394,4 +370,5 @@ const TaskCard = ({
     </>
   );
 };
+
 export default TaskCard;

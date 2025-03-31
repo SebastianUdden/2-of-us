@@ -1,6 +1,4 @@
-import { useEffect, useRef, useState } from "react";
-
-import { ANIMATION } from "../task-card/constants";
+import Card from "../common/Card";
 import DeleteConfirmDialog from "../task-card/DeleteConfirmDialog";
 import { List } from "../../types/List";
 import ListDescription from "./ListDescription";
@@ -8,6 +6,7 @@ import ListHeader from "./ListHeader";
 import ListItems from "./ListItems";
 import ListMetadata from "./ListMetadata";
 import TaskArrows from "../task-card/TaskArrows";
+import { useState } from "react";
 
 interface ListCardProps {
   list: List;
@@ -25,6 +24,7 @@ interface ListCardProps {
   showPriorityControls: boolean;
   expandedListId: string | null;
   setExpandedListId: (id: string | null) => void;
+  onTabChange?: (tab: "todos" | "archive" | "lists") => void;
 }
 
 const ListCard = ({
@@ -43,8 +43,8 @@ const ListCard = ({
   showPriorityControls,
   expandedListId,
   setExpandedListId,
+  onTabChange,
 }: ListCardProps) => {
-  const cardRef = useRef<HTMLDivElement>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedTitle, setEditedTitle] = useState(list.title);
@@ -53,12 +53,6 @@ const ListCard = ({
   );
   const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
     useState(false);
-
-  useEffect(() => {
-    if (!isAnimating && cardRef.current && onHeightChange) {
-      onHeightChange(cardRef.current.offsetHeight);
-    }
-  }, [isAnimating, onHeightChange]);
 
   const handleItemComplete = (itemId: string) => {
     onComplete(list.id, itemId);
@@ -110,28 +104,21 @@ const ListCard = ({
     onUpdate({ ...list, items: [...list.items, newItem] });
   };
 
+  const handleCloneToTask = () => {
+    onCloneToTask(list);
+    onTabChange?.("todos");
+  };
+
   return (
     <>
-      <div
-        ref={cardRef}
+      <Card
         id={`list-${list.id}`}
-        className={`
-          border border-gray-700 rounded-lg w-[90%] 
-          transition-all duration-${ANIMATION.DURATION} ${ANIMATION.EASING}
-          ${isAnimating ? "bg-gray-700" : "bg-gray-800"}
-          ${
-            isAnimating
-              ? isCollapsed
-                ? "animate-collapse"
-                : "animate-fade-in"
-              : ""
-          }
-          ${isCollapsed ? "opacity-0" : "opacity-100"}
-          mx-auto my-4 px-4 py-4
-          origin-top
-          overflow-hidden
-          w-full
-        `}
+        type="list"
+        isAnimating={isAnimating}
+        isCollapsed={isCollapsed}
+        onHeightChange={onHeightChange}
+        expandedId={expandedListId}
+        className="w-[90%]"
       >
         <div className="flex items-start justify-between">
           <div className="flex flex-col h-full justify-between flex-1 pr-2">
@@ -148,7 +135,7 @@ const ListCard = ({
                 expandedListId={expandedListId}
                 setExpandedListId={setExpandedListId}
                 setIsPriorityControlsVisible={setIsPriorityControlsVisible}
-                onCloneToTask={() => onCloneToTask(list)}
+                onCloneToTask={handleCloneToTask}
               />
             </div>
             {expandedListId === list.id && (
@@ -215,7 +202,7 @@ const ListCard = ({
             )}
           </div>
         )}
-      </div>
+      </Card>
       <DeleteConfirmDialog
         isOpen={showDeleteConfirm}
         onClose={() => setShowDeleteConfirm(false)}

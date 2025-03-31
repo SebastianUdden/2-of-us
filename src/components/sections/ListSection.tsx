@@ -18,6 +18,7 @@ interface ListSectionProps {
   showPriorityControls: boolean;
   animatingListId: string | null;
   animatingListHeight: number | null;
+  onTabChange?: (tab: "todos" | "archive" | "lists") => void;
 }
 
 export const ListSection = ({
@@ -36,6 +37,7 @@ export const ListSection = ({
   showPriorityControls,
   animatingListId,
   animatingListHeight,
+  onTabChange,
 }: ListSectionProps) => {
   return (
     <>
@@ -51,7 +53,7 @@ export const ListSection = ({
             onUpdate={onUpdate}
             onLabelClick={onLabelClick}
             selectedLabel={selectedLabel || ""}
-            onCloneToTask={() => onCloneToTask(list)}
+            onCloneToTask={onCloneToTask}
             onPriorityChange={onPriorityChange}
             totalLists={lists.length}
             isAnimating={animatingListId === list.id}
@@ -60,6 +62,7 @@ export const ListSection = ({
             showPriorityControls={showPriorityControls}
             expandedListId={expandedListId === "all" ? list.id : expandedListId}
             setExpandedListId={setExpandedListId}
+            onTabChange={onTabChange}
           />
         ))
       )}

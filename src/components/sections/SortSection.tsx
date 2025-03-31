@@ -20,24 +20,28 @@ export const SortSection = ({
         isActive={sortField === "priority"}
         onClick={() => onSortFieldChange("priority")}
         direction={"asc"}
+        field="priority"
       />
       <SortButton
         label="Tid kvar"
         isActive={sortField === "dueDate"}
         onClick={() => onSortFieldChange("dueDate")}
         direction={sortField === "dueDate" ? sortDirection : "asc"}
+        field="dueDate"
       />
       <SortButton
-        label="Updated"
+        label="Uppdaterad"
         isActive={sortField === "updatedAt"}
         onClick={() => onSortFieldChange("updatedAt")}
         direction={sortField === "updatedAt" ? sortDirection : "asc"}
+        field="updatedAt"
       />
       <SortButton
-        label="Title"
+        label="Titel"
         isActive={sortField === "title"}
         onClick={() => onSortFieldChange("title")}
         direction={sortField === "title" ? sortDirection : "asc"}
+        field="title"
       />
     </div>
   );

@@ -5,6 +5,7 @@ interface SortButtonProps {
   isActive: boolean;
   direction: "asc" | "desc";
   onClick: () => void;
+  field: "dueDate" | "createdAt" | "title" | "updatedAt" | "priority";
 }
 
 /**
@@ -15,9 +16,11 @@ export const SortButton = ({
   isActive,
   direction,
   onClick,
+  field,
 }: SortButtonProps) => (
   <button
     onClick={onClick}
+    data-sort-field={field}
     className={`flex items-center gap-1 px-2 py-1 text-sm rounded-md transition-colors ${
       isActive
         ? "bg-blue-500 text-white hover:bg-blue-600"
