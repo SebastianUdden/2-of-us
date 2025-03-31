@@ -81,15 +81,6 @@ export const SortControls = ({
             </div>
           </div>
         </div>
-        <button
-          onClick={onMinimizeToggle}
-          className="ml-4 p-1 text-gray-400 hover:text-gray-300 transition-colors shrink-0"
-          aria-label={
-            isSortMinimized ? "Expand sort options" : "Minimize sort options"
-          }
-        >
-          <MinimizeIcon isMinimized={isSortMinimized} className="w-5 h-5" />
-        </button>
       </div>
     </div>
   );

@@ -25,6 +25,7 @@ interface ListCardProps {
   expandedListId: string | null;
   setExpandedListId: (id: string | null) => void;
   onTabChange?: (tab: "todos" | "archive" | "lists") => void;
+  expandAll: boolean;
 }
 
 const ListCard = ({
@@ -44,6 +45,7 @@ const ListCard = ({
   expandedListId,
   setExpandedListId,
   onTabChange,
+  expandAll,
 }: ListCardProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -119,6 +121,7 @@ const ListCard = ({
         onHeightChange={onHeightChange}
         expandedId={expandedListId}
         className="w-[90%]"
+        expandAll={expandAll}
       >
         <div className="flex items-start justify-between">
           <div className="flex flex-col h-full justify-between flex-1 pr-2">

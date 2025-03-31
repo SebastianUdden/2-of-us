@@ -11,7 +11,7 @@ interface TaskSectionProps {
   onArchive: (taskId: string) => void;
   onUpdate: (updatedTask: Task) => void;
   isCollapsed: boolean;
-  onHeightChange: (height: number) => void;
+  onHeightChange: (height: number | null) => void;
   onLabelClick: (label: string) => void;
   onAddSubtask: (taskId: string) => void;
   expandedTaskId: string | "all" | null;
@@ -31,7 +31,6 @@ export const TaskSection = ({
   onArchive,
   onUpdate,
   isCollapsed,
-  onHeightChange,
   onLabelClick,
   onAddSubtask,
   expandedTaskId,
@@ -40,6 +39,7 @@ export const TaskSection = ({
   currentSortField,
   animatingTaskId,
   animatingTaskHeight,
+  onHeightChange,
 }: TaskSectionProps) => {
   return (
     <>
@@ -58,14 +58,17 @@ export const TaskSection = ({
             totalTasks={tasks.length}
             isAnimating={task.id === animatingTaskId}
             isCollapsed={isCollapsed}
-            onHeightChange={onHeightChange}
             onLabelClick={onLabelClick}
             selectedLabel={selectedLabel || ""}
             onAddSubtask={onAddSubtask}
             expandedTaskId={expandedTaskId === "all" ? task.id : expandedTaskId}
+            expandAll={expandedTaskId === "all"}
             setExpandedTaskId={setExpandedTaskId}
             showPriorityControls={showPriorityControls}
             currentSortField={currentSortField}
+            animatingTaskId={animatingTaskId}
+            animatingTaskHeight={animatingTaskHeight}
+            onHeightChange={onHeightChange}
           />
         ))
       )}

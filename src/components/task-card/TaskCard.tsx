@@ -34,6 +34,7 @@ interface TaskCardProps {
   onAddSubtask: (taskId: string) => void;
   animatingTaskId: string | null;
   animatingTaskHeight: number | null;
+  expandAll: boolean;
 }
 
 const TaskCard = ({
@@ -53,6 +54,7 @@ const TaskCard = ({
   expandedTaskId,
   setExpandedTaskId,
   showPriorityControls,
+  expandAll,
 }: TaskCardProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
@@ -145,6 +147,7 @@ const TaskCard = ({
         onHeightChange={onHeightChange}
         expandedId={expandedTaskId}
         className={`${task.completed ? "opacity-50" : ""}`}
+        expandAll={expandAll}
       >
         <div className="flex items-start justify-between">
           <div className="flex flex-col h-full justify-between flex-1 pr-2">

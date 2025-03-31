@@ -63,6 +63,7 @@ export const ListSection = ({
             expandedListId={expandedListId === "all" ? list.id : expandedListId}
             setExpandedListId={setExpandedListId}
             onTabChange={onTabChange}
+            expandAll={expandedListId === "all"}
           />
         ))
       )}

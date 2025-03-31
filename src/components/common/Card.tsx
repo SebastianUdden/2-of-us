@@ -12,6 +12,7 @@ interface CardProps {
   className?: string;
   expandedId?: string | null;
   onExpand?: (id: string | null) => void;
+  expandAll?: boolean;
 }
 
 const Card = ({
@@ -23,8 +24,9 @@ const Card = ({
   onHeightChange,
   className = "",
   expandedId,
-  onExpand,
+  expandAll,
 }: CardProps) => {
+  const typeId = `${type}-${expandedId}`;
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Handle height changes
@@ -36,12 +38,12 @@ const Card = ({
 
   // Handle auto-scrolling when expanded
   useEffect(() => {
-    if (expandedId === id && cardRef.current) {
+    if (!expandAll && typeId === id && cardRef.current) {
       const card = cardRef.current;
       card.style.scrollMargin = "50vh";
       card.scrollIntoView({ behavior: "smooth", block: "center" });
     }
-  }, [expandedId, id]);
+  }, [typeId, id, expandAll]);
 
   return (
     <div
@@ -49,15 +51,11 @@ const Card = ({
       id={id}
       className={`
         border ${
-          `${type}-${expandedId}` === id ? "border-gray-600" : "border-gray-700"
+          typeId === id ? "border-gray-600" : "border-gray-700"
         } rounded-lg 
         transition-all duration-${ANIMATION.DURATION} ${ANIMATION.EASING}
         ${isAnimating ? "bg-gray-700" : "bg-gray-800"}
-        ${
-          `${type}-${expandedId}` === id
-            ? "bg-opacity-70 bg-slate-900"
-            : "bg-opacity-100"
-        }
+        ${typeId === id ? "bg-opacity-70 bg-slate-900" : "bg-opacity-100"}
         ${
           isAnimating
             ? isCollapsed
