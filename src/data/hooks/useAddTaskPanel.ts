@@ -55,6 +55,13 @@ export const useAddTaskPanel = (
       } else {
         // Add as main task
         onTasksUpdate([...tasks, newTask]);
+        onExpandedTaskIdChange?.(newTask.id);
+        setTimeout(() => {
+          const taskElement = document.getElementById(`task-${newTask.id}`);
+          if (taskElement) {
+            taskElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          }
+        }, 100);
       }
       closeAddTaskPanel();
     },

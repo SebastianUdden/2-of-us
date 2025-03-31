@@ -1,5 +1,9 @@
 import { mockLists, mockTasks } from "../data/mock";
 import { useEffect, useState } from "react";
+import {
+  useFilteredLists,
+  useFilteredTasks,
+} from "../data/hooks/useFilteredItems";
 
 import { ANIMATION } from "./task-card/constants";
 import AddTaskPanel from "./AddTaskPanel";
@@ -14,7 +18,6 @@ import { TaskSection } from "./sections/TaskSection";
 import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
 import { useExpansionState } from "../data/hooks/useExpansionState";
 import { useFilterManagement } from "../data/hooks/useFilterManagement";
-import { useFilteredTasks } from "../data/hooks/useFilteredItems";
 import { useLabelsAndCounts } from "../data/hooks/useLabelsAndCounts";
 import { usePriorityManagement } from "../data/hooks/usePriorityManagement";
 import { useSearchAndFilter } from "../data/hooks/useSearchAndFilter";
@@ -28,7 +31,6 @@ const Body = () => {
   const [isSortMinimized, setIsSortMinimized] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
-  const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
   const { loadTab, saveTab } = useTabPersistence();
 
   const {
@@ -36,10 +38,12 @@ const Body = () => {
     expandedListId,
     isAllExpanded,
     isAllExpandedMode,
+    isCategoriesExpanded,
     setExpandedTaskId,
     setExpandedListId,
     setIsAllExpanded,
     setIsAllExpandedMode,
+    setIsCategoriesExpanded,
   } = useExpansionState();
 
   const {
@@ -111,7 +115,15 @@ const Body = () => {
     tab,
   });
 
+  const filteredLists = useFilteredLists({
+    lists,
+    searchQuery,
+    labelFilters,
+    selectedLabel,
+  });
+
   const sortedAndFilteredTasks = getSortedTasks(filteredTasks);
+  const sortedAndFilteredLists = getSortedLists(filteredLists);
 
   const handleAddSubtask = (taskId: string) => {
     const task = tasks.find((t) => t.id === taskId);
@@ -222,8 +234,19 @@ const Body = () => {
     );
   };
 
-  const handleListLabelClick = (label: string) => {
-    setSelectedLabel(selectedLabel === label ? null : label);
+  const handleLabelClickWithExpand = (label: string) => {
+    setIsCategoriesExpanded(true);
+    handleLabelClick(label);
+  };
+
+  const handleCompletedClickWithExpand = () => {
+    setIsCategoriesExpanded(true);
+    handleCompletedClick();
+  };
+
+  const handleDueDateClickWithExpand = () => {
+    setIsCategoriesExpanded(true);
+    handleDueDateClick();
   };
 
   const handleListCloneToTask = (list: List) => {
@@ -269,8 +292,6 @@ const Body = () => {
       }
     }, 200);
   };
-
-  const sortedLists = getSortedLists(lists);
 
   // Start the collapse animation
   useEffect(() => {
@@ -402,9 +423,9 @@ const Body = () => {
                   labels={labelsAndCountsLabels}
                   counts={labelsAndCountsCounts}
                   labelFilters={labelFilters}
-                  handleCompletedClick={handleCompletedClick}
-                  handleDueDateClick={handleDueDateClick}
-                  handleLabelClick={handleLabelClick}
+                  handleCompletedClick={handleCompletedClickWithExpand}
+                  handleDueDateClick={handleDueDateClickWithExpand}
+                  handleLabelClick={handleLabelClickWithExpand}
                   clearAllFilters={clearAllFilters}
                   getCompletedState={getCompletedState}
                   getDueDateState={getDueDateState}
@@ -414,12 +435,12 @@ const Body = () => {
               <div className="space-y-2">
                 {tab === "lists" ? (
                   <ListSection
-                    lists={sortedLists}
+                    lists={sortedAndFilteredLists}
                     selectedLabel={selectedLabel}
                     onComplete={handleListComplete}
                     onDelete={handleListDelete}
                     onUpdate={handleListUpdate}
-                    onLabelClick={handleListLabelClick}
+                    onLabelClick={handleLabelClickWithExpand}
                     onCloneToTask={handleListCloneToTask}
                     onPriorityChange={handleListPriorityChange}
                     isCollapsed={isCollapsed}
@@ -444,7 +465,7 @@ const Body = () => {
                     onUpdate={() => {}}
                     isCollapsed={isCollapsed}
                     onHeightChange={setAnimatingTaskHeight}
-                    onLabelClick={handleLabelClick}
+                    onLabelClick={handleLabelClickWithExpand}
                     onAddSubtask={handleAddSubtask}
                     expandedTaskId={isAllExpandedMode ? "all" : expandedTaskId}
                     setExpandedTaskId={setExpandedTaskId}

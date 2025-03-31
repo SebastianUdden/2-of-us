@@ -16,6 +16,7 @@ export const mockTasks: Task[] = [
     updates: [],
     subtasks: [],
     archived: false,
+    size: "S",
   },
   {
     id: "2",
@@ -31,6 +32,7 @@ export const mockTasks: Task[] = [
     updates: [],
     subtasks: [],
     archived: false,
+    size: "M",
   },
   {
     id: "3",
@@ -46,6 +48,7 @@ export const mockTasks: Task[] = [
     updates: [],
     subtasks: [],
     archived: false,
+    size: "L",
   },
   {
     id: "4",
@@ -61,6 +64,7 @@ export const mockTasks: Task[] = [
     updates: [],
     subtasks: [],
     archived: false,
+    size: "S",
   },
   {
     id: "5",
@@ -76,6 +80,7 @@ export const mockTasks: Task[] = [
     updates: [],
     subtasks: [],
     archived: false,
+    size: "S",
   },
   {
     id: "6",
@@ -91,6 +96,7 @@ export const mockTasks: Task[] = [
     updates: [],
     subtasks: [],
     archived: false,
+    size: "M",
   },
   {
     id: "7",
@@ -106,6 +112,7 @@ export const mockTasks: Task[] = [
     updates: [],
     subtasks: [],
     archived: false,
+    size: "S",
   },
   {
     id: "8",
@@ -121,6 +128,7 @@ export const mockTasks: Task[] = [
     updates: [],
     subtasks: [],
     archived: false,
+    size: "M",
   },
   {
     id: "9",
@@ -136,6 +144,7 @@ export const mockTasks: Task[] = [
     updates: [],
     subtasks: [],
     archived: false,
+    size: "S",
   },
   {
     id: "10",
@@ -151,6 +160,7 @@ export const mockTasks: Task[] = [
     updates: [],
     subtasks: [],
     archived: true,
+    size: "S",
   },
 ];
 

@@ -1,17 +1,18 @@
-import { ANIMATION } from "./constants";
+import { useEffect, useRef, useState } from "react";
+
 import Card from "../common/Card";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import { EditIcon } from "../common/EditIcon";
 import { LabelPill } from "../LabelPill";
 import { LabelState } from "../../types/LabelState";
 import { ProgressBar } from "../common/ProgressBar";
+import { SizeLabel } from "./SizeLabel";
 import { Task } from "../../types/Task";
 import TaskArrows from "./TaskArrows";
 import TaskDueDate from "./TaskDueDate";
 import TaskFooter from "./TaskFooter";
 import { TaskHeader } from "./TaskHeader";
 import TaskUpdates from "./TaskUpdates";
-import { useState } from "react";
 
 interface TaskCardProps {
   task: Task;
@@ -27,10 +28,12 @@ interface TaskCardProps {
   setExpandedTaskId: (id: string | null) => void;
   showPriorityControls: boolean;
   currentSortField: string;
-  onHeightChange: (height: number) => void;
+  onHeightChange: (height: number | null) => void;
   onLabelClick: (label: string) => void;
   selectedLabel: string;
   onAddSubtask: (taskId: string) => void;
+  animatingTaskId: string | null;
+  animatingTaskHeight: number | null;
 }
 
 const TaskCard = ({
@@ -58,6 +61,13 @@ const TaskCard = ({
   const [showSubtasks, setShowSubtasks] = useState(expandedTaskId === task.id);
   const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
     useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (cardRef.current) {
+      onHeightChange(cardRef.current.offsetHeight);
+    }
+  }, [onHeightChange]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -134,7 +144,7 @@ const TaskCard = ({
         isCollapsed={isCollapsed}
         onHeightChange={onHeightChange}
         expandedId={expandedTaskId}
-        className={`${task.completed ? "opacity-75" : ""}`}
+        className={`${task.completed ? "opacity-50" : ""}`}
       >
         <div className="flex items-start justify-between">
           <div className="flex flex-col h-full justify-between flex-1 pr-2">
@@ -160,6 +170,7 @@ const TaskCard = ({
                 dueDate={task.dueDate}
                 onDueDateChange={handleDueDateChange}
               />
+              {task.size && <SizeLabel size={task.size} />}
               {task.labels && task.labels.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {task.labels.map((label) => (
