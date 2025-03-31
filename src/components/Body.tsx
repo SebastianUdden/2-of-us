@@ -19,6 +19,7 @@ import { useLabelsAndCounts } from "../data/hooks/useLabelsAndCounts";
 import { usePriorityManagement } from "../data/hooks/usePriorityManagement";
 import { useSearchAndFilter } from "../data/hooks/useSearchAndFilter";
 import { useSorting } from "../data/hooks/useSorting";
+import { useTabPersistence } from "../data/hooks/useTabPersistence";
 
 const Body = () => {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
@@ -28,6 +29,7 @@ const Body = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isCategoriesExpanded, setIsCategoriesExpanded] = useState(false);
+  const { loadTab, saveTab } = useTabPersistence();
 
   const {
     expandedTaskId,
@@ -52,7 +54,13 @@ const Body = () => {
   const { labels: labelsAndCountsLabels, counts: labelsAndCountsCounts } =
     useLabelsAndCounts(tasks, lists, tab, searchQuery);
 
-  const { sortField, sortDirection, handleSort, getSortedTasks } = useSorting();
+  const {
+    sortField,
+    sortDirection,
+    handleSort,
+    getSortedTasks,
+    getSortedLists,
+  } = useSorting();
 
   const {
     labelFilters,
@@ -218,17 +226,6 @@ const Body = () => {
     setSelectedLabel(selectedLabel === label ? null : label);
   };
 
-  const sortedLists = [...lists].sort((a, b) => {
-    // First sort by completion status (completed lists go to bottom)
-    const aCompleted = a.items.every((item) => item.completed);
-    const bCompleted = b.items.every((item) => item.completed);
-    if (aCompleted !== bCompleted) {
-      return aCompleted ? 1 : -1;
-    }
-    // Then sort by priority
-    return a.priority - b.priority;
-  });
-
   const handleListCloneToTask = (list: List) => {
     const newTaskId = `task-${Date.now()}`;
     // Create subtasks from list items
@@ -272,6 +269,8 @@ const Body = () => {
       }
     }, 200);
   };
+
+  const sortedLists = getSortedLists(lists);
 
   // Start the collapse animation
   useEffect(() => {
@@ -324,6 +323,16 @@ const Body = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
 
+  // Load saved tab on mount
+  useEffect(() => {
+    loadTab().then((savedTab) => {
+      console.log("savedTab", savedTab);
+      if (savedTab) {
+        setTab(savedTab);
+      }
+    });
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen">
       <div
@@ -368,7 +377,10 @@ const Body = () => {
               <div className="flex flex-col gap-6">
                 <Tabs
                   view={tab}
-                  onViewChange={setTab}
+                  onViewChange={(tab) => {
+                    setTab(tab);
+                    saveTab(tab);
+                  }}
                   counts={{
                     todos: tasks.length,
                     archive: tasks.filter((task) => task.archived).length,
