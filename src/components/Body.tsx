@@ -111,7 +111,7 @@ const Body = () => {
     setAnimatingTaskHeight,
     setAnimatingListHeight,
     setIsCollapsed,
-  } = usePriorityManagement(tasks, lists, setTasks, setLists);
+  } = usePriorityManagement(setTasks, setLists);
 
   const filteredTasks = useFilteredTasks({
     tasks,
