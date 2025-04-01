@@ -10,7 +10,7 @@ import {
 } from "../../utils/api";
 import { useCallback, useState } from "react";
 
-interface UseApiOptions<T extends BaseEntity> {
+interface UseApiOptions {
   collectionName: string;
   onError?: (error: Error) => void;
 }

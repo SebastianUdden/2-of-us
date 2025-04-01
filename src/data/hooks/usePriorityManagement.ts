@@ -26,8 +26,6 @@ interface UsePriorityManagementResult {
 }
 
 export const usePriorityManagement = (
-  tasks: Task[],
-  lists: List[],
   onTasksUpdate: (tasks: Task[] | ((prevTasks: Task[]) => Task[])) => void,
   onListsUpdate: (lists: List[] | ((prevLists: List[]) => List[])) => void
 ): UsePriorityManagementResult => {

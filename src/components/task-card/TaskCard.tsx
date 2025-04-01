@@ -1,3 +1,4 @@
+import { Size, SizeLabel } from "./SizeLabel";
 import { useEffect, useRef, useState } from "react";
 
 import Card from "../common/Card";
@@ -6,7 +7,6 @@ import { EditIcon } from "../common/EditIcon";
 import { LabelPill } from "../LabelPill";
 import { LabelState } from "../../types/LabelState";
 import { ProgressBar } from "../common/ProgressBar";
-import { SizeLabel } from "./SizeLabel";
 import { Task } from "../../types/Task";
 import TaskArrows from "./TaskArrows";
 import TaskDueDate from "./TaskDueDate";
@@ -191,7 +191,7 @@ const TaskCard = ({
                     <option value="XL">XL</option>
                   </select>
                 ) : (
-                  <SizeLabel size={task.size} />
+                  <SizeLabel size={task.size as Size} />
                 ))}
               {task.labels && task.labels.length > 0 && (
                 <div className="flex flex-wrap gap-1">

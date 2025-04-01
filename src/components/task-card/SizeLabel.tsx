@@ -1,4 +1,4 @@
-type Size = "S" | "M" | "L" | "XL";
+export type Size = "S" | "M" | "L" | "XL";
 
 const getSizeOpacity = (size: Size): number => {
   switch (size) {

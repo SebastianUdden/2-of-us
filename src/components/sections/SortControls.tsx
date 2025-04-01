@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 
-import { MinimizeIcon } from "../icons/MinimizeIcon";
 import { ScrollButtons } from "../ScrollButtons";
 import { SortSection } from "./SortSection";
 
