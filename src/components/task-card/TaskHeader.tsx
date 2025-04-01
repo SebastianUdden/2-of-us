@@ -14,6 +14,7 @@ interface TaskHeaderProps {
   expandedTaskId: string | null;
   setExpandedTaskId: (id: string | null) => void;
   setIsPriorityControlsVisible: (visible: boolean) => void;
+  expandAll: boolean;
 }
 
 export const TaskHeader = ({
@@ -25,6 +26,7 @@ export const TaskHeader = ({
   expandedTaskId,
   setExpandedTaskId,
   setIsPriorityControlsVisible,
+  expandAll,
 }: TaskHeaderProps) => {
   return (
     <div className="flex items-start w-full justify-between">
@@ -63,14 +65,16 @@ export const TaskHeader = ({
           <ArchiveIcon className="w-7 h-7" />
         </button>
         <DeleteButton onClick={() => onDelete(task.id)} />
-        <ChevronButton
-          isExpanded={expandedTaskId === task.id}
-          onClick={() => {
-            setExpandedTaskId(expandedTaskId === task.id ? null : task.id);
-            setIsEditing(false);
-            setIsPriorityControlsVisible(false);
-          }}
-        />
+        {!expandAll && (
+          <ChevronButton
+            isExpanded={expandedTaskId === task.id}
+            onClick={() => {
+              setExpandedTaskId(expandedTaskId === task.id ? null : task.id);
+              setIsEditing(false);
+              setIsPriorityControlsVisible(false);
+            }}
+          />
+        )}
       </div>
     </div>
   );

@@ -143,6 +143,7 @@ const TaskCard = ({
                 expandedTaskId={expandedTaskId}
                 setExpandedTaskId={setExpandedTaskId}
                 setIsPriorityControlsVisible={setIsPriorityControlsVisible}
+                expandAll={expandAll}
               />
             </div>
             <div className="flex items-center gap-2 mt-2">
