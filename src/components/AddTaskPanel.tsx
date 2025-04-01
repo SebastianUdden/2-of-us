@@ -391,13 +391,15 @@ const AddTaskPanel = ({
           </div>
 
           <div className="flex justify-between items-center p-4 border-t border-gray-700">
-            <button
-              type="button"
-              onClick={onToggleMode}
-              className="text-blue-400 hover:text-blue-300"
-            >
-              {isListMode ? "Byt till uppgift" : "Byt till lista"}
-            </button>
+            {!parentTaskId && (
+              <button
+                type="button"
+                onClick={onToggleMode}
+                className="text-blue-400 hover:text-blue-300"
+              >
+                {isListMode ? "Byt till uppgift" : "Byt till lista"}
+              </button>
+            )}
             <div className="flex gap-3">
               <button
                 type="button"

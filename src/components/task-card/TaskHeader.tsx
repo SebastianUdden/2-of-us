@@ -4,19 +4,13 @@ import { DeleteButton } from "../common/DeleteButton";
 import { EditIcon } from "../common/EditIcon";
 import { PriorityIndicator } from "../common/PriorityIndicator";
 import { Task } from "../../types/Task";
-import { TitleEditForm } from "../common/TitleEditForm";
 
 interface TaskHeaderProps {
   task: Task;
   onComplete: (taskId: string) => void;
   onDelete: (taskId: string) => void;
   onArchive: (taskId: string) => void;
-  isEditing: boolean;
   setIsEditing: (isEditing: boolean) => void;
-  editedTitle: string;
-  setEditedTitle: (title: string) => void;
-  onSubmit: (e: React.FormEvent) => void;
-  onCancel: () => void;
   expandedTaskId: string | null;
   setExpandedTaskId: (id: string | null) => void;
   setIsPriorityControlsVisible: (visible: boolean) => void;
@@ -27,11 +21,7 @@ export const TaskHeader = ({
   onComplete,
   onDelete,
   onArchive,
-  isEditing,
   setIsEditing,
-  editedTitle,
-  setEditedTitle,
-  onSubmit,
   expandedTaskId,
   setExpandedTaskId,
   setIsPriorityControlsVisible,
@@ -39,41 +29,25 @@ export const TaskHeader = ({
   return (
     <div className="flex items-start w-full justify-between">
       <div className="flex-1">
-        {isEditing ? (
-          <TitleEditForm
-            value={editedTitle}
-            onChange={setEditedTitle}
-            onSubmit={onSubmit}
-            onCancel={() => {
-              setIsEditing(false);
-              setEditedTitle(task.title);
+        <div className="flex items-center gap-2">
+          <PriorityIndicator priority={task.priority} />
+          <div
+            className="group flex items-center gap-1"
+            onClick={() => {
+              setIsEditing(true);
+              setExpandedTaskId(task.id);
             }}
-            placeholder="Skriv en titel..."
-          />
-        ) : (
-          <div className="flex items-center gap-2">
-            <PriorityIndicator priority={task.priority} />
-            <div
-              className="group flex items-center gap-1"
-              onClick={() => {
-                setIsEditing(true);
-                setEditedTitle(task.title);
-                setExpandedTaskId(task.id);
-              }}
+          >
+            <h3
+              className={`text-lg font-medium ${
+                task.completed ? "line-through text-gray-400" : "text-gray-200"
+              }`}
             >
-              <h3
-                className={`text-lg font-medium ${
-                  task.completed
-                    ? "line-through text-gray-400"
-                    : "text-gray-200"
-                }`}
-              >
-                {task.title}
-              </h3>
-              <EditIcon />
-            </div>
+              {task.title}
+            </h3>
+            <EditIcon />
           </div>
-        )}
+        </div>
       </div>
       <div className="flex items-center gap-2">
         <input

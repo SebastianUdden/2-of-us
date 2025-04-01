@@ -7,9 +7,11 @@ import { EditIcon } from "../common/EditIcon";
 import { LabelPill } from "../LabelPill";
 import { LabelState } from "../../types/LabelState";
 import { ProgressBar } from "../common/ProgressBar";
+import SidePanel from "../common/SidePanel";
 import { Task } from "../../types/Task";
 import TaskArrows from "./TaskArrows";
 import TaskDueDate from "./TaskDueDate";
+import TaskEditPanel from "./TaskEditPanel";
 import TaskFooter from "./TaskFooter";
 import { TaskHeader } from "./TaskHeader";
 import TaskUpdates from "./TaskUpdates";
@@ -58,12 +60,9 @@ const TaskCard = ({
 }: TaskCardProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [editedTitle, setEditedTitle] = useState(task.title);
-  const [editedDescription, setEditedDescription] = useState(task.description);
   const [showSubtasks, setShowSubtasks] = useState(expandedTaskId === task.id);
   const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
     useState(false);
-  const [editedSize, setEditedSize] = useState(task.size);
   const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,29 +70,6 @@ const TaskCard = ({
       onHeightChange(cardRef.current.offsetHeight);
     }
   }, [onHeightChange]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (
-      editedTitle !== task.title ||
-      editedDescription !== task.description ||
-      editedSize !== task.size
-    ) {
-      onUpdate({
-        ...task,
-        title: editedTitle,
-        description: editedDescription,
-        size: editedSize,
-      });
-    }
-    setIsEditing(false);
-  };
-
-  const handleCancel = () => {
-    setEditedTitle(task.title);
-    setEditedDescription(task.description);
-    setIsEditing(false);
-  };
 
   const handleDueDateChange = (date: Date | undefined) => {
     onUpdate({
@@ -163,12 +139,7 @@ const TaskCard = ({
                 onComplete={onComplete}
                 onDelete={() => setShowDeleteConfirm(true)}
                 onArchive={onArchive}
-                isEditing={isEditing}
                 setIsEditing={setIsEditing}
-                editedTitle={editedTitle}
-                setEditedTitle={setEditedTitle}
-                onSubmit={handleSubmit}
-                onCancel={handleCancel}
                 expandedTaskId={expandedTaskId}
                 setExpandedTaskId={setExpandedTaskId}
                 setIsPriorityControlsVisible={setIsPriorityControlsVisible}
@@ -179,20 +150,7 @@ const TaskCard = ({
                 dueDate={task.dueDate}
                 onDueDateChange={handleDueDateChange}
               />
-              {task.size &&
-                (isEditing ? (
-                  <select
-                    value={editedSize}
-                    onChange={(e) => setEditedSize(e.target.value)}
-                  >
-                    <option value="S">S</option>
-                    <option value="M">M</option>
-                    <option value="L">L</option>
-                    <option value="XL">XL</option>
-                  </select>
-                ) : (
-                  <SizeLabel size={task.size as Size} />
-                ))}
+              {task.size && <SizeLabel size={task.size as Size} />}
               {task.labels && task.labels.length > 0 && (
                 <div className="flex flex-wrap gap-1">
                   {task.labels.map((label) => (
@@ -212,42 +170,15 @@ const TaskCard = ({
             </div>
             {expandedTaskId === task.id && (
               <>
-                {isEditing ? (
-                  <form onSubmit={handleSubmit} className="mt-2 space-y-2">
-                    <textarea
-                      value={editedDescription}
-                      onChange={(e) => setEditedDescription(e.target.value)}
-                      className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-blue-500"
-                      rows={3}
-                      placeholder="Add a description..."
-                    />
-                    <div className="flex justify-end gap-2">
-                      <button
-                        type="button"
-                        onClick={handleCancel}
-                        className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-800"
-                      >
-                        Avbryt
-                      </button>
-                      <button
-                        type="submit"
-                        className="px-3 py-1.5 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                      >
-                        Spara
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div
-                    className="group flex items-start gap-1"
-                    onClick={() => setIsEditing(true)}
-                  >
-                    <p className="text-gray-200 text-sm mt-2">
-                      {task.description}
-                    </p>
-                    <EditIcon className="mt-2" />
-                  </div>
-                )}
+                <div
+                  className="group flex items-start gap-1"
+                  onClick={() => setIsEditing(true)}
+                >
+                  <p className="text-gray-200 text-sm mt-2">
+                    {task.description}
+                  </p>
+                  <EditIcon className="mt-2" />
+                </div>
                 <TaskFooter task={task} />
               </>
             )}
@@ -400,6 +331,17 @@ const TaskCard = ({
         }}
         taskTitle={task.title}
       />
+      <SidePanel
+        isOpen={isEditing}
+        onClose={() => setIsEditing(false)}
+        title="Redigera uppgift"
+      >
+        <TaskEditPanel
+          task={task}
+          onUpdate={onUpdate}
+          onClose={() => setIsEditing(false)}
+        />
+      </SidePanel>
     </>
   );
 };

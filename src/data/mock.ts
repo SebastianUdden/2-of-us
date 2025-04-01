@@ -4,6 +4,25 @@ import { Task } from "../types/Task";
 export const mockTasks: Task[] = [
   {
     id: "1",
+    title: "Test-titel",
+    description: "Test-beskrivning",
+    priority: 1,
+    completed: false,
+    createdAt: new Date("2025-03-25"),
+    updatedAt: new Date("2025-03-25"),
+    dueDate: new Date(),
+    author: "Anna",
+    labels: ["inköp", "mat"],
+    updates: [],
+    subtasks: [],
+    archived: false,
+    size: "S",
+  },
+];
+
+export const mockTasks2: Task[] = [
+  {
+    id: "1",
     title: "Handla mat",
     description: "Gå igenom kylen och skapa en inköpslista för veckan",
     priority: 1,
