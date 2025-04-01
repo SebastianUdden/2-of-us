@@ -359,7 +359,6 @@ const Body = () => {
   // Load saved tab on mount
   useEffect(() => {
     loadTab().then((savedTab) => {
-      console.log("savedTab", savedTab);
       if (savedTab) {
         setTab(savedTab);
       }

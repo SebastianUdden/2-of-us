@@ -29,7 +29,6 @@ const SidePanel = ({ isOpen, onClose, children, title }: SidePanelProps) => {
   }, [isOpen]);
 
   useEffect(() => {
-    console.log({ isOpen });
     if (isOpen) {
       setTimeout(() => {
         setHidePanel(false);
