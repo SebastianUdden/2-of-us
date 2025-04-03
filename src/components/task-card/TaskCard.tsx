@@ -6,6 +6,7 @@ import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import { EditIcon } from "../common/EditIcon";
 import { LabelPill } from "../LabelPill";
 import { LabelState } from "../../types/LabelState";
+import { MinimizeIcon } from "../icons/MinimizeIcon";
 import { ProgressBar } from "../common/ProgressBar";
 import SidePanel from "../common/SidePanel";
 import { Task } from "../../types/Task";
@@ -95,6 +96,7 @@ const TaskCard = ({
       // Wait 1 second before hiding subtasks
       setTimeout(() => {
         setShowSubtasks(false);
+        onComplete(task.id);
       }, 1000);
     }
   };
@@ -211,9 +213,13 @@ const TaskCard = ({
               {task.subtasks && task.subtasks.length > 0 && (
                 <button
                   onClick={toggleSubtasks}
-                  className="text-sm text-gray-400 hover:text-gray-300"
+                  className="flex text-sm text-gray-400 hover:text-gray-300 items-center -mb-3"
                 >
                   {showSubtasks ? "Göm deluppgifter" : "Visa deluppgifter"}
+                  <MinimizeIcon
+                    isMinimized={showSubtasks}
+                    className="w-4 h-4 ml-2"
+                  />
                 </button>
               )}
             </div>
@@ -225,7 +231,7 @@ const TaskCard = ({
                     <div className="w-full">
                       <div className="flex items-center justify-between mb-2">
                         <span className="text-sm text-gray-400">
-                          {completedSubtasks} av {totalSubtasks} underuppgifter
+                          {completedSubtasks} av {totalSubtasks} deluppgifter
                         </span>
                         <span className="text-sm text-gray-400">
                           {Math.round(

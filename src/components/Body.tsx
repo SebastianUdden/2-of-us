@@ -12,9 +12,11 @@ import Header from "./Header";
 import { List } from "../types/List";
 import { ListSection } from "./sections/ListSection";
 import { ResetConfirmModal } from "./common/ResetConfirmModal";
+import SidePanel from "./common/SidePanel";
 import { SortControls } from "./sections/SortControls";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
+import TaskAddPanel from "./TaskAddPanel";
 import { TaskSection } from "./sections/TaskSection";
 import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
 import { useExpansionState } from "../data/hooks/useExpansionState";
@@ -305,6 +307,16 @@ const Body = () => {
     }, 200);
   };
 
+  const moreThanOneActiveTask =
+    tasks.filter((task) => !task.archived).length > 1;
+  const moreThanOneArchivedTask =
+    tasks.filter((task) => task.archived).length > 1;
+  const moreThanOneList = lists.length > 1;
+  const showSortControls =
+    (tab === "todos" && moreThanOneActiveTask) ||
+    (tab === "archive" && moreThanOneArchivedTask) ||
+    (tab === "lists" && moreThanOneList);
+
   // Start the collapse animation
   useEffect(() => {
     if (pendingTaskMove) {
@@ -413,7 +425,7 @@ const Body = () => {
         }`}
       >
         {/* Header Section */}
-        <div className="flex items-start justify-between p-4">
+        <div className="flex items-start justify-between p-4 max-w-screen-lg mx-auto">
           <div className="flex-1">
             <Header
               onAddTask={() => openAddTaskPanel()}
@@ -423,34 +435,40 @@ const Body = () => {
           </div>
           <button
             onClick={() => setIsResetModalOpen(true)}
-            className="ml-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            className="fixed right-4 top-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
           >
             Återställ
           </button>
         </div>
 
-        <SortControls
-          sortField={sortField}
-          sortDirection={sortDirection}
-          isSortMinimized={isSortMinimized}
-          onSortFieldChange={handleSort}
-          onMinimizeToggle={() => {
-            setIsSortMinimized(!isSortMinimized);
-            if (!isSortMinimized) {
-              setIsHeaderVisible(false);
-            }
-          }}
-          onScrollToTop={scrollToTop}
-          onScrollToBottom={scrollToBottom}
-        />
+        {showSortControls && (
+          <SortControls
+            sortField={sortField}
+            sortDirection={sortDirection}
+            isSortMinimized={isSortMinimized}
+            onSortFieldChange={handleSort}
+            onMinimizeToggle={() => {
+              setIsSortMinimized(!isSortMinimized);
+              if (!isSortMinimized) {
+                setIsHeaderVisible(false);
+              }
+            }}
+            onScrollToTop={scrollToTop}
+            onScrollToBottom={scrollToBottom}
+          />
+        )}
       </div>
       <div
         className={`flex-1 overflow-y-auto ${
-          isHeaderVisible ? "mt-[120px]" : "mt-0"
+          showSortControls ? (isHeaderVisible ? "mt-[120px]" : "mt-0") : "mt-12"
         }`}
       >
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="pt-8 sm:pt-20 pb-8">
+        <div className="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8">
+          <div
+            className={`pb-8 ${
+              showSortControls ? "pt-4 sm:pt-20" : "pt-8 sm:pt-20"
+            }`}
+          >
             <div className="space-y-4">
               <div className="flex flex-col gap-6">
                 <Tabs
@@ -537,7 +555,24 @@ const Body = () => {
           </div>
         </div>
       </div>
-      {isAddTaskPanelOpen && (
+      <SidePanel
+        isOpen={isAddTaskPanelOpen}
+        onClose={closeAddTaskPanel}
+        title="Lägg till uppgift/lista"
+      >
+        <TaskAddPanel
+          isOpen={isAddTaskPanelOpen}
+          onClose={closeAddTaskPanel}
+          onAddTask={handleAddTask}
+          totalTasks={tasks.length}
+          parentTaskId={parentTaskId}
+          parentTaskTitle={parentTaskTitle}
+          isListMode={isListMode}
+          onToggleMode={() => setIsListMode(!isListMode)}
+          onAddList={handleAddList}
+        />
+      </SidePanel>
+      {/* {isAddTaskPanelOpen && (
         <AddTaskPanel
           isOpen={isAddTaskPanelOpen}
           onClose={closeAddTaskPanel}
@@ -549,7 +584,7 @@ const Body = () => {
           onToggleMode={() => setIsListMode(!isListMode)}
           onAddList={handleAddList}
         />
-      )}
+      )} */}
 
       <ResetConfirmModal
         isOpen={isResetModalOpen}

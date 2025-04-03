@@ -68,7 +68,10 @@ const TaskDueDate = ({ dueDate, onDueDateChange }: TaskDueDateProps) => {
   return (
     <div className="relative">
       <button
-        onClick={() => setShowDatePicker(!showDatePicker)}
+        onClick={(e) => {
+          e.preventDefault();
+          setShowDatePicker(!showDatePicker);
+        }}
         className={`text-sm px-2 py-1 rounded ${
           days < 0
             ? "bg-red-500/20 text-red-400"

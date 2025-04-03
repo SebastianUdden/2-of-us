@@ -1,6 +1,7 @@
+import { useEffect, useRef, useState } from "react";
+
 import { Task } from "../../types/Task";
 import TaskDueDate from "./TaskDueDate";
-import { useState } from "react";
 
 interface TaskEditPanelProps {
   task: Task;
@@ -9,6 +10,7 @@ interface TaskEditPanelProps {
 }
 
 const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
+  const titleRef = useRef<HTMLInputElement>(null);
   const [editedTitle, setEditedTitle] = useState(task.title);
   const [editedDescription, setEditedDescription] = useState(task.description);
   const [editedSize, setEditedSize] = useState(task.size);
@@ -31,6 +33,10 @@ const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
     });
   };
 
+  useEffect(() => {
+    titleRef.current?.focus();
+  }, []);
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Title */}
@@ -42,6 +48,7 @@ const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
           Titel
         </label>
         <input
+          ref={titleRef}
           type="text"
           id="title"
           value={editedTitle}

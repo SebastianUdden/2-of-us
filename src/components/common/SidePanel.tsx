@@ -44,7 +44,9 @@ const SidePanel = ({ isOpen, onClose, children, title }: SidePanelProps) => {
     <div className="fixed inset-0 z-50">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/50 transition-opacity"
+        className={`fixed inset-0 transition duration-500 ${
+          isOpen ? "bg-black/90" : "bg-black/20"
+        }`}
         onClick={handleClose}
       />
 

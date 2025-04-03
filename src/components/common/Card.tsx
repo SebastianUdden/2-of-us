@@ -64,7 +64,7 @@ const Card = ({
             : ""
         }
         ${isCollapsed ? "opacity-0" : "opacity-100"}
-        mx-auto px-4 py-4
+        mx-auto p-3
         origin-top
         overflow-hidden
         w-full
