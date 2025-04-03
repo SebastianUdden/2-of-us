@@ -17,6 +17,7 @@ import { SortControls } from "./sections/SortControls";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
 import TaskAddPanel from "./TaskAddPanel";
+import TaskEditPanel from "./task-card/TaskEditPanel";
 import { TaskSection } from "./sections/TaskSection";
 import { mockLists } from "../data/mock";
 import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
@@ -32,6 +33,7 @@ import { useTaskPersistence } from "../data/hooks/useTaskPersistence";
 
 const Body = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const [isEditing, setIsEditing] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<List[]>(mockLists);
   const [tab, setTab] = useState<"todos" | "archive" | "lists" | "docs">(
@@ -484,6 +486,23 @@ const Body = () => {
           openAddTaskPanel();
         }
       }
+      // Handle Cmd+Enter (Mac) or Ctrl+Enter (Windows) to open expanded task in edit mode
+      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+        console.log("expandedTaskId", expandedTaskId);
+        if (expandedTaskId && isEditing) {
+          setIsEditing(false);
+        }
+        if (expandedTaskId && !isEditing && !isAddTaskPanelOpen) {
+          console.log("task is expanded");
+          const task = tasks.find((t) => t.id === expandedTaskId);
+          console.log("task", task);
+          if (task) {
+            console.log("time to edit");
+            setIsEditing(true);
+          }
+        }
+      }
+
       if (
         e.key === "Backspace" &&
         (e.metaKey || e.ctrlKey) &&
@@ -697,6 +716,20 @@ const Body = () => {
           isListMode={isListMode}
           onToggleMode={() => setIsListMode(!isListMode)}
           onAddList={handleAddList}
+        />
+      </SidePanel>
+      <SidePanel
+        isOpen={isEditing}
+        onClose={() => setIsEditing(false)}
+        title={`Redigera "${
+          tasks.find((t) => t.id === expandedTaskId)?.title
+        }"`}
+      >
+        <TaskEditPanel
+          task={tasks.find((t) => t.id === expandedTaskId)}
+          isEditing={isEditing}
+          onUpdate={handleTaskUpdate}
+          onClose={() => setIsEditing(false)}
         />
       </SidePanel>
       <SidePanel

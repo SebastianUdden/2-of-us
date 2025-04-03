@@ -31,13 +31,13 @@ const DocsSection = () => {
             <h3 className="text-lg font-semibold mb-2">Skapa uppgifter</h3>
             <ul className="list-disc pl-6 space-y-2">
               <li>
-                <kbd className="px-2 py-1 bg-gray-200 rounded">Cmd/Ctrl</kbd> +{" "}
-                <kbd className="px-2 py-1 bg-gray-200 rounded">Space</kbd> -
-                Skapa en ny uppgift
+                <kbd className="px-2 py-1 bg-black rounded">Cmd/Ctrl</kbd> +{" "}
+                <kbd className="px-2 py-1 bg-black rounded">Space</kbd> - Skapa
+                en ny uppgift
               </li>
               <li>
-                <kbd className="px-2 py-1 bg-gray-200 rounded">Cmd/Ctrl</kbd> +{" "}
-                <kbd className="px-2 py-1 bg-gray-200 rounded">Space</kbd> (med
+                <kbd className="px-2 py-1 bg-black rounded">Cmd/Ctrl</kbd> +{" "}
+                <kbd className="px-2 py-1 bg-black rounded">Space</kbd> (med
                 uppgift expanderad) - Skapa en deluppgift
               </li>
             </ul>
@@ -47,18 +47,22 @@ const DocsSection = () => {
             <h3 className="text-lg font-semibold mb-2">Hantera uppgifter</h3>
             <ul className="list-disc pl-6 space-y-2">
               <li>
-                <kbd className="px-2 py-1 bg-gray-200 rounded">Cmd/Ctrl</kbd> +{" "}
-                <kbd className="px-2 py-1 bg-gray-200 rounded">Enter</kbd> -
-                Spara ändringar i redigeringsläge
+                <kbd className="px-2 py-1 bg-black rounded">Cmd/Ctrl</kbd> +{" "}
+                <kbd className="px-2 py-1 bg-black rounded">Enter</kbd> - Öppna
+                redigeringsläge
               </li>
               <li>
-                <kbd className="px-2 py-1 bg-gray-200 rounded">Esc</kbd> - Stäng
+                <kbd className="px-2 py-1 bg-black rounded">Enter</kbd> - Spara
+                ändringar i redigeringsläge
+              </li>
+              <li>
+                <kbd className="px-2 py-1 bg-black rounded">Esc</kbd> - Stäng
                 paneler och dialoger
               </li>
               <li>
-                <kbd className="px-2 py-1 bg-gray-200 rounded">Cmd/Ctrl</kbd> +{" "}
-                <kbd className="px-2 py-1 bg-gray-200 rounded">Backspace</kbd> -
-                Ta bort expanderad uppgift
+                <kbd className="px-2 py-1 bg-black rounded">Cmd/Ctrl</kbd> +{" "}
+                <kbd className="px-2 py-1 bg-black rounded">Backspace</kbd> - Ta
+                bort expanderad uppgift
               </li>
             </ul>
           </div>

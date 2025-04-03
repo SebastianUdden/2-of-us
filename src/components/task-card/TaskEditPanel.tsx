@@ -4,27 +4,33 @@ import { Task } from "../../types/Task";
 import TaskDueDate from "./TaskDueDate";
 
 interface TaskEditPanelProps {
-  task: Task;
+  task?: Task;
   onUpdate: (updatedTask: Task) => void;
   onClose: () => void;
+  isEditing: boolean;
 }
 
 const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
+  const formRef = useRef<HTMLFormElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);
-  const [editedTitle, setEditedTitle] = useState(task.title);
-  const [editedDescription, setEditedDescription] = useState(task.description);
-  const [editedSize, setEditedSize] = useState(task.size);
+  const [editedTitle, setEditedTitle] = useState(task?.title || "");
+  const [editedDescription, setEditedDescription] = useState(
+    task?.description || ""
+  );
+  const [editedSize, setEditedSize] = useState(task?.size || "");
 
   useEffect(() => {
     titleRef.current?.focus();
   }, []);
 
+  if (!task) return null;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (
-      editedTitle !== task.title ||
-      editedDescription !== task.description ||
-      editedSize !== task.size
+      editedTitle !== task?.title ||
+      editedDescription !== task?.description ||
+      editedSize !== task?.size
     ) {
       onUpdate({
         ...task,
@@ -44,7 +50,7 @@ const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" ref={formRef}>
       {/* Title */}
       <div>
         <label

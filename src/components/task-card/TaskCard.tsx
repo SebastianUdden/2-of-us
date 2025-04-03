@@ -8,11 +8,9 @@ import { LabelPill } from "../LabelPill";
 import { LabelState } from "../../types/LabelState";
 import { MinimizeIcon } from "../icons/MinimizeIcon";
 import { ProgressBar } from "../common/ProgressBar";
-import SidePanel from "../common/SidePanel";
 import { Task } from "../../types/Task";
 import TaskArrows from "./TaskArrows";
 import TaskDueDate from "./TaskDueDate";
-import TaskEditPanel from "./TaskEditPanel";
 import TaskFooter from "./TaskFooter";
 import { TaskHeader } from "./TaskHeader";
 import TaskUpdates from "./TaskUpdates";
@@ -383,17 +381,6 @@ const TaskCard = ({
         }}
         taskTitle={task.title}
       />
-      <SidePanel
-        isOpen={isEditing}
-        onClose={() => setIsEditing(false)}
-        title="Redigera uppgift"
-      >
-        <TaskEditPanel
-          task={task}
-          onUpdate={onUpdate}
-          onClose={() => setIsEditing(false)}
-        />
-      </SidePanel>
     </>
   );
 };
