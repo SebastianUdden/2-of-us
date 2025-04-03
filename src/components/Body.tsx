@@ -416,6 +416,43 @@ const Body = () => {
     setIsResetModalOpen(false);
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Only handle Cmd+Space (Mac) or Ctrl+Space (Windows)
+      if (!(e.code === "Space" && (e.metaKey || e.ctrlKey))) return;
+
+      // Prevent default behavior
+
+      // If all tasks are expanded, minimize them first
+      if (isAllExpanded) {
+        setIsAllExpanded(false);
+        return;
+      }
+
+      // If a task is expanded, create a subtask
+      if (expandedTaskId) {
+        const task = tasks.find((t) => t.id === expandedTaskId);
+        if (task) {
+          openAddTaskPanel(task.id, task.title);
+        }
+      }
+      // If we're on the tasks tab and no task is expanded, create a new task
+      else if (tab === "todos") {
+        openAddTaskPanel();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    expandedTaskId,
+    tab,
+    tasks,
+    openAddTaskPanel,
+    isAllExpanded,
+    setIsAllExpanded,
+  ]);
+
   return (
     <div className="flex flex-col min-h-screen">
       <div
@@ -434,7 +471,7 @@ const Body = () => {
           </div>
           <button
             onClick={() => setIsResetModalOpen(true)}
-            className="fixed right-4 top-4 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
+            className="static px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
           >
             Återställ
           </button>
@@ -548,6 +585,7 @@ const Body = () => {
                     currentSortField={sortField}
                     animatingTaskId={animatingTaskId}
                     animatingTaskHeight={animatingTaskHeight}
+                    onAddTask={() => openAddTaskPanel()}
                   />
                 )}
               </div>
@@ -558,7 +596,11 @@ const Body = () => {
       <SidePanel
         isOpen={isAddTaskPanelOpen}
         onClose={closeAddTaskPanel}
-        title="Lägg till uppgift/lista"
+        title={
+          parentTaskId
+            ? `Lägg till deluppgift till "${parentTaskTitle}"`
+            : "Lägg till uppgift"
+        }
       >
         <TaskAddPanel
           isOpen={isAddTaskPanelOpen}
@@ -567,6 +609,7 @@ const Body = () => {
           totalTasks={tasks.length}
           parentTaskId={parentTaskId}
           parentTaskTitle={parentTaskTitle}
+          subtasks={tasks.find((task) => task.id === parentTaskId)?.subtasks}
           isListMode={isListMode}
           onToggleMode={() => setIsListMode(!isListMode)}
           onAddList={handleAddList}

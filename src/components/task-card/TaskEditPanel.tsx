@@ -15,15 +15,33 @@ const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
   const [editedDescription, setEditedDescription] = useState(task.description);
   const [editedSize, setEditedSize] = useState(task.size);
 
+  useEffect(() => {
+    titleRef.current?.focus();
+  }, []);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onUpdate({
-      ...task,
-      title: editedTitle,
-      description: editedDescription,
-      size: editedSize,
-    });
+    if (
+      editedTitle !== task.title ||
+      editedDescription !== task.description ||
+      editedSize !== task.size
+    ) {
+      onUpdate({
+        ...task,
+        title: editedTitle,
+        description: editedDescription,
+        size: editedSize,
+      });
+    }
     onClose();
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      e.stopPropagation();
+      handleSubmit(e);
+    }
   };
 
   const handleDueDateChange = (date: Date | undefined) => {
@@ -33,12 +51,12 @@ const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
     });
   };
 
-  useEffect(() => {
-    titleRef.current?.focus();
-  }, []);
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form
+      onSubmit={handleSubmit}
+      onKeyDown={handleKeyDown}
+      className="space-y-6"
+    >
       {/* Title */}
       <div>
         <label

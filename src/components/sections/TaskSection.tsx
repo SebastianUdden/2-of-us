@@ -20,6 +20,7 @@ interface TaskSectionProps {
   currentSortField: string;
   animatingTaskId: string | null;
   animatingTaskHeight: number | null;
+  onAddTask: () => void;
 }
 
 export const TaskSection = ({
@@ -40,11 +41,16 @@ export const TaskSection = ({
   animatingTaskId,
   animatingTaskHeight,
   onHeightChange,
+  onAddTask,
 }: TaskSectionProps) => {
   return (
     <>
       {tasks.length === 0 ? (
-        <EmptyState type="tasks" selectedLabel={selectedLabel || undefined} />
+        <EmptyState
+          type="tasks"
+          selectedLabel={selectedLabel || undefined}
+          onAddTask={onAddTask}
+        />
       ) : (
         tasks.map((task) => (
           <TaskCard

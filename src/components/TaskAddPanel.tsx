@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { List } from "../types/List";
 import { Size } from "./task-card/SizeLabel";
+import { SubTask } from "../types/SubTask";
 import { Task } from "../types/Task";
 import TaskDueDate from "./task-card/TaskDueDate";
 import { generateUUID } from "../utils/uuid";
@@ -28,6 +29,7 @@ interface AddTaskPanelProps {
   isListMode?: boolean;
   onToggleMode?: () => void;
   onAddList?: (list: List) => void;
+  subtasks?: SubTask[];
 }
 
 const TaskAddPanel = ({
@@ -35,6 +37,7 @@ const TaskAddPanel = ({
   onAddTask,
   totalTasks,
   parentTaskId,
+  subtasks,
 }: /* isOpen,
   parentTaskTitle,
   isListMode = false,
@@ -160,6 +163,25 @@ AddTaskPanelProps) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {subtasks && subtasks.length > 0 && (
+        <div>
+          <label className="block text-sm font-medium text-gray-300 mb-2">
+            Nuvarande deluppgifter
+          </label>
+          <div className="mt-1">
+            {subtasks.map((subtask) => (
+              <div key={subtask.id} className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={subtask.completed}
+                  onChange={() => {}}
+                />
+                {subtask.title}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
       {/* Title */}
       <div>
         <label

@@ -20,7 +20,7 @@ const Header = ({ onAddTask, searchQuery, onSearchChange }: HeaderProps) => {
             alt="Heart"
             className="w-8 h-8 animate-heart-pulse"
           />
-          <h1 className="text-xl font-semibold text-white">Vi två</h1>
+          <h1 className="text-xl font-semibold text-white">Collab</h1>
         </div>
         <div className="flex items-center gap-2">
           <button

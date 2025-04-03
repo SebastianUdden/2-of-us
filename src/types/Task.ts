@@ -1,3 +1,5 @@
+import { SubTask } from "./SubTask";
+
 export interface TaskUpdate {
   updatedAt: Date;
   author: string;
@@ -16,11 +18,7 @@ export interface Task {
   labels?: string[];
   archived: boolean;
   updates: TaskUpdate[];
-  subtasks: {
-    id: string;
-    title: string;
-    completed: boolean;
-  }[];
+  subtasks: SubTask[];
   parentTaskId?: string;
   size?: string;
 }

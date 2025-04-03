@@ -59,19 +59,26 @@ const TaskDueDate = ({ dueDate, onDueDateChange }: TaskDueDateProps) => {
   }, [dueDate, updateTimeRemaining]);
 
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    e.preventDefault();
     const date = e.target.value ? new Date(e.target.value) : undefined;
     setSelectedDate(e.target.value);
     onDueDateChange(date);
     setShowDatePicker(false);
   };
 
+  const handleButtonClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    if (e.type === "keydown" && (e as React.KeyboardEvent).key === "Enter") {
+      e.preventDefault();
+      return;
+    }
+    setShowDatePicker(!showDatePicker);
+  };
+
   return (
     <div className="relative">
       <button
-        onClick={(e) => {
-          e.preventDefault();
-          setShowDatePicker(!showDatePicker);
-        }}
+        onClick={handleButtonClick}
+        onKeyDown={handleButtonClick}
         className={`text-sm px-2 py-1 rounded ${
           days < 0
             ? "bg-red-500/20 text-red-400"
