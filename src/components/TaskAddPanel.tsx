@@ -31,16 +31,16 @@ interface AddTaskPanelProps {
 }
 
 const TaskAddPanel = ({
-  isOpen,
   onClose,
   onAddTask,
   totalTasks,
   parentTaskId,
+}: /* isOpen,
   parentTaskTitle,
   isListMode = false,
   onToggleMode,
-  onAddList,
-}: AddTaskPanelProps) => {
+  onAddList, */
+AddTaskPanelProps) => {
   const [editedLabel, setEditedLabel] = useState("");
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
   const labelInputRef = useRef<HTMLInputElement>(null);
