@@ -440,19 +440,25 @@ const Body = () => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Only handle Cmd+Space (Mac) or Ctrl+Space (Windows)
-      if (!(e.code === "Space" && (e.metaKey || e.ctrlKey))) return;
+      if (e.code === "Space" && (e.metaKey || e.ctrlKey)) {
+        console.log("Space key pressed");
 
-      // If a task is expanded, create a subtask
-      if (expandedTaskId && !isAllExpanded) {
-        const task = tasks.find((t) => t.id === expandedTaskId);
-        setShowSubTasksId(expandedTaskId);
-        if (task) {
-          openAddTaskPanel(task.id, task.title);
+        console.log("tab", tab);
+        // If a task is expanded, create a subtask
+        if (expandedTaskId && !isAllExpanded) {
+          console.log("Expanded task ID:", expandedTaskId);
+          const task = tasks.find((t) => t.id === expandedTaskId);
+          setShowSubTasksId(expandedTaskId);
+          if (task) {
+            console.log("Task found:", task);
+            openAddTaskPanel(task.id, task.title);
+          }
         }
-      }
-      // If we're on the tasks tab and no task is expanded, create a new task
-      else if (tab === "todos") {
-        openAddTaskPanel();
+        // If we're on the tasks tab and no task is expanded, create a new task
+        else if (tab === "todos") {
+          console.log("Creating new task");
+          openAddTaskPanel();
+        }
       }
     };
 
@@ -465,6 +471,10 @@ const Body = () => {
     openAddTaskPanel,
     isAllExpanded,
     setIsAllExpanded,
+    setIsAllExpandedMode,
+    setExpandedTaskId,
+    setExpandedListId,
+    setShowSubTasksId,
   ]);
 
   return (

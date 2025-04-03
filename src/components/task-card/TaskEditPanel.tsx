@@ -36,14 +36,6 @@ const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
     onClose();
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      e.stopPropagation();
-      handleSubmit(e);
-    }
-  };
-
   const handleDueDateChange = (date: Date | undefined) => {
     onUpdate({
       ...task,
@@ -52,11 +44,7 @@ const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      onKeyDown={handleKeyDown}
-      className="space-y-6"
-    >
+    <form onSubmit={handleSubmit} className="space-y-6">
       {/* Title */}
       <div>
         <label
