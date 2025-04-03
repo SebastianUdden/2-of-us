@@ -6,7 +6,6 @@ import {
 } from "../data/hooks/useFilteredItems";
 
 import { ANIMATION } from "./task-card/constants";
-import AddTaskPanel from "./AddTaskPanel";
 import { FilterSection } from "./sections/FilterSection";
 import Header from "./Header";
 import { List } from "../types/List";
@@ -484,6 +483,7 @@ const Body = () => {
                   }}
                 />
                 <FilterSection
+                  tab={tab}
                   isCategoriesExpanded={isCategoriesExpanded}
                   setIsCategoriesExpanded={setIsCategoriesExpanded}
                   isAllExpanded={isAllExpanded}
@@ -572,19 +572,6 @@ const Body = () => {
           onAddList={handleAddList}
         />
       </SidePanel>
-      {/* {isAddTaskPanelOpen && (
-        <AddTaskPanel
-          isOpen={isAddTaskPanelOpen}
-          onClose={closeAddTaskPanel}
-          onAddTask={handleAddTask}
-          totalTasks={tasks.length}
-          parentTaskId={parentTaskId}
-          parentTaskTitle={parentTaskTitle}
-          isListMode={isListMode}
-          onToggleMode={() => setIsListMode(!isListMode)}
-          onAddList={handleAddList}
-        />
-      )} */}
 
       <ResetConfirmModal
         isOpen={isResetModalOpen}
