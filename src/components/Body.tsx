@@ -1,4 +1,3 @@
-import { mockLists, mockTasks } from "../data/mock";
 import { useEffect, useState } from "react";
 import {
   useFilteredLists,
@@ -17,6 +16,7 @@ import Tabs from "./Tabs";
 import { Task } from "../types/Task";
 import TaskAddPanel from "./TaskAddPanel";
 import { TaskSection } from "./sections/TaskSection";
+import { mockLists } from "../data/mock";
 import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
 import { useExpansionState } from "../data/hooks/useExpansionState";
 import { useFilterManagement } from "../data/hooks/useFilterManagement";
@@ -401,9 +401,10 @@ const Body = () => {
     loadTasks().then((savedTasks: Task[]) => {
       if (savedTasks.length > 0) {
         setTasks(savedTasks);
-      } else {
-        setTasks(mockTasks);
       }
+      /* else {
+        setTasks(mockTasks);
+      } */
     });
   }, []);
 
