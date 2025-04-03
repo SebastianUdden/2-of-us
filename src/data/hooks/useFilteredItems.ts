@@ -8,7 +8,7 @@ interface UseFilteredTasksProps {
   searchQuery: string;
   labelFilters: LabelFilter[];
   selectedLabel: string | null;
-  tab: "todos" | "archive" | "lists";
+  tab: "todos" | "archive" | "lists" | "docs";
 }
 
 interface UseFilteredListsProps {

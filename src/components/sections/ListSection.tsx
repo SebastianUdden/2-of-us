@@ -42,7 +42,11 @@ export const ListSection = ({
   return (
     <>
       {lists.length === 0 ? (
-        <EmptyState type="lists" selectedLabel={selectedLabel || undefined} />
+        <EmptyState
+          type="lists"
+          selectedLabel={selectedLabel || undefined}
+          onAddTask={() => {}}
+        />
       ) : (
         lists.map((list) => (
           <ListCard
