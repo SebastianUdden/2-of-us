@@ -3,15 +3,17 @@ import { useEffect, useRef, useState } from "react";
 import { ANIMATION } from "./task-card/constants";
 import { ArchiveIcon } from "./icons/ArchiveIcon";
 import { CheckmarkIcon } from "./icons/CheckmarkIcon";
+import { DocumentIcon } from "./icons/DocumentIcon";
 import { ListIcon } from "./icons/ListIcon";
 
 interface TabsProps {
-  view: "todos" | "archive" | "lists";
-  onViewChange: (view: "todos" | "archive" | "lists") => void;
+  view: "todos" | "archive" | "lists" | "docs";
+  onViewChange: (view: "todos" | "archive" | "lists" | "docs") => void;
   counts: {
     todos: number;
     archive: number;
     lists: number;
+    docs: number;
   };
 }
 
@@ -20,7 +22,8 @@ const Tabs = ({ view, onViewChange, counts }: TabsProps) => {
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   useEffect(() => {
-    const index = view === "todos" ? 0 : view === "archive" ? 1 : 2;
+    const index =
+      view === "todos" ? 0 : view === "archive" ? 1 : view === "lists" ? 2 : 3;
     setActiveTabIndex(index);
   }, [view]);
 
@@ -96,11 +99,31 @@ const Tabs = ({ view, onViewChange, counts }: TabsProps) => {
           }
         `}
       >
-        <ListIcon className="w-5 h-5" />
+        <ListIcon className="w-4 h-4" />
         <span>Listor</span>
         <span className="text-xs bg-gray-700 px-2 py-0.5 rounded-full">
           {counts.lists}
         </span>
+      </button>
+      <button
+        ref={(el) => {
+          tabsRef.current[3] = el;
+        }}
+        onClick={() => onViewChange("docs")}
+        className={`
+          py-2 text-sm font-medium transition-colors duration-${
+            ANIMATION.DURATION
+          } ${ANIMATION.EASING}
+          flex items-center gap-2 justify-start
+          ${
+            view === "docs"
+              ? "text-blue-400"
+              : "text-gray-400 hover:text-gray-300"
+          }
+        `}
+      >
+        <DocumentIcon className="w-4 h-4" />
+        <span>Docs</span>
       </button>
     </div>
   );

@@ -4,7 +4,7 @@ interface TabState {
   id: string;
   createdAt: string;
   updatedAt: string;
-  currentTab: "todos" | "archive" | "lists";
+  currentTab: "todos" | "archive" | "lists" | "docs";
 }
 
 export const useTabPersistence = () => {
@@ -17,7 +17,7 @@ export const useTabPersistence = () => {
     return tabState?.currentTab || "todos";
   };
 
-  const saveTab = async (tab: "todos" | "archive" | "lists") => {
+  const saveTab = async (tab: "todos" | "archive" | "lists" | "docs") => {
     await saveItem({ currentTab: tab });
   };
 

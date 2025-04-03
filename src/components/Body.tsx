@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   useFilteredLists,
   useFilteredTasks,
@@ -6,6 +6,7 @@ import {
 
 import { ANIMATION } from "./task-card/constants";
 import DeleteConfirmDialog from "./task-card/DeleteConfirmDialog";
+import DocsSection from "./sections/DocsSection";
 import { FilterSection } from "./sections/FilterSection";
 import Header from "./Header";
 import { List } from "../types/List";
@@ -30,9 +31,12 @@ import { useTabPersistence } from "../data/hooks/useTabPersistence";
 import { useTaskPersistence } from "../data/hooks/useTaskPersistence";
 
 const Body = () => {
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<List[]>(mockLists);
-  const [tab, setTab] = useState<"todos" | "archive" | "lists">("todos");
+  const [tab, setTab] = useState<"todos" | "archive" | "lists" | "docs">(
+    "todos"
+  );
   const [isSortMinimized, setIsSortMinimized] = useState(false);
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
@@ -467,20 +471,16 @@ const Body = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Only handle Cmd+Space (Mac) or Ctrl+Space (Windows)
       if (e.code === "Space" && (e.metaKey || e.ctrlKey)) {
-        console.log("Space key pressed");
         // If a task is expanded, create a subtask
         if (expandedTaskId && !isAllExpanded) {
-          console.log("Expanded task ID:", expandedTaskId);
           const task = tasks.find((t) => t.id === expandedTaskId);
           setShowSubTasksId(expandedTaskId);
           if (task) {
-            console.log("Task found:", task);
             openAddTaskPanel(task.id, task.title);
           }
         }
         // If we're on the tasks tab and no task is expanded, create a new task
         else if (tab === "todos") {
-          console.log("Creating new task");
           openAddTaskPanel();
         }
       }
@@ -515,6 +515,14 @@ const Body = () => {
     isAllExpanded,
   ]);
 
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    if (query.trim() !== "") {
+      setTab("todos");
+      saveTab("todos");
+    }
+  };
+
   return (
     <div className="flex flex-col min-h-screen">
       <div
@@ -526,9 +534,10 @@ const Body = () => {
         <div className="flex items-start justify-between p-4 max-w-screen-lg mx-auto">
           <div className="flex-1">
             <Header
+              ref={searchInputRef}
               onAddTask={() => openAddTaskPanel()}
               searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
+              onSearchChange={handleSearch}
             />
           </div>
           {/*   <button
@@ -571,43 +580,46 @@ const Body = () => {
               <div className="flex flex-col gap-6">
                 <Tabs
                   view={tab}
-                  onViewChange={(tab) => {
-                    setTab(tab);
-                    saveTab(tab);
+                  onViewChange={(newTab) => {
+                    setTab(newTab);
+                    saveTab(newTab);
                   }}
                   counts={{
-                    todos: tasks.length,
+                    todos: tasks.filter((task) => !task.archived).length,
                     archive: tasks.filter((task) => task.archived).length,
                     lists: lists.length,
+                    docs: 0,
                   }}
                 />
-                <FilterSection
-                  tab={tab}
-                  isCategoriesExpanded={isCategoriesExpanded}
-                  setIsCategoriesExpanded={setIsCategoriesExpanded}
-                  isAllExpanded={isAllExpanded}
-                  setIsAllExpanded={setIsAllExpanded}
-                  setIsAllExpandedMode={setIsAllExpandedMode}
-                  setExpandedTaskId={setExpandedTaskId}
-                  setExpandedListId={setExpandedListId}
-                  tasks={tasks}
-                  lists={lists}
-                  completedCount={completedCount}
-                  tasksWithDueDate={tasksWithDueDate}
-                  labels={labelsAndCountsLabels}
-                  counts={labelsAndCountsCounts}
-                  labelFilters={labelFilters}
-                  handleCompletedClick={handleCompletedClickWithExpand}
-                  handleDueDateClick={handleDueDateClickWithExpand}
-                  handleLabelClick={handleLabelClickWithExpand}
-                  clearAllFilters={clearAllFilters}
-                  getCompletedState={getCompletedState}
-                  getDueDateState={getDueDateState}
-                  getLabelState={getLabelState}
-                />
+                {tab !== "docs" && (
+                  <FilterSection
+                    tab={tab}
+                    isCategoriesExpanded={isCategoriesExpanded}
+                    setIsCategoriesExpanded={setIsCategoriesExpanded}
+                    isAllExpanded={isAllExpanded}
+                    setIsAllExpanded={setIsAllExpanded}
+                    setIsAllExpandedMode={setIsAllExpandedMode}
+                    setExpandedTaskId={setExpandedTaskId}
+                    setExpandedListId={setExpandedListId}
+                    tasks={tasks}
+                    lists={lists}
+                    completedCount={completedCount}
+                    tasksWithDueDate={tasksWithDueDate}
+                    labels={labelsAndCountsLabels}
+                    counts={labelsAndCountsCounts}
+                    labelFilters={labelFilters}
+                    handleCompletedClick={handleCompletedClickWithExpand}
+                    handleDueDateClick={handleDueDateClickWithExpand}
+                    handleLabelClick={handleLabelClickWithExpand}
+                    clearAllFilters={clearAllFilters}
+                    getCompletedState={getCompletedState}
+                    getDueDateState={getDueDateState}
+                    getLabelState={getLabelState}
+                  />
+                )}
               </div>
               <div className="space-y-2">
-                {tab === "lists" ? (
+                {tab === "lists" && (
                   <ListSection
                     lists={sortedAndFilteredLists}
                     selectedLabel={selectedLabel}
@@ -628,7 +640,8 @@ const Body = () => {
                     animatingListHeight={animatingListHeight}
                     onTabChange={setTab}
                   />
-                ) : (
+                )}
+                {(tab === "todos" || tab === "archive") && (
                   <TaskSection
                     tasks={sortedAndFilteredTasks}
                     selectedLabel={selectedLabel}
@@ -650,8 +663,15 @@ const Body = () => {
                     onAddTask={() => openAddTaskPanel()}
                     showSubTasksId={showSubTasksId}
                     setShowSubTasksId={setShowSubTasksId}
+                    onClearFilters={() => {
+                      setSelectedLabel(null);
+                      setSearchQuery("");
+                      clearAllFilters();
+                      searchInputRef.current?.focus();
+                    }}
                   />
                 )}
+                {tab === "docs" && <DocsSection />}
               </div>
             </div>
           </div>

@@ -23,6 +23,7 @@ interface TaskSectionProps {
   setExpandedTaskId: (id: string | null) => void;
   showSubTasksId: string | null;
   setShowSubTasksId: (id: string | null) => void;
+  onClearFilters?: () => void;
 }
 
 export const TaskSection = ({
@@ -46,6 +47,7 @@ export const TaskSection = ({
   setExpandedTaskId,
   showSubTasksId,
   setShowSubTasksId,
+  onClearFilters,
 }: TaskSectionProps) => {
   return (
     <>
@@ -54,6 +56,7 @@ export const TaskSection = ({
           type="tasks"
           selectedLabel={selectedLabel || undefined}
           onAddTask={onAddTask}
+          onClearFilters={onClearFilters}
         />
       ) : (
         tasks.map((task) => (
