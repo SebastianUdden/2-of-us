@@ -6,7 +6,7 @@ interface TaskSectionProps {
   tasks: Task[];
   selectedLabel: string | null;
   onPriorityChange: (taskId: string, newPosition: number) => void;
-  onComplete: (taskId: string) => void;
+  onComplete: (taskId: string, allCompleted?: boolean) => void;
   onDelete: (taskId: string) => void;
   onArchive: (taskId: string) => void;
   onUpdate: (updatedTask: Task) => void;
@@ -14,13 +14,15 @@ interface TaskSectionProps {
   onHeightChange: (height: number | null) => void;
   onLabelClick: (label: string) => void;
   onAddSubtask: (taskId: string) => void;
-  expandedTaskId: string | "all" | null;
-  setExpandedTaskId: (id: string | null) => void;
   showPriorityControls: boolean;
   currentSortField: string;
   animatingTaskId: string | null;
   animatingTaskHeight: number | null;
   onAddTask: () => void;
+  expandedTaskId: string | "all" | null;
+  setExpandedTaskId: (id: string | null) => void;
+  showSubTasksId: string | null;
+  setShowSubTasksId: (id: string | null) => void;
 }
 
 export const TaskSection = ({
@@ -34,14 +36,16 @@ export const TaskSection = ({
   isCollapsed,
   onLabelClick,
   onAddSubtask,
-  expandedTaskId,
-  setExpandedTaskId,
   showPriorityControls,
   currentSortField,
   animatingTaskId,
   animatingTaskHeight,
   onHeightChange,
   onAddTask,
+  expandedTaskId,
+  setExpandedTaskId,
+  showSubTasksId,
+  setShowSubTasksId,
 }: TaskSectionProps) => {
   return (
     <>
@@ -67,14 +71,16 @@ export const TaskSection = ({
             onLabelClick={onLabelClick}
             selectedLabel={selectedLabel || ""}
             onAddSubtask={onAddSubtask}
-            expandedTaskId={expandedTaskId === "all" ? task.id : expandedTaskId}
             expandAll={expandedTaskId === "all"}
-            setExpandedTaskId={setExpandedTaskId}
             showPriorityControls={showPriorityControls}
             currentSortField={currentSortField}
             animatingTaskId={animatingTaskId}
             animatingTaskHeight={animatingTaskHeight}
             onHeightChange={onHeightChange}
+            expandedTaskId={expandedTaskId === "all" ? task.id : expandedTaskId}
+            setExpandedTaskId={setExpandedTaskId}
+            showSubTasksId={showSubTasksId}
+            setShowSubTasksId={setShowSubTasksId}
           />
         ))
       )}

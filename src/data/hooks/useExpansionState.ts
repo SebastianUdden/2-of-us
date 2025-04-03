@@ -3,11 +3,13 @@ import { useCallback, useEffect, useState } from "react";
 import { useExpansionPersistence } from "./useExpansionPersistence";
 
 interface UseExpansionStateResult {
+  showSubTasksId: string | null;
   expandedTaskId: string | null;
   expandedListId: string | null;
   isAllExpanded: boolean;
   isAllExpandedMode: boolean;
   isCategoriesExpanded: boolean;
+  setShowSubTasksId: (taskId: string | null) => void;
   setExpandedTaskId: (taskId: string | null) => void;
   setExpandedListId: (listId: string | null) => void;
   setIsAllExpanded: (isExpanded: boolean) => void;
@@ -19,6 +21,7 @@ interface UseExpansionStateResult {
 
 export const useExpansionState = (): UseExpansionStateResult => {
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const [showSubTasksId, setShowSubTasksId] = useState<string | null>(null);
   const [expandedListId, setExpandedListId] = useState<string | null>(null);
   const [isAllExpanded, setIsAllExpanded] = useState(false);
   const [isAllExpandedMode, setIsAllExpandedMode] = useState(false);
@@ -28,6 +31,7 @@ export const useExpansionState = (): UseExpansionStateResult => {
   // Load saved expansion state on mount
   useEffect(() => {
     loadExpansionState().then((state) => {
+      setShowSubTasksId(state.showSubTasksId);
       setExpandedTaskId(state.expandedTaskId);
       setExpandedListId(state.expandedListId);
       setIsAllExpanded(state.isAllExpanded);
@@ -39,6 +43,7 @@ export const useExpansionState = (): UseExpansionStateResult => {
   // Save expansion state whenever it changes
   useEffect(() => {
     saveExpansionState({
+      showSubTasksId,
       expandedTaskId,
       expandedListId,
       isAllExpanded,
@@ -46,6 +51,7 @@ export const useExpansionState = (): UseExpansionStateResult => {
       isCategoriesExpanded,
     });
   }, [
+    showSubTasksId,
     expandedTaskId,
     expandedListId,
     isAllExpanded,
@@ -66,11 +72,13 @@ export const useExpansionState = (): UseExpansionStateResult => {
   }, []);
 
   return {
+    showSubTasksId,
     expandedTaskId,
     expandedListId,
     isAllExpanded,
     isAllExpandedMode,
     isCategoriesExpanded,
+    setShowSubTasksId,
     setExpandedTaskId,
     setExpandedListId,
     setIsAllExpanded,

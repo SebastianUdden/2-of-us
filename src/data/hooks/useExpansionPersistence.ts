@@ -4,6 +4,7 @@ interface ExpansionState {
   id: string;
   createdAt: string;
   updatedAt: string;
+  showSubTasksId: string | null;
   expandedTaskId: string | null;
   expandedListId: string | null;
   isAllExpanded: boolean;
@@ -19,6 +20,7 @@ export const useExpansionPersistence = () => {
   const loadExpansionState = async () => {
     const state = await loadItem();
     return {
+      showSubTasksId: state?.showSubTasksId || null,
       expandedTaskId: state?.expandedTaskId || null,
       expandedListId: state?.expandedListId || null,
       isAllExpanded: state?.isAllExpanded || false,
@@ -28,6 +30,7 @@ export const useExpansionPersistence = () => {
   };
 
   const saveExpansionState = async (state: {
+    showSubTasksId: string | null;
     expandedTaskId: string | null;
     expandedListId: string | null;
     isAllExpanded: boolean;

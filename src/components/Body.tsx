@@ -21,6 +21,7 @@ import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
 import { useExpansionState } from "../data/hooks/useExpansionState";
 import { useFilterManagement } from "../data/hooks/useFilterManagement";
 import { useLabelsAndCounts } from "../data/hooks/useLabelsAndCounts";
+import { useMessagePanel } from "../data/hooks/useMessagePanel";
 import { usePriorityManagement } from "../data/hooks/usePriorityManagement";
 import { useSearchAndFilter } from "../data/hooks/useSearchAndFilter";
 import { useSorting } from "../data/hooks/useSorting";
@@ -41,12 +42,14 @@ const Body = () => {
 
   const {
     expandedTaskId,
+    showSubTasksId,
     expandedListId,
     isAllExpanded,
     isAllExpandedMode,
     isCategoriesExpanded,
     setExpandedTaskId,
     setExpandedListId,
+    setShowSubTasksId,
     setIsAllExpanded,
     setIsAllExpandedMode,
     setIsCategoriesExpanded,
@@ -94,6 +97,14 @@ const Body = () => {
   } = useAddTaskPanel(tasks, setTasks, lists, setLists, setExpandedTaskId);
 
   const {
+    isMessagePanelOpen,
+    messagePanelTitle,
+    messagePanelMessage,
+    openMessagePanel,
+    closeMessagePanel,
+  } = useMessagePanel();
+
+  const {
     sortTasks,
     sortLists,
     handlePriorityChange,
@@ -139,7 +150,16 @@ const Body = () => {
     }
   };
 
-  const handleComplete = (taskId: string) => {
+  const handleComplete = (taskId: string, allCompleted?: boolean) => {
+    const task = tasks.find((t) => t.id === taskId);
+    if (!task?.completed && !allCompleted) {
+      openMessagePanel(
+        "Subtasks imcomplete",
+        "Please complete or delete all subtasks before completing the task."
+      );
+      return;
+    }
+
     // First update the completion status immediately
     setTasks((prevTasks) => {
       return prevTasks.map((task) =>
@@ -421,17 +441,10 @@ const Body = () => {
       // Only handle Cmd+Space (Mac) or Ctrl+Space (Windows)
       if (!(e.code === "Space" && (e.metaKey || e.ctrlKey))) return;
 
-      // Prevent default behavior
-
-      // If all tasks are expanded, minimize them first
-      if (isAllExpanded) {
-        setIsAllExpanded(false);
-        return;
-      }
-
       // If a task is expanded, create a subtask
-      if (expandedTaskId) {
+      if (expandedTaskId && !isAllExpanded) {
         const task = tasks.find((t) => t.id === expandedTaskId);
+        setShowSubTasksId(expandedTaskId);
         if (task) {
           openAddTaskPanel(task.id, task.title);
         }
@@ -469,12 +482,12 @@ const Body = () => {
               onSearchChange={setSearchQuery}
             />
           </div>
-          <button
+          {/*   <button
             onClick={() => setIsResetModalOpen(true)}
             className="static px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
           >
             Återställ
-          </button>
+          </button> */}
         </div>
 
         {showSortControls && (
@@ -586,6 +599,8 @@ const Body = () => {
                     animatingTaskId={animatingTaskId}
                     animatingTaskHeight={animatingTaskHeight}
                     onAddTask={() => openAddTaskPanel()}
+                    showSubTasksId={showSubTasksId}
+                    setShowSubTasksId={setShowSubTasksId}
                   />
                 )}
               </div>
@@ -614,6 +629,13 @@ const Body = () => {
           onToggleMode={() => setIsListMode(!isListMode)}
           onAddList={handleAddList}
         />
+      </SidePanel>
+      <SidePanel
+        isOpen={isMessagePanelOpen}
+        onClose={closeMessagePanel}
+        title={messagePanelTitle || ""}
+      >
+        <div>{messagePanelMessage}</div>
       </SidePanel>
 
       <ResetConfirmModal

@@ -20,15 +20,13 @@ import TaskUpdates from "./TaskUpdates";
 interface TaskCardProps {
   task: Task;
   onPriorityChange: (taskId: string, newPosition: number) => void;
-  onComplete: (taskId: string) => void;
+  onComplete: (taskId: string, allCompleted?: boolean) => void;
   onDelete: (taskId: string) => void;
   onArchive: (taskId: string) => void;
   onUpdate: (updatedTask: Task) => void;
   totalTasks: number;
   isAnimating: boolean;
   isCollapsed: boolean;
-  expandedTaskId: string | null;
-  setExpandedTaskId: (id: string | null) => void;
   showPriorityControls: boolean;
   currentSortField: string;
   onHeightChange: (height: number | null) => void;
@@ -37,6 +35,10 @@ interface TaskCardProps {
   onAddSubtask: (taskId: string) => void;
   animatingTaskId: string | null;
   animatingTaskHeight: number | null;
+  expandedTaskId: string | null;
+  setExpandedTaskId: (id: string | null) => void;
+  showSubTasksId: string | null;
+  setShowSubTasksId: (id: string | null) => void;
   expandAll: boolean;
 }
 
@@ -56,12 +58,13 @@ const TaskCard = ({
   onAddSubtask,
   expandedTaskId,
   setExpandedTaskId,
+  showSubTasksId,
+  setShowSubTasksId,
   showPriorityControls,
   expandAll,
 }: TaskCardProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [showSubtasks, setShowSubtasks] = useState(expandedTaskId === task.id);
   const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
     useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -91,13 +94,22 @@ const TaskCard = ({
     });
 
     // Check if all subtasks are now completed
-    const allCompleted = updatedSubtasks.every((subtask) => subtask.completed);
+    const allCompleted =
+      updatedSubtasks.length > 0 &&
+      updatedSubtasks.every((subtask) => subtask.completed);
     if (allCompleted) {
       // Wait 1 second before hiding subtasks
       setTimeout(() => {
-        setShowSubtasks(false);
-        onComplete(task.id);
-      }, 1000);
+        setShowSubTasksId(null);
+        onComplete(task.id, allCompleted);
+        if (expandedTaskId === task.id) {
+          setTimeout(() => {
+            setExpandedTaskId(null);
+          }, 500);
+        }
+      }, 500);
+    } else if (task.completed) {
+      onComplete(task.id);
     }
   };
 
@@ -105,14 +117,27 @@ const TaskCard = ({
     const updatedSubtasks = task.subtasks.filter(
       (subtask) => subtask.id !== subtaskId
     );
+    const allCompleted =
+      updatedSubtasks.length > 0 &&
+      updatedSubtasks.every((subtask) => subtask.completed);
+    if (allCompleted) {
+      // Wait 1 second before hiding subtasks
+      setTimeout(() => {
+        if (showSubTasksId === task.id) {
+          setShowSubTasksId(null);
+        }
+        onComplete(task.id, allCompleted);
+        if (expandedTaskId === task.id) {
+          setTimeout(() => {
+            setExpandedTaskId(null);
+          }, 500);
+        }
+      }, 500);
+    }
     onUpdate({
       ...task,
       subtasks: updatedSubtasks,
     });
-  };
-
-  const toggleSubtasks = () => {
-    setShowSubtasks(!showSubtasks);
   };
 
   // Calculate subtask progress
@@ -138,7 +163,21 @@ const TaskCard = ({
             <div className="flex items-start justify-between w-full">
               <TaskHeader
                 task={task}
-                onComplete={onComplete}
+                onComplete={(taskId) => {
+                  const allComplete =
+                    task.subtasks.length === 0 ||
+                    task.subtasks.every((s) => s.completed);
+                  onComplete(taskId, allComplete);
+                  if (
+                    expandedTaskId === task.id &&
+                    !task.completed &&
+                    allComplete
+                  ) {
+                    setTimeout(() => {
+                      setExpandedTaskId(null);
+                    }, 500);
+                  }
+                }}
                 onDelete={() => setShowDeleteConfirm(true)}
                 onArchive={onArchive}
                 setIsEditing={setIsEditing}
@@ -212,12 +251,18 @@ const TaskCard = ({
               )}
               {task.subtasks && task.subtasks.length > 0 && (
                 <button
-                  onClick={toggleSubtasks}
+                  onClick={() =>
+                    showSubTasksId === task.id
+                      ? setShowSubTasksId(null)
+                      : setShowSubTasksId(task.id)
+                  }
                   className="flex text-sm text-gray-400 hover:text-gray-300 items-center -mb-3"
                 >
-                  {showSubtasks ? "Göm deluppgifter" : "Visa deluppgifter"}
+                  {showSubTasksId === task.id
+                    ? "Göm deluppgifter"
+                    : "Visa deluppgif ter"}
                   <MinimizeIcon
-                    isMinimized={showSubtasks}
+                    isMinimized={showSubTasksId === task.id}
                     className="w-4 h-4 ml-2"
                   />
                 </button>
@@ -248,7 +293,7 @@ const TaskCard = ({
                     </div>
                   )}
                 </div>
-                {showSubtasks && (
+                {showSubTasksId === task.id && (
                   <div className="space-y-2">
                     {task.subtasks.map((subtask) => (
                       <div
