@@ -1,3 +1,5 @@
+import { useEffect, useRef } from "react";
+
 interface ConfirmDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -13,6 +15,14 @@ const ConfirmDialog = ({
   title,
   message,
 }: ConfirmDialogProps) => {
+  const cancelButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      cancelButtonRef.current?.focus();
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   return (
@@ -26,6 +36,7 @@ const ConfirmDialog = ({
         <p className="text-gray-300 mb-6">{message}</p>
         <div className="flex justify-end gap-3">
           <button
+            ref={cancelButtonRef}
             onClick={onClose}
             className="px-4 py-2 text-sm font-medium text-gray-300 hover:text-white transition-colors"
           >

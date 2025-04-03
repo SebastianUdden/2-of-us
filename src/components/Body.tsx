@@ -5,6 +5,7 @@ import {
 } from "../data/hooks/useFilteredItems";
 
 import { ANIMATION } from "./task-card/constants";
+import DeleteConfirmDialog from "./task-card/DeleteConfirmDialog";
 import { FilterSection } from "./sections/FilterSection";
 import Header from "./Header";
 import { List } from "../types/List";
@@ -36,6 +37,8 @@ const Body = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [isHeaderVisible, setIsHeaderVisible] = useState(true);
   const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
   const [isListMode, setIsListMode] = useState(false);
   const { loadTab, saveTab } = useTabPersistence();
   const { loadTasks, saveTasks } = useTaskPersistence();
@@ -176,20 +179,43 @@ const Body = () => {
   };
 
   const handleDelete = (taskId: string) => {
-    setAnimatingTaskId(taskId);
-    setIsCollapsed(true);
+    const task = tasks.find((t) => t.id === taskId);
+    if (task) {
+      setTaskToDelete(task);
+      setIsDeleteModalOpen(true);
+    }
+  };
 
-    // Wait for collapse animation
-    setTimeout(() => {
-      setTasks((prevTasks) => {
-        const filteredTasks = prevTasks.filter((task) => task.id !== taskId);
-        // Sort remaining tasks and update priorities
-        return sortTasks(filteredTasks);
-      });
-      setAnimatingTaskId(null);
-      setAnimatingTaskHeight(null);
-      setIsCollapsed(false);
-    }, ANIMATION.DURATION * 2);
+  const handleDeleteConfirm = () => {
+    if (taskToDelete) {
+      setAnimatingTaskId(taskToDelete.id);
+      setIsCollapsed(true);
+
+      // Wait for collapse animation
+      setTimeout(() => {
+        setTasks((prevTasks) => {
+          const filteredTasks = prevTasks.filter(
+            (task) => task.id !== taskToDelete.id
+          );
+          // Sort remaining tasks and update priorities
+          const sortedTasks = sortTasks(filteredTasks);
+          // Save to localStorage
+          saveTasks(sortedTasks);
+          return sortedTasks;
+        });
+        setAnimatingTaskId(null);
+        setAnimatingTaskHeight(null);
+        setIsCollapsed(false);
+      }, ANIMATION.DURATION * 2);
+    }
+    setIsDeleteModalOpen(false);
+    setTaskToDelete(null);
+    setExpandedTaskId(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setIsDeleteModalOpen(false);
+    setTaskToDelete(null);
   };
 
   const handleArchive = (taskId: string) => {
@@ -442,8 +468,6 @@ const Body = () => {
       // Only handle Cmd+Space (Mac) or Ctrl+Space (Windows)
       if (e.code === "Space" && (e.metaKey || e.ctrlKey)) {
         console.log("Space key pressed");
-
-        console.log("tab", tab);
         // If a task is expanded, create a subtask
         if (expandedTaskId && !isAllExpanded) {
           console.log("Expanded task ID:", expandedTaskId);
@@ -458,6 +482,18 @@ const Body = () => {
         else if (tab === "todos") {
           console.log("Creating new task");
           openAddTaskPanel();
+        }
+      }
+      if (
+        e.key === "Backspace" &&
+        (e.metaKey || e.ctrlKey) &&
+        expandedTaskId &&
+        !isAllExpanded
+      ) {
+        e.preventDefault();
+        const task = tasks.find((t) => t.id === expandedTaskId);
+        if (task) {
+          handleDelete(task.id);
         }
       }
     };
@@ -475,6 +511,8 @@ const Body = () => {
     setExpandedTaskId,
     setExpandedListId,
     setShowSubTasksId,
+    handleDelete,
+    isAllExpanded,
   ]);
 
   return (
@@ -653,6 +691,13 @@ const Body = () => {
         isOpen={isResetModalOpen}
         onClose={() => setIsResetModalOpen(false)}
         onConfirm={handleReset}
+      />
+
+      <DeleteConfirmDialog
+        isOpen={isDeleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        taskTitle={taskToDelete?.title || ""}
       />
     </div>
   );
