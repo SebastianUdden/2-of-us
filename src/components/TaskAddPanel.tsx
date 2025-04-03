@@ -8,15 +8,15 @@ import TaskDueDate from "./task-card/TaskDueDate";
 import { generateUUID } from "../utils/uuid";
 
 const AVAILABLE_LABELS = [
-  "work",
-  "personal",
-  "family",
-  "planning",
-  "communication",
-  "daily",
-  "shopping",
-  "entertainment",
-  "project",
+  "arbete",
+  "privat",
+  "familj",
+  "planering",
+  "kommunication",
+  "dagliga",
+  "handla",
+  "nöje",
+  "projekt",
 ];
 
 interface AddTaskPanelProps {
@@ -197,7 +197,7 @@ AddTaskPanelProps) => {
           value={editedTitle}
           onChange={(e) => setEditedTitle(e.target.value)}
           className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
-          placeholder="Lägg till titel"
+          placeholder="Ex. Handla mat"
         />
       </div>
 
@@ -217,7 +217,7 @@ AddTaskPanelProps) => {
               value={editedDescription}
               onChange={(e) => setEditedDescription(e.target.value)}
               className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
-              placeholder="Lägg till beskrivning"
+              placeholder="Ex. Köp ingredienser för lasagne"
             />
           </div>
 
