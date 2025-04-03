@@ -48,8 +48,18 @@ const DocsSection = () => {
             <ul className="list-disc pl-6 space-y-2">
               <li>
                 <kbd className="px-2 py-1 bg-black rounded">Cmd/Ctrl</kbd> +{" "}
+                <kbd className="px-2 py-1 bg-black rounded">M</kbd> -
+                Expandera/minimera alla uppgifter
+              </li>
+              <li>
+                <kbd className="px-2 py-1 bg-black rounded">Cmd/Ctrl</kbd> +{" "}
+                <kbd className="px-2 py-1 bg-black rounded">0-9</kbd> -
+                Minimera/maximera uppgift 1-10
+              </li>
+              <li>
+                <kbd className="px-2 py-1 bg-black rounded">Cmd/Ctrl</kbd> +{" "}
                 <kbd className="px-2 py-1 bg-black rounded">Enter</kbd> - Öppna
-                redigeringsläge
+                redigeringsläge för expanderad uppgift
               </li>
               <li>
                 <kbd className="px-2 py-1 bg-black rounded">Enter</kbd> - Spara

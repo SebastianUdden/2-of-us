@@ -487,23 +487,42 @@ const Body = () => {
         }
       }
       // Handle Cmd+Enter (Mac) or Ctrl+Enter (Windows) to open expanded task in edit mode
-      if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-        console.log("expandedTaskId", expandedTaskId);
-        if (expandedTaskId && isEditing) {
-          setIsEditing(false);
-        }
-        if (expandedTaskId && !isEditing && !isAddTaskPanelOpen) {
-          console.log("task is expanded");
+      else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
+        if (expandedTaskId && !isAllExpanded && !isAddTaskPanelOpen) {
           const task = tasks.find((t) => t.id === expandedTaskId);
-          console.log("task", task);
           if (task) {
-            console.log("time to edit");
             setIsEditing(true);
           }
         }
       }
-
-      if (
+      // Handle Cmd+M (Mac) or Ctrl+M (Windows) to minimize/maximize all tasks
+      else if (e.key === "m" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        if (tab === "todos" || tab === "archive") {
+          setIsAllExpanded(!isAllExpanded);
+          setIsAllExpandedMode(!isAllExpandedMode);
+          if (!isAllExpanded) {
+            setExpandedTaskId("all");
+          } else {
+            setExpandedTaskId(null);
+          }
+        }
+      }
+      // Handle Cmd+1-0 (Mac) or Ctrl+1-0 (Windows) to minimize/maximize individual tasks
+      else if (e.key >= "0" && e.key <= "9" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        if (tab === "todos" || tab === "archive") {
+          const taskIndex = e.key === "0" ? 9 : parseInt(e.key) - 1;
+          const task = filteredTasks[taskIndex];
+          if (task) {
+            if (expandedTaskId === task.id) {
+              setExpandedTaskId(null);
+            } else {
+              setExpandedTaskId(task.id);
+            }
+          }
+        }
+      } else if (
         e.key === "Backspace" &&
         (e.metaKey || e.ctrlKey) &&
         expandedTaskId &&
@@ -532,6 +551,8 @@ const Body = () => {
     setShowSubTasksId,
     handleDelete,
     isAllExpanded,
+    isAddTaskPanelOpen,
+    filteredTasks,
   ]);
 
   const handleSearch = (query: string) => {

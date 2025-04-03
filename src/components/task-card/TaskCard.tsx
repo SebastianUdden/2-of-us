@@ -258,7 +258,7 @@ const TaskCard = ({
                 >
                   {showSubTasksId === task.id
                     ? "Göm deluppgifter"
-                    : "Visa deluppgif ter"}
+                    : "Visa deluppgifter"}
                   <MinimizeIcon
                     isMinimized={showSubTasksId === task.id}
                     className="w-4 h-4 ml-2"
