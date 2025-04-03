@@ -24,6 +24,7 @@ interface TaskSectionProps {
   showSubTasksId: string | null;
   setShowSubTasksId: (id: string | null) => void;
   onClearFilters?: () => void;
+  setIsEditing: (isEditing: boolean) => void;
 }
 
 export const TaskSection = ({
@@ -48,6 +49,7 @@ export const TaskSection = ({
   showSubTasksId,
   setShowSubTasksId,
   onClearFilters,
+  setIsEditing,
 }: TaskSectionProps) => {
   return (
     <>
@@ -84,6 +86,7 @@ export const TaskSection = ({
             setExpandedTaskId={setExpandedTaskId}
             showSubTasksId={showSubTasksId}
             setShowSubTasksId={setShowSubTasksId}
+            setIsEditing={setIsEditing}
           />
         ))
       )}

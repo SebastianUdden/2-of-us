@@ -38,6 +38,7 @@ interface TaskCardProps {
   showSubTasksId: string | null;
   setShowSubTasksId: (id: string | null) => void;
   expandAll: boolean;
+  setIsEditing: (isEditing: boolean) => void;
 }
 
 const TaskCard = ({
@@ -55,6 +56,7 @@ const TaskCard = ({
   selectedLabel,
   onAddSubtask,
   expandedTaskId,
+  setIsEditing,
   setExpandedTaskId,
   showSubTasksId,
   setShowSubTasksId,
@@ -62,7 +64,6 @@ const TaskCard = ({
   expandAll,
 }: TaskCardProps) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [isEditing, setIsEditing] = useState(false);
   const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
     useState(false);
   const cardRef = useRef<HTMLDivElement>(null);

@@ -709,6 +709,7 @@ const Body = () => {
                       clearAllFilters();
                       searchInputRef.current?.focus();
                     }}
+                    setIsEditing={setIsEditing}
                   />
                 )}
                 {tab === "docs" && <DocsSection />}
