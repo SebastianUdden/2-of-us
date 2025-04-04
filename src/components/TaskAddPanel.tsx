@@ -29,35 +29,22 @@ interface AddTaskPanelProps {
   isListMode?: boolean;
   onToggleMode?: () => void;
   onAddList?: (list: List) => void;
+  onTitleChange?: (title: string) => void;
   subtasks?: SubTask[];
 }
 
 const TaskAddPanel = ({
   onClose,
   onAddTask,
+  onTitleChange,
   totalTasks,
   parentTaskId,
   subtasks,
-}: /* isOpen,
-  parentTaskTitle,
-  isListMode = false,
-  onToggleMode,
-  onAddList, */
-AddTaskPanelProps) => {
+}: AddTaskPanelProps) => {
+  const titleRef = useRef<HTMLInputElement>(null);
   const [editedLabel, setEditedLabel] = useState("");
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
   const labelInputRef = useRef<HTMLInputElement>(null);
-  /* const [listItem, setListItem] = useState("");
-  const [formData, setFormData] = useState({
-    title: "",
-    description: "",
-    priority: 1,
-    labels: [] as string[],
-    size: "S",
-    items: [] as string[],
-  }); */
-  const titleRef = useRef<HTMLInputElement>(null);
-  /* const listItemInputRef = useRef<HTMLInputElement>(null); */
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
   const [editedSize, setEditedSize] = useState<Size>("S");
@@ -68,60 +55,26 @@ AddTaskPanelProps) => {
   useEffect(() => {
     titleRef.current?.focus();
   }, []);
-  /* 
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      // Reset form and set default position to the bottom
-      setFormData((prev) => ({
-        ...prev,
-        title: "",
-        description: "",
-        priority: totalTasks + 1,
-        labels: [],
-        size: "S",
-        items: [],
-      }));
-      // Focus the title input when panel opens
-      setTimeout(() => titleInputRef.current?.focus(), 100);
-    } else {
-      document.body.style.overflow = "unset";
-    }
-    return () => {
-      document.body.style.overflow = "unset";
-    };
-  }, [isOpen, totalTasks]);
- */
+
+  const handleLocalSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setEditedTitle("");
+    titleRef.current?.focus();
+    handleAddTask();
+  };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editedTitle.trim()) return;
+    handleAddTask();
+    onClose();
+  };
 
-    /*   if (isListMode) {
-      const newList: List = {
-        id: generateUUID(),
-        title: formData.title.trim(),
-        description: formData.description.trim(),
-        items: formData.items.map((item) => ({
-          id: generateUUID(),
-          content: item,
-          completed: false,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        })),
-        author: "Sebastian",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        type: "ordered",
-        priority: 1,
-      };
-      onAddList?.(newList);
-      onClose();
-      return;
-    }
- */
+  const handleAddTask = () => {
+    const trimmedTitle = editedTitle.trim();
+    if (!trimmedTitle) return;
+
     const newTask: Task = {
       id: generateUUID(),
-      title: editedTitle.trim(),
+      title: trimmedTitle,
       description: editedDescription.trim(),
       completed: false,
       archived: false,
@@ -138,27 +91,16 @@ AddTaskPanelProps) => {
 
     if (parentTaskId) {
       // Adding a subtask
-      const subtask: Task = {
+      const subtask: SubTask = {
         id: generateUUID(),
         title: editedTitle,
-        description: editedDescription,
         completed: false,
-        archived: false,
-        priority: totalTasks + 1,
-        labels: [],
-        author: "Sebastian",
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        updates: [],
-        subtasks: [],
-        dueDate: undefined,
       };
       newTask.subtasks = [subtask];
       newTask.parentTaskId = parentTaskId;
     }
 
     onAddTask(newTask);
-    onClose();
   };
 
   return (
@@ -195,7 +137,10 @@ AddTaskPanelProps) => {
           type="text"
           id="title"
           value={editedTitle}
-          onChange={(e) => setEditedTitle(e.target.value)}
+          onChange={(e) => {
+            setEditedTitle(e.target.value);
+            onTitleChange?.(e.target.value);
+          }}
           className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
           placeholder="Ex. Handla mat"
         />
@@ -316,12 +261,20 @@ AddTaskPanelProps) => {
       )}
 
       {/* Submit Button */}
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        {parentTaskId && (
+          <button
+            onClick={handleLocalSubmit}
+            className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
+            Lägg till
+          </button>
+        )}
         <button
-          type="submit"
+          onClick={handleSubmit}
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
-          Spara
+          Spara och stäng
         </button>
       </div>
     </form>

@@ -41,6 +41,14 @@ export const useAddTaskPanel = (
 
   const handleAddTask = useCallback(
     (newTask: Task) => {
+      if (
+        tasks.some(
+          (t) =>
+            t.title === newTask.title ||
+            t.subtasks?.some((st) => st?.title === newTask?.subtasks[0]?.title)
+        )
+      )
+        return;
       if (parentTaskId) {
         // Add as subtask
         onTasksUpdate(
@@ -67,15 +75,8 @@ export const useAddTaskPanel = (
           }
         }, 100);
       }
-      closeAddTaskPanel();
     },
-    [
-      tasks,
-      parentTaskId,
-      onTasksUpdate,
-      onExpandedTaskIdChange,
-      closeAddTaskPanel,
-    ]
+    [tasks, parentTaskId, onTasksUpdate, onExpandedTaskIdChange]
   );
 
   const handleAddList = useCallback(

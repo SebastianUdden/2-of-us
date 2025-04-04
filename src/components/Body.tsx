@@ -14,11 +14,13 @@ import { ListSection } from "./sections/ListSection";
 import { ResetConfirmModal } from "./common/ResetConfirmModal";
 import SidePanel from "./common/SidePanel";
 import { SortControls } from "./sections/SortControls";
+import { SubTask } from "../types/SubTask";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
 import TaskAddPanel from "./TaskAddPanel";
 import TaskEditPanel from "./task-card/TaskEditPanel";
 import { TaskSection } from "./sections/TaskSection";
+import { generateUUID } from "../utils/uuid";
 import { mockLists } from "../data/mock";
 import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
 import { useExpansionState } from "../data/hooks/useExpansionState";
@@ -34,6 +36,7 @@ import { useTaskPersistence } from "../data/hooks/useTaskPersistence";
 const Body = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [taskTitle, setTaskTitle] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<List[]>(mockLists);
   const [tab, setTab] = useState<"todos" | "archive" | "lists" | "docs">(
@@ -151,7 +154,7 @@ const Body = () => {
   const sortedAndFilteredTasks = getSortedTasks(filteredTasks);
   const sortedAndFilteredLists = getSortedLists(filteredLists);
 
-  const handleAddSubtask = (taskId: string) => {
+  const handleOpenAddSubtask = (taskId: string) => {
     const task = tasks.find((t) => t.id === taskId);
     if (task) {
       openAddTaskPanel(task.id, task.title);
@@ -520,6 +523,19 @@ const Body = () => {
             setIsEditing(true);
           }
         }
+      } else if (e.key === "Enter" && expandedTaskId) {
+        e.preventDefault();
+        const task = tasks.find((t) => t.id === expandedTaskId);
+        if (!task) return;
+        const subtask: SubTask = {
+          id: generateUUID(),
+          title: taskTitle,
+          completed: false,
+        };
+        handleTaskUpdate({
+          ...task,
+          subtasks: [...task.subtasks, subtask],
+        });
       }
       // Handle Cmd+M (Mac) or Ctrl+M (Windows) to minimize/maximize all tasks
       else if (e.key === "m" && (e.metaKey || e.ctrlKey)) {
@@ -811,7 +827,7 @@ const Body = () => {
                     onUpdate={handleTaskUpdate}
                     isCollapsed={isCollapsed}
                     onLabelClick={handleLabelClickWithExpand}
-                    onAddSubtask={handleAddSubtask}
+                    onAddSubtask={handleOpenAddSubtask}
                     expandedTaskId={isAllExpandedMode ? "all" : expandedTaskId}
                     setExpandedTaskId={setExpandedTaskId}
                     showPriorityControls={sortField === "priority"}
@@ -853,6 +869,7 @@ const Body = () => {
           parentTaskId={parentTaskId}
           parentTaskTitle={parentTaskTitle}
           subtasks={tasks.find((task) => task.id === parentTaskId)?.subtasks}
+          onTitleChange={(title) => setTaskTitle(title)}
           isListMode={isListMode}
           onToggleMode={() => setIsListMode(!isListMode)}
           onAddList={handleAddList}
