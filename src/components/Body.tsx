@@ -792,9 +792,6 @@ const Body = () => {
                     onCloneToTask={handleListCloneToTask}
                     onPriorityChange={handleListPriorityChange}
                     isCollapsed={isCollapsed}
-                    onHeightChange={(height) =>
-                      setAnimatingListHeight(height || 0)
-                    }
                     expandedListId={isAllExpandedMode ? "all" : expandedListId}
                     setExpandedListId={setExpandedListId}
                     showPriorityControls={sortField === "priority"}
@@ -813,7 +810,6 @@ const Body = () => {
                     onArchive={handleArchive}
                     onUpdate={handleTaskUpdate}
                     isCollapsed={isCollapsed}
-                    onHeightChange={setAnimatingTaskHeight}
                     onLabelClick={handleLabelClickWithExpand}
                     onAddSubtask={handleAddSubtask}
                     expandedTaskId={isAllExpandedMode ? "all" : expandedTaskId}

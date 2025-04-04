@@ -12,7 +12,6 @@ interface ListSectionProps {
   onCloneToTask: (list: List) => void;
   onPriorityChange: (listId: string, newPosition: number) => void;
   isCollapsed: boolean;
-  onHeightChange: (height: number | null) => void;
   expandedListId: string | "all" | null;
   setExpandedListId: (id: string | null) => void;
   showPriorityControls: boolean;

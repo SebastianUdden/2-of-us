@@ -1,5 +1,5 @@
 import { Size, SizeLabel } from "./SizeLabel";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 
 import Card from "../common/Card";
 import DeleteConfirmDialog from "./DeleteConfirmDialog";
@@ -67,7 +67,7 @@ const TaskCard = ({
     if (task.id !== expandedTaskId) {
       setIsPriorityControlsVisible(false);
     }
-  }, [expandedTaskId]);
+  }, [expandedTaskId, task.id]);
 
   const handleDueDateChange = (date: Date | undefined) => {
     onUpdate({
