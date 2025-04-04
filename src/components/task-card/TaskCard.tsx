@@ -62,13 +62,6 @@ const TaskCard = ({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
     useState(false);
-  const cardRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (cardRef.current) {
-      onHeightChange(cardRef.current.offsetHeight);
-    }
-  }, [onHeightChange]);
 
   useEffect(() => {
     if (task.id !== expandedTaskId) {
