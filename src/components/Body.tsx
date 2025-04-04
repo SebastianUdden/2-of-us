@@ -129,10 +129,6 @@ const Body = () => {
     animatingTaskHeight,
     animatingListHeight,
     isCollapsed,
-    setAnimatingTaskId,
-    setAnimatingListId,
-    setAnimatingTaskHeight,
-    setAnimatingListHeight,
     setIsCollapsed,
   } = usePriorityManagement(setTasks, setLists);
 
@@ -195,9 +191,8 @@ const Body = () => {
   };
 
   const handleDeleteConfirm = () => {
+    console.log("Delete confirm");
     if (taskToDelete) {
-      setAnimatingTaskId(taskToDelete.id);
-
       // Wait for collapse animation
       setTimeout(() => {
         setTasks((prevTasks) => {
@@ -210,7 +205,6 @@ const Body = () => {
           saveTasks(sortedTasks);
           return sortedTasks;
         });
-        setAnimatingTaskId(null);
       }, ANIMATION.DURATION);
     }
     setIsDeleteModalOpen(false);
@@ -224,7 +218,6 @@ const Body = () => {
   };
 
   const handleArchive = (taskId: string) => {
-    setAnimatingTaskId(taskId);
     setIsCollapsed(true);
 
     // Wait for collapse animation
@@ -236,8 +229,6 @@ const Body = () => {
         // Sort remaining tasks and update priorities
         return sortTasks(updatedTasks);
       });
-      setAnimatingTaskId(null);
-      setAnimatingTaskHeight(null);
       setIsCollapsed(false);
     }, ANIMATION.DURATION * 2);
   };
@@ -270,7 +261,6 @@ const Body = () => {
   };
 
   const handleListDelete = (listId: string) => {
-    setAnimatingListId(listId);
     setIsCollapsed(true);
 
     // Wait for collapse animation
@@ -280,8 +270,6 @@ const Body = () => {
         // Sort remaining lists and update priorities
         return sortLists(filteredLists);
       });
-      setAnimatingListId(null);
-      setAnimatingListHeight(null);
       setIsCollapsed(false);
     }, ANIMATION.DURATION * 2);
   };

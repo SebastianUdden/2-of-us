@@ -13,15 +13,7 @@ interface UsePriorityManagementResult {
   handleTaskMove: (direction: Direction, expandedTaskId: string | null) => void;
   handleListMove: () => void;
   pendingListMove: { listId: string; newPosition: number } | null;
-  animatingTaskId: string | null;
-  animatingListId: string | null;
-  animatingTaskHeight: number | null;
-  animatingListHeight: number | null;
   isCollapsed: boolean;
-  setAnimatingTaskId: (id: string | null) => void;
-  setAnimatingListId: (id: string | null) => void;
-  setAnimatingTaskHeight: (height: number | null) => void;
-  setAnimatingListHeight: (height: number | null) => void;
   setIsCollapsed: (isCollapsed: boolean) => void;
 }
 
@@ -33,14 +25,6 @@ export const usePriorityManagement = (
     listId: string;
     newPosition: number;
   } | null>(null);
-  const [animatingTaskId, setAnimatingTaskId] = useState<string | null>(null);
-  const [animatingListId, setAnimatingListId] = useState<string | null>(null);
-  const [animatingTaskHeight, setAnimatingTaskHeight] = useState<number | null>(
-    null
-  );
-  const [animatingListHeight, setAnimatingListHeight] = useState<number | null>(
-    null
-  );
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const sortTasks = useCallback((tasks: Task[]): Task[] => {
@@ -90,7 +74,6 @@ export const usePriorityManagement = (
 
   const handleListPriorityChange = useCallback(
     (listId: string, newPosition: number) => {
-      setAnimatingListId(listId);
       setPendingListMove({ listId, newPosition });
       setIsCollapsed(true);
     },
@@ -130,8 +113,6 @@ export const usePriorityManagement = (
       // Wait for expand animation and then scroll to the task
       setTimeout(() => {
         setIsCollapsed(false);
-        /* setAnimatingTaskId(null); */
-        /* setAnimatingTaskHeight(null); */
 
         // Scroll to the task
         const taskElement = document.getElementById(`task-${expandedTaskId}`);
@@ -157,28 +138,7 @@ export const usePriorityManagement = (
 
     // Start expand animation
     setIsCollapsed(false);
-
-    // Wait for expand animation and then scroll to the list
-    setTimeout(() => {
-      setAnimatingListId(null);
-      setPendingListMove(null);
-      setAnimatingListHeight(null);
-
-      // Scroll to the list with offset based on the list's height
-      const listElement = document.getElementById(`list-${listId}`);
-      if (listElement && animatingListHeight) {
-        const offset = animatingListHeight / 2;
-        const elementPosition = listElement.getBoundingClientRect().top;
-        const offsetPosition = elementPosition + window.pageYOffset - offset;
-        window.scrollTo({
-          top: offsetPosition,
-          behavior: "smooth",
-        });
-      } else if (listElement) {
-        listElement.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }, ANIMATION.DURATION);
-  }, [pendingListMove, sortLists, animatingListHeight, onListsUpdate]);
+  }, [pendingListMove, sortLists, onListsUpdate]);
 
   return {
     sortTasks,
@@ -188,15 +148,7 @@ export const usePriorityManagement = (
     handleTaskMove,
     handleListMove,
     pendingListMove,
-    animatingTaskId,
-    animatingListId,
-    animatingTaskHeight,
-    animatingListHeight,
     isCollapsed,
-    setAnimatingTaskId,
-    setAnimatingListId,
-    setAnimatingTaskHeight,
-    setAnimatingListHeight,
     setIsCollapsed,
   };
 };
