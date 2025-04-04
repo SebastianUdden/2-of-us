@@ -29,12 +29,12 @@ const Card = ({
   const typeId = `${type}-${expandedId}`;
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // Handle height changes
+  /* // Handle height changes
   useEffect(() => {
     if (!isAnimating && cardRef.current && onHeightChange) {
       onHeightChange(cardRef.current.offsetHeight);
     }
-  }, [isAnimating, onHeightChange]);
+  }, [isAnimating, onHeightChange]); */
 
   // Handle auto-scrolling when expanded
   useEffect(() => {
@@ -54,16 +54,12 @@ const Card = ({
           typeId === id ? "border-gray-600" : "border-gray-700"
         } rounded-lg 
         transition-all duration-${ANIMATION.DURATION} ${ANIMATION.EASING}
-        ${isAnimating ? "bg-gray-700" : "bg-gray-800"}
-        ${typeId === id ? "bg-opacity-70 bg-slate-900" : "bg-opacity-100"}
         ${
-          isAnimating
-            ? isCollapsed
-              ? "animate-collapse"
-              : "animate-fade-in"
-            : ""
+          typeId === id && isCollapsed
+            ? "bg-gray-600 bg-opacity-50"
+            : "bg-gray-800 bg-opacity-100"
         }
-        ${isCollapsed ? "opacity-0" : "opacity-100"}
+        ${typeId === id ? "bg-opacity-70 bg-slate-900" : "bg-opacity-100"}
         mx-auto p-3
         origin-top
         overflow-hidden

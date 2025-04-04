@@ -74,6 +74,12 @@ const TaskCard = ({
     }
   }, [onHeightChange]);
 
+  useEffect(() => {
+    if (task.id !== expandedTaskId) {
+      setIsPriorityControlsVisible(false);
+    }
+  }, [expandedTaskId]);
+
   const handleDueDateChange = (date: Date | undefined) => {
     onUpdate({
       ...task,

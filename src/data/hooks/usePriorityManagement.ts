@@ -4,14 +4,14 @@ import { ANIMATION } from "../../components/task-card/constants";
 import { List } from "../../types/List";
 import { Task } from "../../types/Task";
 
+type Direction = "top" | "bottom" | "up" | "down";
 interface UsePriorityManagementResult {
   sortTasks: (tasks: Task[]) => Task[];
   sortLists: (lists: List[]) => List[];
   handlePriorityChange: (taskId: string, newPosition: number) => void;
   handleListPriorityChange: (listId: string, newPosition: number) => void;
-  handleTaskMove: () => void;
+  handleTaskMove: (direction: Direction, expandedTaskId: string | null) => void;
   handleListMove: () => void;
-  pendingTaskMove: { taskId: string; newPosition: number } | null;
   pendingListMove: { listId: string; newPosition: number } | null;
   animatingTaskId: string | null;
   animatingListId: string | null;
@@ -29,10 +29,6 @@ export const usePriorityManagement = (
   onTasksUpdate: (tasks: Task[] | ((prevTasks: Task[]) => Task[])) => void,
   onListsUpdate: (lists: List[] | ((prevLists: List[]) => List[])) => void
 ): UsePriorityManagementResult => {
-  const [pendingTaskMove, setPendingTaskMove] = useState<{
-    taskId: string;
-    newPosition: number;
-  } | null>(null);
   const [pendingListMove, setPendingListMove] = useState<{
     listId: string;
     newPosition: number;
@@ -79,14 +75,18 @@ export const usePriorityManagement = (
     }));
   }, []);
 
-  const handlePriorityChange = useCallback(
-    (taskId: string, newPosition: number) => {
-      setAnimatingTaskId(taskId);
-      setPendingTaskMove({ taskId, newPosition });
+  const handlePriorityChange = (taskId: string, newPosition: number) => {
+    onTasksUpdate((prevTasks: Task[]) => {
       setIsCollapsed(true);
-    },
-    []
-  );
+      const movedTask = prevTasks.find((t) => t.id === taskId) as Task;
+      const newTasks = prevTasks.filter((t) => t.id !== taskId);
+      newTasks.splice(newPosition - 1, 0, movedTask);
+      return sortTasks(newTasks);
+    });
+    setTimeout(() => {
+      setIsCollapsed(false);
+    }, ANIMATION.DURATION);
+  };
 
   const handleListPriorityChange = useCallback(
     (listId: string, newPosition: number) => {
@@ -97,36 +97,51 @@ export const usePriorityManagement = (
     []
   );
 
-  const handleTaskMove = useCallback(() => {
-    if (!pendingTaskMove) return;
+  const handleTaskMove = useCallback(
+    (direction: Direction = "down", expandedTaskId: string | null = null) => {
+      onTasksUpdate((prevTasks: Task[]) => {
+        const taskIndex = prevTasks.findIndex(
+          (task) => task.id === expandedTaskId
+        );
+        const newTasks = [...prevTasks];
+        const [movedTask] = newTasks.splice(taskIndex, 1);
+        if (direction === "bottom" || (direction === "up" && taskIndex === 0)) {
+          newTasks.splice(newTasks.length, 0, movedTask);
+        } else if (
+          direction === "top" ||
+          (direction === "down" && taskIndex === newTasks.length)
+        ) {
+          newTasks.splice(0, 0, movedTask);
+        } else {
+          newTasks.splice(
+            taskIndex + (direction === "down" ? 1 : -1),
+            0,
+            movedTask
+          );
+        }
 
-    const { taskId, newPosition } = pendingTaskMove;
-    onTasksUpdate((prevTasks: Task[]) => {
-      const taskIndex = prevTasks.findIndex((task) => task.id === taskId);
-      const newTasks = [...prevTasks];
-      const [movedTask] = newTasks.splice(taskIndex, 1);
-      newTasks.splice(newPosition - 1, 0, movedTask);
+        // Sort tasks and update priorities
+        return sortTasks(newTasks);
+      });
 
-      // Sort tasks and update priorities
-      return sortTasks(newTasks);
-    });
+      // Start expand animation
+      setIsCollapsed(true);
 
-    // Start expand animation
-    setIsCollapsed(false);
+      // Wait for expand animation and then scroll to the task
+      setTimeout(() => {
+        setIsCollapsed(false);
+        /* setAnimatingTaskId(null); */
+        /* setAnimatingTaskHeight(null); */
 
-    // Wait for expand animation and then scroll to the task
-    setTimeout(() => {
-      setAnimatingTaskId(null);
-      setPendingTaskMove(null);
-      setAnimatingTaskHeight(null);
-
-      // Scroll to the task
-      const taskElement = document.getElementById(`task-${taskId}`);
-      if (taskElement) {
-        taskElement.scrollIntoView({ behavior: "smooth", block: "center" });
-      }
-    }, ANIMATION.DURATION);
-  }, [pendingTaskMove, sortTasks, onTasksUpdate]);
+        // Scroll to the task
+        const taskElement = document.getElementById(`task-${expandedTaskId}`);
+        if (taskElement) {
+          taskElement.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+      }, ANIMATION.DURATION);
+    },
+    [sortTasks, onTasksUpdate]
+  );
 
   const handleListMove = useCallback(() => {
     if (!pendingListMove) return;
@@ -172,7 +187,6 @@ export const usePriorityManagement = (
     handleListPriorityChange,
     handleTaskMove,
     handleListMove,
-    pendingTaskMove,
     pendingListMove,
     animatingTaskId,
     animatingListId,

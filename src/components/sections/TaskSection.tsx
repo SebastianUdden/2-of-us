@@ -77,7 +77,9 @@ export const TaskSection = ({
             selectedLabel={selectedLabel || ""}
             onAddSubtask={onAddSubtask}
             expandAll={expandedTaskId === "all"}
-            showPriorityControls={showPriorityControls}
+            showPriorityControls={
+              showPriorityControls && expandedTaskId === task.id
+            }
             currentSortField={currentSortField}
             animatingTaskId={animatingTaskId}
             animatingTaskHeight={animatingTaskHeight}
@@ -90,12 +92,12 @@ export const TaskSection = ({
           />
         ))
       )}
-      {animatingTaskHeight !== null && isCollapsed && (
+      {/* {animatingTaskHeight !== null && isCollapsed && (
         <div
           className="w-full bg-transparent"
           style={{ height: `${animatingTaskHeight}px` }}
         />
-      )}
+      )} */}
     </>
   );
 };

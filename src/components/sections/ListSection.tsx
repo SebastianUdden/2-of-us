@@ -71,12 +71,12 @@ export const ListSection = ({
           />
         ))
       )}
-      {animatingListHeight !== null && isCollapsed && (
+      {/* {animatingListHeight !== null && isCollapsed && (
         <div
           className="w-full bg-transparent"
           style={{ height: `${animatingListHeight}px` }}
         />
-      )}
+      )} */}
     </>
   );
 };
