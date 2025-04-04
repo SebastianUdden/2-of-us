@@ -18,9 +18,7 @@ interface ListCardProps {
   onCloneToTask: (list: List) => void;
   onPriorityChange: (listId: string, newPosition: number) => void;
   totalLists: number;
-  isAnimating: boolean;
   isCollapsed: boolean;
-  onHeightChange: (height: number) => void;
   showPriorityControls: boolean;
   expandedListId: string | null;
   setExpandedListId: (id: string | null) => void;
@@ -38,9 +36,7 @@ const ListCard = ({
   onCloneToTask,
   onPriorityChange,
   totalLists,
-  isAnimating,
   isCollapsed,
-  onHeightChange,
   showPriorityControls,
   expandedListId,
   setExpandedListId,
@@ -116,9 +112,7 @@ const ListCard = ({
       <Card
         id={`list-${list.id}`}
         type="list"
-        isAnimating={isAnimating}
         isCollapsed={isCollapsed}
-        onHeightChange={onHeightChange}
         expandedId={expandedListId}
         className="w-[90%]"
         expandAll={expandAll}

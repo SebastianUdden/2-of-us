@@ -23,11 +23,9 @@ interface TaskCardProps {
   onArchive: (taskId: string) => void;
   onUpdate: (updatedTask: Task) => void;
   totalTasks: number;
-  isAnimating: boolean;
   isCollapsed: boolean;
   showPriorityControls: boolean;
   currentSortField: string;
-  onHeightChange: (height: number | null) => void;
   onLabelClick: (label: string) => void;
   selectedLabel: string;
   onAddSubtask: (taskId: string) => void;
@@ -49,9 +47,7 @@ const TaskCard = ({
   onArchive,
   onUpdate,
   totalTasks,
-  isAnimating = false,
   isCollapsed = false,
-  onHeightChange,
   onLabelClick,
   selectedLabel,
   onAddSubtask,
@@ -156,9 +152,7 @@ const TaskCard = ({
       <Card
         id={`task-${task.id}`}
         type="task"
-        isAnimating={isAnimating}
         isCollapsed={isCollapsed}
-        onHeightChange={onHeightChange}
         expandedId={expandedTaskId}
         className={`${task.completed ? "opacity-50" : ""}`}
         expandAll={expandAll}

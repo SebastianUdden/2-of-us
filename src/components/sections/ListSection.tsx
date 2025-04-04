@@ -31,12 +31,9 @@ export const ListSection = ({
   onCloneToTask,
   onPriorityChange,
   isCollapsed,
-  onHeightChange,
   expandedListId,
   setExpandedListId,
   showPriorityControls,
-  animatingListId,
-  animatingListHeight,
   onTabChange,
 }: ListSectionProps) => {
   return (
@@ -60,9 +57,7 @@ export const ListSection = ({
             onCloneToTask={onCloneToTask}
             onPriorityChange={onPriorityChange}
             totalLists={lists.length}
-            isAnimating={animatingListId === list.id}
             isCollapsed={isCollapsed}
-            onHeightChange={onHeightChange}
             showPriorityControls={showPriorityControls}
             expandedListId={expandedListId === "all" ? list.id : expandedListId}
             setExpandedListId={setExpandedListId}
@@ -71,12 +66,6 @@ export const ListSection = ({
           />
         ))
       )}
-      {/* {animatingListHeight !== null && isCollapsed && (
-        <div
-          className="w-full bg-transparent"
-          style={{ height: `${animatingListHeight}px` }}
-        />
-      )} */}
     </>
   );
 };

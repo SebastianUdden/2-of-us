@@ -11,7 +11,6 @@ interface TaskSectionProps {
   onArchive: (taskId: string) => void;
   onUpdate: (updatedTask: Task) => void;
   isCollapsed: boolean;
-  onHeightChange: (height: number | null) => void;
   onLabelClick: (label: string) => void;
   onAddSubtask: (taskId: string) => void;
   showPriorityControls: boolean;
@@ -42,7 +41,6 @@ export const TaskSection = ({
   currentSortField,
   animatingTaskId,
   animatingTaskHeight,
-  onHeightChange,
   onAddTask,
   expandedTaskId,
   setExpandedTaskId,
@@ -71,7 +69,6 @@ export const TaskSection = ({
             onArchive={onArchive}
             onUpdate={onUpdate}
             totalTasks={tasks.length}
-            isAnimating={task.id === animatingTaskId}
             isCollapsed={isCollapsed}
             onLabelClick={onLabelClick}
             selectedLabel={selectedLabel || ""}
@@ -83,7 +80,6 @@ export const TaskSection = ({
             currentSortField={currentSortField}
             animatingTaskId={animatingTaskId}
             animatingTaskHeight={animatingTaskHeight}
-            onHeightChange={onHeightChange}
             expandedTaskId={expandedTaskId === "all" ? task.id : expandedTaskId}
             setExpandedTaskId={setExpandedTaskId}
             showSubTasksId={showSubTasksId}
@@ -92,12 +88,6 @@ export const TaskSection = ({
           />
         ))
       )}
-      {/* {animatingTaskHeight !== null && isCollapsed && (
-        <div
-          className="w-full bg-transparent"
-          style={{ height: `${animatingTaskHeight}px` }}
-        />
-      )} */}
     </>
   );
 };

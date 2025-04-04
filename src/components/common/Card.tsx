@@ -6,12 +6,9 @@ interface CardProps {
   id: string;
   type: "task" | "list";
   children: React.ReactNode;
-  isAnimating?: boolean;
   isCollapsed?: boolean;
-  onHeightChange?: (height: number) => void;
   className?: string;
   expandedId?: string | null;
-  onExpand?: (id: string | null) => void;
   expandAll?: boolean;
 }
 
@@ -19,22 +16,13 @@ const Card = ({
   id,
   type,
   children,
-  isAnimating = false,
   isCollapsed = false,
-  onHeightChange,
   className = "",
   expandedId,
   expandAll,
 }: CardProps) => {
   const typeId = `${type}-${expandedId}`;
   const cardRef = useRef<HTMLDivElement>(null);
-
-  /* // Handle height changes
-  useEffect(() => {
-    if (!isAnimating && cardRef.current && onHeightChange) {
-      onHeightChange(cardRef.current.offsetHeight);
-    }
-  }, [isAnimating, onHeightChange]); */
 
   // Handle auto-scrolling when expanded
   useEffect(() => {
