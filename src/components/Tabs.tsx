@@ -82,7 +82,7 @@ const Tabs = ({ view, onViewChange, counts }: TabsProps) => {
           {counts.archive}
         </span>
       </button>
-      <button
+      {/* <button
         ref={(el) => {
           tabsRef.current[2] = el;
         }}
@@ -104,7 +104,7 @@ const Tabs = ({ view, onViewChange, counts }: TabsProps) => {
         <span className="text-xs bg-gray-700 px-2 py-0.5 rounded-full">
           {counts.lists}
         </span>
-      </button>
+      </button> */}
       <button
         ref={(el) => {
           tabsRef.current[3] = el;
