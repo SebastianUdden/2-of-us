@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 import { Task } from "../../types/Task";
 import { firebaseTaskService } from "../../services/firebaseTaskService";
 import { useAuth } from "../../context/AuthContext";
@@ -8,6 +10,8 @@ const STORAGE_KEY = "tasks";
 export const useTaskPersistence = () => {
   const { storageType } = useStorage();
   const { user } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const saveTasks = async (tasks: Task[]) => {
     try {
@@ -18,6 +22,8 @@ export const useTaskPersistence = () => {
           console.warn("Cannot save to cloud storage: User not signed in");
           return;
         }
+        setIsLoading(true);
+        setError(null);
         // First, get all existing tasks for this user
         const existingTasks = await firebaseTaskService.getTasks(user.uid);
 
@@ -39,11 +45,16 @@ export const useTaskPersistence = () => {
       }
     } catch (error) {
       console.error("Error saving tasks:", error);
+      setError("Failed to save tasks. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const loadTasks = async (): Promise<Task[]> => {
     try {
+      setIsLoading(true);
+      setError(null);
       if (storageType === "local") {
         const savedTasks = localStorage.getItem(STORAGE_KEY);
         if (savedTasks) {
@@ -59,12 +70,32 @@ export const useTaskPersistence = () => {
       return [];
     } catch (error) {
       console.error("Error loading tasks:", error);
+      setError("Failed to load tasks. Please try again.");
       return [];
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  // Set up real-time updates for cloud storage
+  useEffect(() => {
+    if (storageType === "cloud" && user) {
+      const unsubscribe = firebaseTaskService.onTasksUpdate(
+        user.uid,
+        (tasks) => {
+          // Update local storage to keep in sync
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+        }
+      );
+
+      return () => unsubscribe();
+    }
+  }, [storageType, user]);
 
   return {
     saveTasks,
     loadTasks,
+    isLoading,
+    error,
   };
 };

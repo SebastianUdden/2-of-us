@@ -5,7 +5,9 @@ import { Size } from "./task-card/SizeLabel";
 import { SubTask } from "../types/SubTask";
 import { Task } from "../types/Task";
 import TaskDueDate from "./task-card/TaskDueDate";
+import { generateInitials } from "../utils/user";
 import { generateUUID } from "../utils/uuid";
+import { useAuth } from "../context/AuthContext";
 
 const AVAILABLE_LABELS = [
   "arbete",
@@ -41,6 +43,7 @@ const TaskAddPanel = ({
   parentTaskId,
   subtasks,
 }: AddTaskPanelProps) => {
+  const { user } = useAuth();
   const titleRef = useRef<HTMLInputElement>(null);
   const [editedLabel, setEditedLabel] = useState("");
   const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
@@ -81,12 +84,13 @@ const TaskAddPanel = ({
       priority: totalTasks + 1,
       size: editedSize,
       labels: [],
-      author: "Sebastian",
       createdAt: new Date(),
       updatedAt: new Date(),
       updates: [],
       subtasks: [],
       dueDate: editedDueDate,
+      username: user?.displayName || undefined,
+      initials: generateInitials(user?.displayName),
     };
 
     if (parentTaskId) {

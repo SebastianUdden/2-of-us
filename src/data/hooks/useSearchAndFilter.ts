@@ -24,7 +24,7 @@ export const useSearchAndFilter = (tasks: Task[]): UseSearchAndFilterResult => {
             task.description
               .toLowerCase()
               .includes(searchQuery.toLowerCase()) ||
-            task.author.toLowerCase().includes(searchQuery.toLowerCase())
+            task.username?.toLowerCase().includes(searchQuery.toLowerCase())
           : true;
 
         const matchesLabel = selectedLabel
@@ -42,7 +42,7 @@ export const useSearchAndFilter = (tasks: Task[]): UseSearchAndFilterResult => {
       const matchesSearch = searchQuery
         ? task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          task.author.toLowerCase().includes(searchQuery.toLowerCase())
+          task.username?.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
 
       return matchesSearch && task.dueDate;
@@ -54,7 +54,7 @@ export const useSearchAndFilter = (tasks: Task[]): UseSearchAndFilterResult => {
       const matchesSearch = searchQuery
         ? task.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           task.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          task.author.toLowerCase().includes(searchQuery.toLowerCase())
+          task.username?.toLowerCase().includes(searchQuery.toLowerCase())
         : true;
 
       return matchesSearch && task.completed;

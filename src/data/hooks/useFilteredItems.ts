@@ -36,7 +36,7 @@ export const useFilteredTasks = ({
       const matchesSearch =
         task.title.toLowerCase().includes(searchLower) ||
         task.description.toLowerCase().includes(searchLower) ||
-        task.author.toLowerCase().includes(searchLower);
+        task.username?.toLowerCase().includes(searchLower);
       if (!matchesSearch) return false;
     }
 
@@ -84,7 +84,6 @@ export const useFilteredLists = ({
       const matchesSearch =
         list.title.toLowerCase().includes(searchLower) ||
         (list.description?.toLowerCase() || "").includes(searchLower) ||
-        list.author.toLowerCase().includes(searchLower) ||
         list.items.some((item) =>
           item.content.toLowerCase().includes(searchLower)
         );

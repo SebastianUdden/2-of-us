@@ -29,7 +29,7 @@ const Card = ({
     if (!expandAll && typeId === id && cardRef.current) {
       const card = cardRef.current;
       card.style.scrollMargin = "50vh";
-      card.scrollIntoView({ behavior: "smooth", block: "center" });
+      card.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [typeId, id, expandAll]);
 

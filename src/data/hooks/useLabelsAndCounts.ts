@@ -28,8 +28,7 @@ export const useLabelsAndCounts = (
         ? item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           (item.description ?? "")
             .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          item.author.toLowerCase().includes(searchQuery.toLowerCase())
+            .includes(searchQuery.toLowerCase())
         : true;
 
       // Then check if task has the label

@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from "react";
 
 import { Task } from "../../types/Task";
 import TaskDueDate from "./TaskDueDate";
+import { generateInitials } from "../../utils/user";
+import { useAuth } from "../../context/AuthContext";
 
 interface TaskEditPanelProps {
   task?: Task;
@@ -11,6 +13,7 @@ interface TaskEditPanelProps {
 }
 
 const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
+  const { user } = useAuth();
   const formRef = useRef<HTMLFormElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const [editedTitle, setEditedTitle] = useState(task?.title || "");
@@ -37,6 +40,8 @@ const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
         title: editedTitle,
         description: editedDescription,
         size: editedSize,
+        username: user?.displayName || undefined,
+        initials: generateInitials(user?.displayName),
       });
     }
     onClose();
@@ -46,6 +51,8 @@ const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
     onUpdate({
       ...task,
       dueDate: date,
+      username: user?.displayName || undefined,
+      initials: generateInitials(user?.displayName),
     });
   };
 

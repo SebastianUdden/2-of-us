@@ -31,7 +31,7 @@ const TaskUpdates = ({ task }: TaskUpdatesProps) => {
         </div>
         <div className="flex items-start gap-2">
           <span className="text-sm font-semibold text-blue-400">
-            {latestUpdate.author}
+            {latestUpdate.username || latestUpdate.initials || "Unknown"}
           </span>
           <span className="text-sm text-gray-400">
             ({latestUpdate.updatedAt.toLocaleDateString()})
@@ -42,7 +42,8 @@ const TaskUpdates = ({ task }: TaskUpdatesProps) => {
         <div className="mt-2 space-y-1">
           {task.updates.slice(0, -1).map((update, index) => (
             <div key={index} className="text-sm text-gray-400 border-gray-700">
-              {update.author} - {update.updatedAt.toLocaleDateString()}
+              {update.username || update.initials || "Unknown"} -{" "}
+              {update.updatedAt.toLocaleDateString()}
             </div>
           ))}
         </div>

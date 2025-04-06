@@ -14,6 +14,7 @@ import TaskDueDate from "./TaskDueDate";
 import TaskFooter from "./TaskFooter";
 import { TaskHeader } from "./TaskHeader";
 import TaskUpdates from "./TaskUpdates";
+import { UserAvatar } from "../common/UserAvatar";
 
 interface TaskCardProps {
   task: Task;
@@ -199,6 +200,9 @@ const TaskCard = ({
                   ))}
                 </div>
               )}
+              <div className="ml-auto">
+                <UserAvatar initials={task.initials} username={task.username} />
+              </div>
             </div>
             {expandedTaskId === task.id && (
               <>

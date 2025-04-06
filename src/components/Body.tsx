@@ -7,10 +7,12 @@ import {
 import { ANIMATION } from "./task-card/constants";
 import DeleteConfirmDialog from "./task-card/DeleteConfirmDialog";
 import DocsSection from "./sections/DocsSection";
+import { ErrorMessage } from "./common/ErrorMessage";
 import { FilterSection } from "./sections/FilterSection";
 import Header from "./Header";
 import { List } from "../types/List";
 import { ListSection } from "./sections/ListSection";
+import { LoadingSpinner } from "./common/LoadingSpinner";
 import { ResetConfirmModal } from "./common/ResetConfirmModal";
 import SidePanel from "./common/SidePanel";
 import { SortControls } from "./sections/SortControls";
@@ -50,7 +52,7 @@ const Body = () => {
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
   const [isListMode, setIsListMode] = useState(false);
   const { loadTab, saveTab } = useTabPersistence();
-  const { loadTasks, saveTasks } = useTaskPersistence();
+  const { loadTasks, saveTasks, isLoading, error } = useTaskPersistence();
 
   const {
     expandedTaskId,
@@ -317,7 +319,6 @@ const Body = () => {
       archived: false,
       priority: tasks.length + 1,
       labels: list.labels || [],
-      author: list.author,
       createdAt: new Date(),
       updatedAt: new Date(),
       updates: [],
@@ -737,95 +738,107 @@ const Body = () => {
         <div className="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="pb-8 pt-8 sm:pt-20">
             <div className="space-y-4">
-              <div className="flex flex-col gap-6">
-                <Tabs
-                  view={tab}
-                  onViewChange={(newTab) => {
-                    setTab(newTab);
-                    saveTab(newTab);
-                  }}
-                  counts={{
-                    todos: tasks.filter((task) => !task.archived).length,
-                    archive: tasks.filter((task) => task.archived).length,
-                    lists: lists.length,
-                    docs: 0,
-                  }}
-                />
-                {tab !== "docs" && (
-                  <FilterSection
-                    tab={tab}
-                    isCategoriesExpanded={isCategoriesExpanded}
-                    setIsCategoriesExpanded={setIsCategoriesExpanded}
-                    isAllExpanded={isAllExpanded}
-                    setIsAllExpanded={setIsAllExpanded}
-                    setIsAllExpandedMode={setIsAllExpandedMode}
-                    setExpandedTaskId={setExpandedTaskId}
-                    setExpandedListId={setExpandedListId}
-                    tasks={tasks}
-                    lists={lists}
-                    completedCount={completedCount}
-                    tasksWithDueDate={tasksWithDueDate}
-                    labels={labelsAndCountsLabels}
-                    counts={labelsAndCountsCounts}
-                    labelFilters={labelFilters}
-                    handleCompletedClick={handleCompletedClickWithExpand}
-                    handleDueDateClick={handleDueDateClickWithExpand}
-                    handleLabelClick={handleLabelClickWithExpand}
-                    clearAllFilters={clearAllFilters}
-                    getCompletedState={getCompletedState}
-                    getDueDateState={getDueDateState}
-                    getLabelState={getLabelState}
-                  />
-                )}
-              </div>
-              <div className="space-y-2">
-                {tab === "lists" && (
-                  <ListSection
-                    lists={sortedAndFilteredLists}
-                    selectedLabel={selectedLabel}
-                    onComplete={handleListComplete}
-                    onDelete={handleListDelete}
-                    onUpdate={handleListUpdate}
-                    onLabelClick={handleLabelClickWithExpand}
-                    onCloneToTask={handleListCloneToTask}
-                    onPriorityChange={handleListPriorityChange}
-                    isCollapsed={isCollapsed}
-                    expandedListId={isAllExpandedMode ? "all" : expandedListId}
-                    setExpandedListId={setExpandedListId}
-                    showPriorityControls={sortField === "priority"}
-                    onTabChange={setTab}
-                  />
-                )}
-                {(tab === "todos" || tab === "archive") && (
-                  <TaskSection
-                    tasks={sortedAndFilteredTasks}
-                    selectedLabel={selectedLabel}
-                    onPriorityChange={handlePriorityChange}
-                    onComplete={handleComplete}
-                    onDelete={handleDelete}
-                    onArchive={handleArchive}
-                    onUpdate={handleTaskUpdate}
-                    isCollapsed={isCollapsed}
-                    onLabelClick={handleLabelClickWithExpand}
-                    onAddSubtask={handleOpenAddSubtask}
-                    expandedTaskId={isAllExpandedMode ? "all" : expandedTaskId}
-                    setExpandedTaskId={setExpandedTaskId}
-                    showPriorityControls={sortField === "priority"}
-                    currentSortField={sortField}
-                    onAddTask={() => openAddTaskPanel()}
-                    showSubTasksId={showSubTasksId}
-                    setShowSubTasksId={setShowSubTasksId}
-                    onClearFilters={() => {
-                      setSelectedLabel(null);
-                      setSearchQuery("");
-                      clearAllFilters();
-                      searchInputRef.current?.focus();
-                    }}
-                    setIsEditing={setIsEditing}
-                  />
-                )}
-                {tab === "docs" && <DocsSection />}
-              </div>
+              {isLoading ? (
+                <LoadingSpinner />
+              ) : error ? (
+                <ErrorMessage message={error} onRetry={loadTasks} />
+              ) : (
+                <>
+                  <div className="flex flex-col gap-6">
+                    <Tabs
+                      view={tab}
+                      onViewChange={(newTab) => {
+                        setTab(newTab);
+                        saveTab(newTab);
+                      }}
+                      counts={{
+                        todos: tasks.filter((task) => !task.archived).length,
+                        archive: tasks.filter((task) => task.archived).length,
+                        lists: lists.length,
+                        docs: 0,
+                      }}
+                    />
+                    {tab !== "docs" && (
+                      <FilterSection
+                        tab={tab}
+                        isCategoriesExpanded={isCategoriesExpanded}
+                        setIsCategoriesExpanded={setIsCategoriesExpanded}
+                        isAllExpanded={isAllExpanded}
+                        setIsAllExpanded={setIsAllExpanded}
+                        setIsAllExpandedMode={setIsAllExpandedMode}
+                        setExpandedTaskId={setExpandedTaskId}
+                        setExpandedListId={setExpandedListId}
+                        tasks={tasks}
+                        lists={lists}
+                        completedCount={completedCount}
+                        tasksWithDueDate={tasksWithDueDate}
+                        labels={labelsAndCountsLabels}
+                        counts={labelsAndCountsCounts}
+                        labelFilters={labelFilters}
+                        handleCompletedClick={handleCompletedClickWithExpand}
+                        handleDueDateClick={handleDueDateClickWithExpand}
+                        handleLabelClick={handleLabelClickWithExpand}
+                        clearAllFilters={clearAllFilters}
+                        getCompletedState={getCompletedState}
+                        getDueDateState={getDueDateState}
+                        getLabelState={getLabelState}
+                      />
+                    )}
+                  </div>
+                  <div className="space-y-2">
+                    {tab === "lists" && (
+                      <ListSection
+                        lists={sortedAndFilteredLists}
+                        selectedLabel={selectedLabel}
+                        onComplete={handleListComplete}
+                        onDelete={handleListDelete}
+                        onUpdate={handleListUpdate}
+                        onLabelClick={handleLabelClickWithExpand}
+                        onCloneToTask={handleListCloneToTask}
+                        onPriorityChange={handleListPriorityChange}
+                        isCollapsed={isCollapsed}
+                        expandedListId={
+                          isAllExpandedMode ? "all" : expandedListId
+                        }
+                        setExpandedListId={setExpandedListId}
+                        showPriorityControls={sortField === "priority"}
+                        onTabChange={setTab}
+                      />
+                    )}
+                    {(tab === "todos" || tab === "archive") && (
+                      <TaskSection
+                        tasks={sortedAndFilteredTasks}
+                        selectedLabel={selectedLabel}
+                        onPriorityChange={handlePriorityChange}
+                        onComplete={handleComplete}
+                        onDelete={handleDelete}
+                        onArchive={handleArchive}
+                        onUpdate={handleTaskUpdate}
+                        isCollapsed={isCollapsed}
+                        onLabelClick={handleLabelClickWithExpand}
+                        onAddSubtask={handleOpenAddSubtask}
+                        expandedTaskId={
+                          isAllExpandedMode ? "all" : expandedTaskId
+                        }
+                        setExpandedTaskId={setExpandedTaskId}
+                        showPriorityControls={sortField === "priority"}
+                        currentSortField={sortField}
+                        onAddTask={() => openAddTaskPanel()}
+                        showSubTasksId={showSubTasksId}
+                        setShowSubTasksId={setShowSubTasksId}
+                        onClearFilters={() => {
+                          setSelectedLabel(null);
+                          setSearchQuery("");
+                          clearAllFilters();
+                          searchInputRef.current?.focus();
+                        }}
+                        setIsEditing={setIsEditing}
+                      />
+                    )}
+                    {tab === "docs" && <DocsSection />}
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
