@@ -15,8 +15,6 @@ interface ListSectionProps {
   expandedListId: string | "all" | null;
   setExpandedListId: (id: string | null) => void;
   showPriorityControls: boolean;
-  animatingListId: string | null;
-  animatingListHeight: number | null;
   onTabChange?: (tab: "todos" | "archive" | "lists") => void;
 }
 

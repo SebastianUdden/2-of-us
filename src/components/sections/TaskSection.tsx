@@ -15,8 +15,6 @@ interface TaskSectionProps {
   onAddSubtask: (taskId: string) => void;
   showPriorityControls: boolean;
   currentSortField: string;
-  animatingTaskId: string | null;
-  animatingTaskHeight: number | null;
   onAddTask: () => void;
   expandedTaskId: string | "all" | null;
   setExpandedTaskId: (id: string | null) => void;
@@ -39,8 +37,6 @@ export const TaskSection = ({
   onAddSubtask,
   showPriorityControls,
   currentSortField,
-  animatingTaskId,
-  animatingTaskHeight,
   onAddTask,
   expandedTaskId,
   setExpandedTaskId,
@@ -78,8 +74,6 @@ export const TaskSection = ({
               showPriorityControls && expandedTaskId === task.id
             }
             currentSortField={currentSortField}
-            animatingTaskId={animatingTaskId}
-            animatingTaskHeight={animatingTaskHeight}
             expandedTaskId={expandedTaskId === "all" ? task.id : expandedTaskId}
             setExpandedTaskId={setExpandedTaskId}
             showSubTasksId={showSubTasksId}

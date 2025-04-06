@@ -124,10 +124,6 @@ const Body = () => {
     handleTaskMove,
     handleListMove,
     pendingListMove,
-    animatingTaskId,
-    animatingListId,
-    animatingTaskHeight,
-    animatingListHeight,
     isCollapsed,
     setIsCollapsed,
   } = usePriorityManagement(setTasks, setLists);
@@ -411,9 +407,6 @@ const Body = () => {
       if (savedTasks.length > 0) {
         setTasks(savedTasks);
       }
-      /* else {
-        setTasks(mockTasks);
-      } */
     });
   }, []);
 
@@ -683,6 +676,7 @@ const Body = () => {
     isAddTaskPanelOpen,
     filteredTasks,
     isMessagePanelOpen,
+    isDeleteModalOpen,
   ]);
 
   const handleSearch = (query: string) => {
@@ -799,8 +793,6 @@ const Body = () => {
                     expandedListId={isAllExpandedMode ? "all" : expandedListId}
                     setExpandedListId={setExpandedListId}
                     showPriorityControls={sortField === "priority"}
-                    animatingListId={animatingListId}
-                    animatingListHeight={animatingListHeight}
                     onTabChange={setTab}
                   />
                 )}
@@ -820,8 +812,6 @@ const Body = () => {
                     setExpandedTaskId={setExpandedTaskId}
                     showPriorityControls={sortField === "priority"}
                     currentSortField={sortField}
-                    animatingTaskId={animatingTaskId}
-                    animatingTaskHeight={animatingTaskHeight}
                     onAddTask={() => openAddTaskPanel()}
                     showSubTasksId={showSubTasksId}
                     setShowSubTasksId={setShowSubTasksId}

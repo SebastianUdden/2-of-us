@@ -29,8 +29,6 @@ interface TaskCardProps {
   onLabelClick: (label: string) => void;
   selectedLabel: string;
   onAddSubtask: (taskId: string) => void;
-  animatingTaskId: string | null;
-  animatingTaskHeight: number | null;
   expandedTaskId: string | null;
   setExpandedTaskId: (id: string | null) => void;
   showSubTasksId: string | null;
