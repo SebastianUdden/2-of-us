@@ -22,9 +22,11 @@ import { Task } from "../types/Task";
 import TaskAddPanel from "./TaskAddPanel";
 import TaskEditPanel from "./task-card/TaskEditPanel";
 import { TaskSection } from "./sections/TaskSection";
+import { firebaseTaskService } from "../services/firebaseTaskService";
 import { generateUUID } from "../utils/uuid";
 import { mockLists } from "../data/mock";
 import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
+import { useAuth } from "../context/AuthContext";
 import { useExpansionState } from "../data/hooks/useExpansionState";
 import { useFilterManagement } from "../data/hooks/useFilterManagement";
 import { useLabelsAndCounts } from "../data/hooks/useLabelsAndCounts";
@@ -32,6 +34,7 @@ import { useMessagePanel } from "../data/hooks/useMessagePanel";
 import { usePriorityManagement } from "../data/hooks/usePriorityManagement";
 import { useSearchAndFilter } from "../data/hooks/useSearchAndFilter";
 import { useSorting } from "../data/hooks/useSorting";
+import { useStorage } from "../context/StorageContext";
 import { useTabPersistence } from "../data/hooks/useTabPersistence";
 import { useTaskPersistence } from "../data/hooks/useTaskPersistence";
 
@@ -53,6 +56,8 @@ const Body = () => {
   const [isListMode, setIsListMode] = useState(false);
   const { loadTab, saveTab } = useTabPersistence();
   const { loadTasks, saveTasks, isLoading, error } = useTaskPersistence();
+  const { user } = useAuth();
+  const { storageType } = useStorage();
 
   const {
     expandedTaskId,
@@ -148,13 +153,6 @@ const Body = () => {
   const sortedAndFilteredTasks = getSortedTasks(filteredTasks);
   const sortedAndFilteredLists = getSortedLists(filteredLists);
 
-  const handleOpenAddSubtask = (taskId: string) => {
-    const task = tasks.find((t) => t.id === taskId);
-    if (task) {
-      openAddTaskPanel(task.id, task.title);
-    }
-  };
-
   const handleComplete = (taskId: string, allCompleted?: boolean) => {
     const task = tasks.find((t) => t.id === taskId);
     if (!task?.completed && !allCompleted) {
@@ -168,7 +166,17 @@ const Body = () => {
     // First update the completion status immediately
     setTasks((prevTasks) => {
       return prevTasks.map((task) =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
+        task.id === taskId
+          ? {
+              ...task,
+              completed: !task.completed,
+              subtasks: task.subtasks?.map((subtask) => ({
+                id: subtask.id,
+                title: subtask.title,
+                completed: subtask.completed,
+              })),
+            }
+          : task
       );
     });
 
@@ -188,8 +196,7 @@ const Body = () => {
     }
   };
 
-  const handleDeleteConfirm = () => {
-    console.log("Delete confirm");
+  const handleDeleteConfirm = async () => {
     if (taskToDelete) {
       // Wait for collapse animation
       setTimeout(() => {
@@ -197,17 +204,32 @@ const Body = () => {
           const filteredTasks = prevTasks.filter(
             (task) => task.id !== taskToDelete.id
           );
+          const deletedTaskIndex = prevTasks.findIndex(
+            (t) => t.id === expandedTaskId
+          );
+          if (deletedTaskIndex) {
+            const closestTask = filteredTasks[deletedTaskIndex - 1];
+            setExpandedTaskId(closestTask ? closestTask.id : null);
+          } else {
+            setExpandedTaskId(filteredTasks[0].id);
+          }
           // Sort remaining tasks and update priorities
-          const sortedTasks = sortTasks(filteredTasks);
-          // Save to localStorage
-          saveTasks(sortedTasks);
-          return sortedTasks;
+          return sortTasks(filteredTasks);
         });
       }, ANIMATION.DURATION);
+
+      // Delete from cloud storage if using cloud storage
+      if (storageType === "cloud" && user) {
+        try {
+          await firebaseTaskService.deleteTask(taskToDelete.id);
+        } catch (error) {
+          console.error("Error deleting task:", error);
+          // Don't show error to user since the task is already removed from UI
+        }
+      }
     }
     setIsDeleteModalOpen(false);
     setTaskToDelete(null);
-    setExpandedTaskId(null);
   };
 
   const handleDeleteCancel = () => {
@@ -730,17 +752,11 @@ const Body = () => {
           />
         )}
       </div>
-      <div
-        className={`flex-1 overflow-y-auto ${
-          isHeaderVisible ? "mt-[120px]" : "mt-0"
-        }`}
-      >
+      <div className="flex-1 overflow-y-auto mt-[120px]">
         <div className="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="pb-8 pt-8 sm:pt-20">
             <div className="space-y-4">
-              {isLoading ? (
-                <LoadingSpinner />
-              ) : error ? (
+              {error ? (
                 <ErrorMessage message={error} onRetry={loadTasks} />
               ) : (
                 <>
@@ -816,7 +832,9 @@ const Body = () => {
                         onUpdate={handleTaskUpdate}
                         isCollapsed={isCollapsed}
                         onLabelClick={handleLabelClickWithExpand}
-                        onAddSubtask={handleOpenAddSubtask}
+                        onAddSubtask={(id, title) =>
+                          openAddTaskPanel(id, title)
+                        }
                         expandedTaskId={
                           isAllExpandedMode ? "all" : expandedTaskId
                         }
@@ -837,6 +855,11 @@ const Body = () => {
                     )}
                     {tab === "docs" && <DocsSection />}
                   </div>
+                  {isLoading && (
+                    <div className="fixed bottom-0 left-0 right-0 flex justify-center py-4 bg-gray-900/80 backdrop-blur-sm z-50 border-t border-gray-700">
+                      <LoadingSpinner />
+                    </div>
+                  )}
                 </>
               )}
             </div>

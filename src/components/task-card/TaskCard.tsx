@@ -2,7 +2,6 @@ import { Size, SizeLabel } from "./SizeLabel";
 import { useEffect, useState } from "react";
 
 import Card from "../common/Card";
-import DeleteConfirmDialog from "./DeleteConfirmDialog";
 import { EditIcon } from "../common/EditIcon";
 import { LabelPill } from "../LabelPill";
 import { LabelState } from "../../types/LabelState";
@@ -29,7 +28,7 @@ interface TaskCardProps {
   currentSortField: string;
   onLabelClick: (label: string) => void;
   selectedLabel: string;
-  onAddSubtask: (taskId: string) => void;
+  onAddSubtask: (taskId: string, taskTitle: string) => void;
   expandedTaskId: string | null;
   setExpandedTaskId: (id: string | null) => void;
   showSubTasksId: string | null;
@@ -58,7 +57,6 @@ const TaskCard = ({
   showPriorityControls,
   expandAll,
 }: TaskCardProps) => {
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
     useState(false);
 
@@ -78,9 +76,18 @@ const TaskCard = ({
   const handleSubtaskComplete = (subtaskId: string) => {
     const updatedSubtasks = task.subtasks.map((subtask) =>
       subtask.id === subtaskId
-        ? { ...subtask, completed: !subtask.completed }
-        : subtask
+        ? {
+            id: subtask.id,
+            title: subtask.title,
+            completed: !subtask.completed,
+          }
+        : {
+            id: subtask.id,
+            title: subtask.title,
+            completed: subtask.completed,
+          }
     );
+
     onUpdate({
       ...task,
       subtasks: updatedSubtasks,
@@ -107,9 +114,14 @@ const TaskCard = ({
   };
 
   const handleSubtaskDelete = (subtaskId: string) => {
-    const updatedSubtasks = task.subtasks.filter(
-      (subtask) => subtask.id !== subtaskId
-    );
+    const updatedSubtasks = task.subtasks
+      .filter((subtask) => subtask.id !== subtaskId)
+      .map((subtask) => ({
+        id: subtask.id,
+        title: subtask.title,
+        completed: subtask.completed,
+      }));
+
     const allCompleted =
       updatedSubtasks.length > 0 &&
       updatedSubtasks.every((subtask) => subtask.completed);
@@ -127,6 +139,7 @@ const TaskCard = ({
         }
       }, 500);
     }
+
     onUpdate({
       ...task,
       subtasks: updatedSubtasks,
@@ -169,7 +182,7 @@ const TaskCard = ({
                     }, 500);
                   }
                 }}
-                onDelete={() => setShowDeleteConfirm(true)}
+                onDelete={() => onDelete(task.id)}
                 onArchive={onArchive}
                 setIsEditing={setIsEditing}
                 expandedTaskId={expandedTaskId}
@@ -236,7 +249,7 @@ const TaskCard = ({
             <div className="flex justify-between">
               {onAddSubtask && (
                 <button
-                  onClick={() => onAddSubtask(task.id)}
+                  onClick={() => onAddSubtask(task.id, task.title)}
                   className="mt-4 text-sm text-blue-400 hover:text-blue-300 flex items-center gap-1"
                 >
                   <span>+</span>
@@ -368,15 +381,6 @@ const TaskCard = ({
           </>
         )}
       </Card>
-      <DeleteConfirmDialog
-        isOpen={showDeleteConfirm}
-        onClose={() => setShowDeleteConfirm(false)}
-        onConfirm={() => {
-          setShowDeleteConfirm(false);
-          onDelete(task.id);
-        }}
-        taskTitle={task.title}
-      />
     </>
   );
 };

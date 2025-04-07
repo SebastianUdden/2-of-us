@@ -1,7 +1,9 @@
 import { useCallback, useState } from "react";
 
 import { List } from "../../types/List";
+import { SubTask } from "../../types/SubTask";
 import { Task } from "../../types/Task";
+import { generateUUID } from "../../utils/uuid";
 
 interface UseAddTaskPanelResult {
   isAddTaskPanelOpen: boolean;
@@ -51,12 +53,18 @@ export const useAddTaskPanel = (
         return;
       if (parentTaskId) {
         // Add as subtask
+        const newSubtask: SubTask = {
+          id: generateUUID(),
+          title: newTask.title,
+          completed: false,
+        };
+
         onTasksUpdate(
           tasks.map((task) => {
             if (task.id === parentTaskId) {
               return {
                 ...task,
-                subtasks: [...task.subtasks, newTask],
+                subtasks: [...(task.subtasks || []), newSubtask],
               };
             }
             return task;

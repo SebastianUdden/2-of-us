@@ -12,7 +12,7 @@ interface TaskSectionProps {
   onUpdate: (updatedTask: Task) => void;
   isCollapsed: boolean;
   onLabelClick: (label: string) => void;
-  onAddSubtask: (taskId: string) => void;
+  onAddSubtask: (taskId: string, taskTitle: string) => void;
   showPriorityControls: boolean;
   currentSortField: string;
   onAddTask: () => void;

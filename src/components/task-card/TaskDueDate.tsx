@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useState } from "react";
 
+import { Timestamp } from "firebase/firestore";
+
 interface TaskDueDateProps {
-  dueDate?: Date | string;
+  dueDate?: Date | string | Timestamp;
   onDueDateChange: (date: Date | undefined) => void;
 }
 
@@ -11,13 +13,56 @@ const TaskDueDate = ({ dueDate, onDueDateChange }: TaskDueDateProps) => {
   const [timeRemaining, setTimeRemaining] = useState<string>("");
   const [days, setDays] = useState<number>(0);
 
+  const convertToDate = useCallback(
+    (
+      date: Date | string | Timestamp | { seconds: number } | undefined
+    ): Date | undefined => {
+      if (!date) return undefined;
+      try {
+        if (date instanceof Date) {
+          if (isNaN(date.getTime())) return undefined;
+          return date;
+        }
+        if (date instanceof Timestamp) {
+          const jsDate = date.toDate();
+          if (isNaN(jsDate.getTime())) return undefined;
+          return jsDate;
+        }
+        if (typeof date === "object" && "seconds" in date) {
+          const jsDate = new Date(date.seconds * 1000);
+          if (isNaN(jsDate.getTime())) return undefined;
+          return jsDate;
+        }
+        const parsedDate = new Date(date);
+        if (isNaN(parsedDate.getTime())) return undefined;
+        return parsedDate;
+      } catch (error) {
+        console.error("Error converting date:", error);
+        return undefined;
+      }
+    },
+    []
+  );
+
+  const formatDateForInput = useCallback((date: Date): string => {
+    try {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "";
+    }
+  }, []);
+
   const updateTimeRemaining = useCallback(() => {
     if (!dueDate) return;
 
     const now = new Date();
-    // Convert dueDate to Date if it's a string
-    const dueDateObj =
-      typeof dueDate === "string" ? new Date(dueDate) : dueDate;
+    const dueDateObj = convertToDate(dueDate);
+    if (!dueDateObj) return;
+
     // Set both dates to start of day for accurate day comparison
     const dueDateStart = new Date(
       dueDateObj.getFullYear(),
@@ -40,16 +85,25 @@ const TaskDueDate = ({ dueDate, onDueDateChange }: TaskDueDateProps) => {
     } else {
       setTimeRemaining("Förfaller idag");
     }
-  }, [dueDate]);
+  }, [dueDate, convertToDate]);
 
   useEffect(() => {
     if (dueDate) {
-      const dueDateObj =
-        typeof dueDate === "string" ? new Date(dueDate) : dueDate;
-      setSelectedDate(dueDateObj.toISOString().split("T")[0]);
-      updateTimeRemaining();
+      const dueDateObj = convertToDate(dueDate);
+      if (dueDateObj) {
+        setSelectedDate(formatDateForInput(dueDateObj));
+        updateTimeRemaining();
+      } else {
+        setSelectedDate("");
+        setTimeRemaining("");
+        setDays(0);
+      }
+    } else {
+      setSelectedDate("");
+      setTimeRemaining("");
+      setDays(0);
     }
-  }, [dueDate, updateTimeRemaining]);
+  }, [dueDate, updateTimeRemaining, convertToDate, formatDateForInput]);
 
   useEffect(() => {
     if (dueDate) {
@@ -61,8 +115,13 @@ const TaskDueDate = ({ dueDate, onDueDateChange }: TaskDueDateProps) => {
   const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
     const date = e.target.value ? new Date(e.target.value) : undefined;
-    setSelectedDate(e.target.value);
-    onDueDateChange(date);
+    if (date && !isNaN(date.getTime())) {
+      setSelectedDate(e.target.value);
+      onDueDateChange(date);
+    } else {
+      setSelectedDate("");
+      onDueDateChange(undefined);
+    }
     setShowDatePicker(false);
   };
 
