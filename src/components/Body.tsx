@@ -526,21 +526,13 @@ const Body = () => {
           const task = tasks.find((t) => t.id === expandedTaskId);
           if (task) {
             setIsEditing(true);
+            setFocusDescription(false);
           }
+        } else {
+          setExpandedTaskId(tasks[0].id);
+          setIsEditing(true);
+          setFocusDescription(false);
         }
-      } else if (e.key === "Enter" && expandedTaskId) {
-        e.preventDefault();
-        const task = tasks.find((t) => t.id === expandedTaskId);
-        if (!task) return;
-        const subtask: SubTask = {
-          id: generateUUID(),
-          title: taskTitle,
-          completed: false,
-        };
-        handleTaskUpdate({
-          ...task,
-          subtasks: [...task.subtasks, subtask],
-        });
       }
       // Handle Cmd+M (Mac) or Ctrl+M (Windows) to minimize/maximize all tasks
       else if (e.key === "m" && (e.metaKey || e.ctrlKey)) {
