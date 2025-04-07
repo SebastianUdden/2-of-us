@@ -22,7 +22,7 @@ const Header = forwardRef(
               alt="Heart"
               className="w-8 h-8 animate-heart-pulse"
             />
-            <h1 className="text-xl font-semibold text-white">Collab</h1>
+            <h1 className="text-xl font-semibold text-white">ToDuo</h1>
           </div>
           <div className="flex items-center gap-2">
             <button

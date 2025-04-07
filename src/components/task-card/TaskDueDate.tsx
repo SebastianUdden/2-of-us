@@ -5,9 +5,14 @@ import { Timestamp } from "firebase/firestore";
 interface TaskDueDateProps {
   dueDate?: Date | string | Timestamp;
   onDueDateChange: (date: Date | undefined) => void;
+  className?: string;
 }
 
-const TaskDueDate = ({ dueDate, onDueDateChange }: TaskDueDateProps) => {
+const TaskDueDate = ({
+  dueDate,
+  onDueDateChange,
+  className,
+}: TaskDueDateProps) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>("");
   const [timeRemaining, setTimeRemaining] = useState<string>("");
@@ -144,7 +149,7 @@ const TaskDueDate = ({ dueDate, onDueDateChange }: TaskDueDateProps) => {
             : days === 0
             ? "bg-yellow-500/20 text-yellow-400"
             : "bg-blue-500/20 text-blue-400"
-        }`}
+        } ${className || ""}`}
       >
         {dueDate ? timeRemaining : "Set due date"}
       </button>

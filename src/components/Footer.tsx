@@ -1,11 +1,11 @@
 import SignInButton from "./common/SignInButton";
 import { useAuth } from "../context/AuthContext";
-import { useStorage } from "../context/StorageContext";
+/* import { useStorage } from "../context/StorageContext"; */
 
 const Footer = () => {
-  const { storageType, setStorageType } = useStorage();
+  /* const { storageType, setStorageType } = useStorage(); */
   const { user } = useAuth();
-
+  /* 
   const handleStorageToggle = () => {
     if (storageType === "local") {
       setStorageType("cloud");
@@ -13,12 +13,12 @@ const Footer = () => {
       setStorageType("local");
     }
   };
-
+ */
   return (
     <footer className="mt-auto bg-gray-800 text-white">
       <div className="flex justify-between items-center container mx-auto px-4 py-6">
-        <div className="flex justify-center items-center">
-          <div className="flex items-center space-x-2">
+        {/* <div className="flex justify-center items-center"> */}
+        {/* <div className="flex items-center space-x-2">
             <span className="text-sm">Lokal</span>
             <button
               onClick={handleStorageToggle}
@@ -33,14 +33,14 @@ const Footer = () => {
               />
             </button>
             <span className="text-sm">Moln</span>
-          </div>
-        </div>
-        {storageType === "cloud" && (
-          <div className="flex items-center space-x-4">
-            {user && <p className="text-sm text-gray-300">{user.email}</p>}
-            <SignInButton />
-          </div>
-        )}
+          </div> */}
+        {/* </div> */}
+        {/* {storageType === "cloud" && ( */}
+        {/* <div className="flex items-center space-x-4"> */}
+        {user && <p className="text-sm text-gray-300">{user.email}</p>}
+        <SignInButton />
+        {/* </div> */}
+        {/* )} */}
       </div>
     </footer>
   );

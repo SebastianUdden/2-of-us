@@ -60,7 +60,7 @@ const SidePanel = ({ isOpen, onClose, children, title }: SidePanelProps) => {
 
       {/* Panel */}
       <div
-        className={`fixed inset-y-0 right-0 w-full md:w-[40%] bg-gray-900 shadow-xl transition ${
+        className={`fixed inset-y-0 right-0 w-full sm:w-[50%] lg:w-[40%] bg-gray-900 shadow-xl transition ${
           hidePanel ? "translate-x-full" : "translate-x-0"
         }`}
       >

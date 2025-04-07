@@ -197,40 +197,27 @@ const Body = () => {
     }
   };
 
-  const handleDeleteConfirm = async () => {
-    if (taskToDelete) {
-      // Wait for collapse animation
-      setTimeout(() => {
-        setTasks((prevTasks) => {
-          const filteredTasks = prevTasks.filter(
-            (task) => task.id !== taskToDelete.id
-          );
-          const deletedTaskIndex = prevTasks.findIndex(
-            (t) => t.id === expandedTaskId
-          );
-          if (deletedTaskIndex) {
-            const closestTask = filteredTasks[deletedTaskIndex - 1];
-            setExpandedTaskId(closestTask ? closestTask.id : null);
-          } else {
-            setExpandedTaskId(filteredTasks[0].id);
-          }
-          // Sort remaining tasks and update priorities
-          return sortTasks(filteredTasks);
-        });
-      }, ANIMATION.DURATION);
+  const handleDeleteConfirm = async (taskId: string) => {
+    try {
+      // First, update the local state to remove the task
+      const updatedTasks = tasks.filter((task) => task.id !== taskId);
+      setTasks(updatedTasks);
 
-      // Delete from cloud storage if using cloud storage
+      // If using cloud storage and user is authenticated, delete the task from Firestore
       if (storageType === "cloud" && user) {
         try {
-          await firebaseTaskService.deleteTask(taskToDelete.id);
+          await firebaseTaskService.deleteTask(taskId);
         } catch (error) {
           console.error("Error deleting task:", error);
-          // Don't show error to user since the task is already removed from UI
+          // If the deletion fails, reload the tasks to ensure consistency
+          loadTasks();
         }
       }
+    } catch (error) {
+      console.error("Error in handleDeleteConfirm:", error);
+      // If there's an error, reload the tasks to ensure consistency
+      loadTasks();
     }
-    setIsDeleteModalOpen(false);
-    setTaskToDelete(null);
   };
 
   const handleDeleteCancel = () => {
@@ -470,7 +457,6 @@ const Body = () => {
     const tabs: ("todos" | "archive" | "lists" | "docs")[] = [
       "todos",
       "archive",
-      "lists",
       "docs",
     ];
     const currentIndex = tabs.indexOf(tab);
@@ -504,8 +490,8 @@ const Body = () => {
       ) {
         closeAddTaskPanel();
         // If a task is expanded, create a subtask
-        if (expandedTaskId && !isAllExpanded && !isMessagePanelOpen) {
-          const task = tasks.find((t) => t.id === expandedTaskId);
+        const task = tasks.find((t) => t.id === expandedTaskId);
+        if (task && !isAllExpanded && !isMessagePanelOpen) {
           setShowSubTasksId(expandedTaskId);
           if (task) {
             setTab("todos");
@@ -912,7 +898,7 @@ const Body = () => {
       <DeleteConfirmDialog
         isOpen={isDeleteModalOpen}
         onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
+        onConfirm={() => handleDeleteConfirm(taskToDelete?.id || "")}
         taskTitle={taskToDelete?.title || ""}
       />
     </div>

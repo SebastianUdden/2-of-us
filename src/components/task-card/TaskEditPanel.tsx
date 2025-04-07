@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 
+import LabelInput from "../common/LabelInput";
+import SizeSelect from "../common/SizeSelect";
 import { Task } from "../../types/Task";
 import TaskDueDate from "./TaskDueDate";
-import { generateInitials } from "../../utils/user";
-import { useAuth } from "../../context/AuthContext";
+import TaskFormInput from "../common/TaskFormInput";
 
 interface TaskEditPanelProps {
   task?: Task;
@@ -19,7 +20,6 @@ const TaskEditPanel = ({
   onClose,
   focusDescription,
 }: TaskEditPanelProps) => {
-  const { user } = useAuth();
   const formRef = useRef<HTMLFormElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);
   const descriptionRef = useRef<HTMLTextAreaElement>(null);
@@ -28,6 +28,12 @@ const TaskEditPanel = ({
     task?.description || ""
   );
   const [editedSize, setEditedSize] = useState(task?.size || "");
+  const [selectedLabels, setSelectedLabels] = useState<string[]>(
+    task?.labels || []
+  );
+  const [editedDueDate, setEditedDueDate] = useState<Date | undefined>(
+    task?.dueDate
+  );
 
   useEffect(() => {
     if (focusDescription) {
@@ -39,113 +45,86 @@ const TaskEditPanel = ({
 
   if (!task) return null;
 
+  const handleDueDateChange = (date: Date | undefined) => {
+    setEditedDueDate(date);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (
       editedTitle !== task?.title ||
       editedDescription !== task?.description ||
-      editedSize !== task?.size
+      editedSize !== task?.size ||
+      JSON.stringify(selectedLabels) !== JSON.stringify(task?.labels) ||
+      editedDueDate?.getTime() !== task?.dueDate?.getTime()
     ) {
       onUpdate({
         ...task,
         title: editedTitle,
         description: editedDescription,
         size: editedSize,
-        username: user?.displayName || undefined,
-        initials: generateInitials(user?.displayName),
+        labels: selectedLabels,
+        dueDate: editedDueDate,
       });
     }
     onClose();
   };
 
-  const handleDueDateChange = (date: Date | undefined) => {
-    onUpdate({
-      ...task,
-      dueDate: date,
-      username: user?.displayName || undefined,
-      initials: generateInitials(user?.displayName),
-    });
-  };
-
   return (
-    <form onSubmit={handleSubmit} className="space-y-6" ref={formRef}>
-      {/* Title */}
-      <div>
-        <label
-          htmlFor="title"
-          className="block text-sm font-medium text-gray-300 mb-2"
-        >
-          Titel
-        </label>
-        <input
-          ref={titleRef}
-          type="text"
-          id="title"
-          value={editedTitle}
-          onChange={(e) => setEditedTitle(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
-        />
-      </div>
+    <form ref={formRef} onSubmit={handleSubmit} className="space-y-6">
+      <TaskFormInput
+        id="title"
+        label="Titel"
+        value={editedTitle}
+        onChange={setEditedTitle}
+        placeholder="Ex. Handla mat"
+        ref={titleRef as React.RefObject<HTMLInputElement>}
+        autoFocus={!focusDescription}
+      />
 
-      {/* Description */}
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-300 mb-2"
-        >
-          Beskrivning
-        </label>
-        <textarea
-          ref={descriptionRef}
-          id="description"
-          rows={4}
-          value={editedDescription}
-          onChange={(e) => setEditedDescription(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
-        />
-      </div>
+      <TaskFormInput
+        id="description"
+        label="Beskrivning"
+        value={editedDescription}
+        onChange={setEditedDescription}
+        placeholder="Ex. Köp ingredienser för lasagne"
+        type="textarea"
+        ref={descriptionRef as React.RefObject<HTMLTextAreaElement>}
+        autoFocus={focusDescription}
+      />
 
-      {/* Due Date */}
+      <SizeSelect value={editedSize} onChange={setEditedSize} />
+
       <div>
         <label className="block text-sm font-medium text-gray-300 mb-2">
           Förfallodatum
         </label>
         <div className="mt-1">
           <TaskDueDate
-            dueDate={task.dueDate}
+            dueDate={editedDueDate}
             onDueDateChange={handleDueDateChange}
           />
         </div>
       </div>
 
-      {/* Size */}
-      <div>
-        <label
-          htmlFor="size"
-          className="block text-sm font-medium text-gray-300 mb-2"
-        >
-          Storlek
-        </label>
-        <select
-          id="size"
-          value={editedSize}
-          onChange={(e) => setEditedSize(e.target.value)}
-          className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
-        >
-          <option value="S">S</option>
-          <option value="M">M</option>
-          <option value="L">L</option>
-          <option value="XL">XL</option>
-        </select>
-      </div>
+      <LabelInput
+        selectedLabels={selectedLabels}
+        onLabelsChange={setSelectedLabels}
+      />
 
-      {/* Submit Button */}
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <button
+          type="button"
+          onClick={onClose}
+          className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+        >
+          Avbryt
+        </button>
         <button
           type="submit"
           className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
         >
-          Spara
+          Spara och stäng
         </button>
       </div>
     </form>

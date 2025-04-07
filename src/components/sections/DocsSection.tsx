@@ -4,20 +4,22 @@ const DocsSection = () => {
       <section>
         <h2 className="text-2xl font-bold mb-4">Kom igång</h2>
         <p className="mb-4">
-          Välkommen till 2-of-us, en applikation för att hantera uppgifter och
-          listor. Så här kommer du igång:
+          Välkommen till ToDuo, en applikation för att hantera vardagliga
+          uppgifter tillsammans. Så här kommer du igång:
         </p>
         <ul className="list-disc pl-6 space-y-2">
-          <li>Använd "Lägg till uppgift" för att skapa nya uppgifter</li>
+          <li>Logga in med ditt google konto i bottenmenyn.</li>
+          <li>Använd "Lägg till uppgift" för att skapa nya uppgifter.</li>
           <li>
-            Klicka på en uppgift för att expandera och se/redigera detaljer
+            Klicka på en uppgift för att expandera och se/redigera detaljer.
           </li>
           <li>
             Använd flikarna för att växla mellan aktiva uppgifter, arkiverade
-            uppgifter och listor
+            uppgifter och dokumentationen.
           </li>
           <li>
-            Filtrera uppgifter efter etiketter, slutförandestatus eller deadline
+            Filtrera uppgifter efter etiketter, slutförandestatus eller
+            deadline.
           </li>
         </ul>
       </section>

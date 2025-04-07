@@ -1,25 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 
+import LabelInput from "./common/LabelInput";
 import { List } from "../types/List";
 import { Size } from "./task-card/SizeLabel";
+import SizeSelect from "./common/SizeSelect";
 import { SubTask } from "../types/SubTask";
 import { Task } from "../types/Task";
 import TaskDueDate from "./task-card/TaskDueDate";
+import TaskFormInput from "./common/TaskFormInput";
 import { generateInitials } from "../utils/user";
 import { generateUUID } from "../utils/uuid";
 import { useAuth } from "../context/AuthContext";
-
-const AVAILABLE_LABELS = [
-  "arbete",
-  "privat",
-  "familj",
-  "planering",
-  "kommunication",
-  "dagliga",
-  "handla",
-  "nöje",
-  "projekt",
-];
 
 interface AddTaskPanelProps {
   isOpen: boolean;
@@ -45,12 +36,10 @@ const TaskAddPanel = ({
 }: AddTaskPanelProps) => {
   const { user } = useAuth();
   const titleRef = useRef<HTMLInputElement>(null);
-  const [editedLabel, setEditedLabel] = useState("");
-  const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
-  const labelInputRef = useRef<HTMLInputElement>(null);
   const [editedTitle, setEditedTitle] = useState("");
   const [editedDescription, setEditedDescription] = useState("");
   const [editedSize, setEditedSize] = useState<Size>("S");
+  const [selectedLabels, setSelectedLabels] = useState<string[]>([]);
   const [editedDueDate, setEditedDueDate] = useState<Date | undefined>(
     undefined
   );
@@ -65,6 +54,7 @@ const TaskAddPanel = ({
     titleRef.current?.focus();
     handleAddTask();
   };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     handleAddTask();
@@ -83,7 +73,7 @@ const TaskAddPanel = ({
       archived: false,
       priority: totalTasks + 1,
       size: editedSize,
-      labels: [],
+      labels: selectedLabels,
       createdAt: new Date(),
       updatedAt: new Date(),
       updates: [],
@@ -128,70 +118,38 @@ const TaskAddPanel = ({
           </div>
         </div>
       )}
-      {/* Title */}
-      <div>
-        <label
-          htmlFor="title"
-          className="block text-sm font-medium text-gray-300 mb-2"
-        >
-          Titel
-        </label>
-        <input
-          ref={titleRef}
-          type="text"
-          id="title"
-          value={editedTitle}
-          onChange={(e) => {
-            setEditedTitle(e.target.value);
-            onTitleChange?.(e.target.value);
-          }}
-          className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
-          placeholder="Ex. Handla mat"
-        />
-      </div>
 
-      {/* Description */}
+      <TaskFormInput
+        id="title"
+        label="Titel"
+        value={editedTitle}
+        onChange={(value) => {
+          setEditedTitle(value);
+          onTitleChange?.(value);
+        }}
+        placeholder="Ex. Handla mat"
+        ref={
+          titleRef as React.RefObject<HTMLInputElement | HTMLTextAreaElement>
+        }
+        autoFocus
+      />
+
       {!parentTaskId && (
         <>
-          <div>
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-300 mb-2"
-            >
-              Beskrivning
-            </label>
-            <textarea
-              id="description"
-              rows={4}
-              value={editedDescription}
-              onChange={(e) => setEditedDescription(e.target.value)}
-              className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
-              placeholder="Ex. Köp ingredienser för lasagne"
-            />
-          </div>
+          <TaskFormInput
+            id="description"
+            label="Beskrivning"
+            value={editedDescription}
+            onChange={setEditedDescription}
+            placeholder="Ex. Köp ingredienser för lasagne"
+            type="textarea"
+          />
 
-          {/* Size */}
-          <div>
-            <label
-              htmlFor="size"
-              className="block text-sm font-medium text-gray-300 mb-2"
-            >
-              Storlek
-            </label>
-            <select
-              id="size"
-              value={editedSize}
-              onChange={(e) => setEditedSize(e.target.value as Size)}
-              className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
-            >
-              <option value="S">S</option>
-              <option value="M">M</option>
-              <option value="L">L</option>
-              <option value="XL">XL</option>
-            </select>
-          </div>
+          <SizeSelect
+            value={editedSize}
+            onChange={(value) => setEditedSize(value as Size)}
+          />
 
-          {/* Due Date */}
           <div>
             <label className="block text-sm font-medium text-gray-300 mb-2">
               Förfallodatum
@@ -204,67 +162,13 @@ const TaskAddPanel = ({
             </div>
           </div>
 
-          {/* Labels */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">
-              Etiketter
-            </label>
-            <div className="flex gap-2 justify-between mb-2">
-              <input
-                ref={labelInputRef}
-                type="text"
-                placeholder="Skapa etikett"
-                className="block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
-                onChange={(e) => setEditedLabel(e.target.value)}
-              />
-              <button
-                className="rounded-md bg-blue-600 px-4 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                onClick={() => {
-                  if (editedLabel.trim()) {
-                    setSelectedLabels([...selectedLabels, editedLabel]);
-                    setEditedLabel("");
-                  } else {
-                    labelInputRef.current?.focus();
-                  }
-                }}
-              >
-                +
-              </button>
-            </div>
-            <div className="mt-1 flex flex-wrap gap-2">
-              {selectedLabels.map((label) => (
-                <button
-                  key={label}
-                  className="rounded-md bg-blue-700 px-2 py-1 text-sm font-medium text-white hover:bg-blue-600"
-                  onClick={() =>
-                    setSelectedLabels(selectedLabels.filter((l) => l !== label))
-                  }
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <hr className="my-4 border-gray-700" />
-            <div className="mt-1 flex flex-wrap gap-2">
-              {AVAILABLE_LABELS.filter(
-                (label) => !selectedLabels.includes(label)
-              ).map((label) => (
-                <button
-                  key={label}
-                  className="rounded-md bg-gray-700 px-2 py-1 text-sm font-medium text-gray-300 hover:bg-gray-600"
-                  onClick={() => {
-                    setSelectedLabels([...selectedLabels, label]);
-                  }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
+          <LabelInput
+            selectedLabels={selectedLabels}
+            onLabelsChange={setSelectedLabels}
+          />
         </>
       )}
 
-      {/* Submit Button */}
       <div className="flex justify-end gap-2">
         {parentTaskId && (
           <button
