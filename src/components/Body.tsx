@@ -41,7 +41,6 @@ const Body = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [focusDescription, setFocusDescription] = useState(false);
-  const [taskTitle, setTaskTitle] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<List[]>(mockLists);
   const [tab, setTab] = useState<"todos" | "archive" | "lists" | "docs">(
@@ -896,7 +895,6 @@ const Body = () => {
           parentTaskId={parentTaskId}
           parentTaskTitle={parentTaskTitle}
           subtasks={tasks.find((task) => task.id === parentTaskId)?.subtasks}
-          onTitleChange={(title) => setTaskTitle(title)}
           isListMode={isListMode}
           onToggleMode={() => setIsListMode(!isListMode)}
           onAddList={handleAddList}
