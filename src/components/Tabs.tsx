@@ -4,7 +4,7 @@ import { ANIMATION } from "./task-card/constants";
 import { ArchiveIcon } from "./icons/ArchiveIcon";
 import { CheckmarkIcon } from "./icons/CheckmarkIcon";
 import { DocumentIcon } from "./icons/DocumentIcon";
-import { ListIcon } from "./icons/ListIcon";
+import { useAuth } from "../context/AuthContext";
 
 interface TabsProps {
   view: "todos" | "archive" | "lists" | "docs";
@@ -18,6 +18,7 @@ interface TabsProps {
 }
 
 const Tabs = ({ view, onViewChange, counts }: TabsProps) => {
+  const { user } = useAuth();
   const [activeTabIndex, setActiveTabIndex] = useState(0);
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -36,12 +37,13 @@ const Tabs = ({ view, onViewChange, counts }: TabsProps) => {
           left: tabsRef.current[activeTabIndex]?.offsetLeft || 0,
         }}
       />
-      <button
-        ref={(el) => {
-          tabsRef.current[0] = el;
-        }}
-        onClick={() => onViewChange("todos")}
-        className={`
+      {user && (
+        <button
+          ref={(el) => {
+            tabsRef.current[0] = el;
+          }}
+          onClick={() => onViewChange("todos")}
+          className={`
           mr-4 py-2 text-sm font-medium transition-colors duration-${
             ANIMATION.DURATION
           } ${ANIMATION.EASING}
@@ -52,19 +54,21 @@ const Tabs = ({ view, onViewChange, counts }: TabsProps) => {
               : "text-gray-400 hover:text-gray-300"
           }
         `}
-      >
-        <CheckmarkIcon className="w-5 h-5" />
-        <span>Att göra</span>
-        <span className="text-xs bg-gray-700 px-2 py-0.5 rounded-full">
-          {counts.todos}
-        </span>
-      </button>
-      <button
-        ref={(el) => {
-          tabsRef.current[1] = el;
-        }}
-        onClick={() => onViewChange("archive")}
-        className={`
+        >
+          <CheckmarkIcon className="w-5 h-5" />
+          <span>Att göra</span>
+          <span className="text-xs bg-gray-700 px-2 py-0.5 rounded-full">
+            {counts.todos}
+          </span>
+        </button>
+      )}
+      {user && (
+        <button
+          ref={(el) => {
+            tabsRef.current[1] = el;
+          }}
+          onClick={() => onViewChange("archive")}
+          className={`
           mr-4 py-2 text-sm font-medium transition-colors duration-${
             ANIMATION.DURATION
           } ${ANIMATION.EASING}
@@ -75,13 +79,14 @@ const Tabs = ({ view, onViewChange, counts }: TabsProps) => {
               : "text-gray-400 hover:text-gray-300"
           }
         `}
-      >
-        <ArchiveIcon className="w-5 h-5" />
-        <span>Arkiv</span>
-        <span className="text-xs bg-gray-700 px-2 py-0.5 rounded-full">
-          {counts.archive}
-        </span>
-      </button>
+        >
+          <ArchiveIcon className="w-5 h-5" />
+          <span>Arkiv</span>
+          <span className="text-xs bg-gray-700 px-2 py-0.5 rounded-full">
+            {counts.archive}
+          </span>
+        </button>
+      )}
       {/* <button
         ref={(el) => {
           tabsRef.current[2] = el;

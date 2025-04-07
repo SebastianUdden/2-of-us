@@ -83,6 +83,8 @@ export const usePriorityManagement = (
   const handleTaskMove = useCallback(
     (direction: Direction = "down", expandedTaskId: string | null = null) => {
       onTasksUpdate((prevTasks: Task[]) => {
+        console.log(direction, expandedTaskId);
+        console.log(prevTasks);
         const taskIndex = prevTasks.findIndex(
           (task) => task.id === expandedTaskId
         );

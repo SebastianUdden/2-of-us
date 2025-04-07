@@ -43,13 +43,17 @@ const Footer = () => {
         {/* {storageType === "cloud" && ( */}
         {/* <div className="flex items-center space-x-4"> */}
         <div className="flex items-center space-x-4">
-          {user && <p className="text-sm text-gray-300">{user.email}</p>}
-          <button
-            onClick={() => setIsBackupPanelOpen(true)}
-            className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
-          >
-            Data Backup
-          </button>
+          {user && (
+            <>
+              <p className="text-sm text-gray-300">{user.email}</p>
+              <button
+                onClick={() => setIsBackupPanelOpen(true)}
+                className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              >
+                Data Backup
+              </button>
+            </>
+          )}
         </div>
         <SignInButton />
         {/* </div> */}

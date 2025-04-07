@@ -23,6 +23,7 @@ import TaskAddPanel from "./TaskAddPanel";
 import TaskEditPanel from "./task-card/TaskEditPanel";
 import { TaskSection } from "./sections/TaskSection";
 import { firebaseTaskService } from "../services/firebaseTaskService";
+import { generateInitials } from "../utils/user";
 import { mockLists } from "../data/mock";
 import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
 import { useAuth } from "../context/AuthContext";
@@ -293,6 +294,21 @@ const Body = () => {
     );
   };
 
+  const updateTaskWithUserInfo = (task: Task) => {
+    return {
+      ...task,
+      updatedAt: new Date(),
+      updates: [
+        ...task.updates,
+        {
+          updatedAt: new Date(),
+          username: user?.displayName || undefined,
+          initials: generateInitials(user?.displayName),
+        },
+      ],
+    };
+  };
+
   const handleLabelClickWithExpand = (label: string) => {
     setIsCategoriesExpanded(true);
     handleLabelClick(label);
@@ -472,7 +488,11 @@ const Body = () => {
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (document.activeElement?.tagName === "INPUT") {
+      if (
+        (document.activeElement?.tagName === "INPUT" ||
+          document.activeElement?.tagName === "TEXTAREA") &&
+        !(e.key === "s" && e.metaKey)
+      ) {
         return;
       }
       if (e.code === "Space" && e.altKey && !isMessagePanelOpen) {
@@ -588,12 +608,14 @@ const Body = () => {
       ) {
         e.preventDefault();
         if (tab === "todos" || tab === "archive") {
+          console.log("up/down arrow navigation");
           setIsAllExpandedMode(false);
           const currentIndex = expandedTaskId
             ? filteredTasks.findIndex((task) => task.id === expandedTaskId)
             : -1;
-
+          console.log(currentIndex);
           if (e.key === "ArrowDown") {
+            console.log("arrow down");
             // If no task is expanded, expand the first task
             if (currentIndex === -1) {
               if (filteredTasks.length > 0) {
@@ -612,6 +634,7 @@ const Body = () => {
               setShowSubTasksId(null);
             }
           } else if (e.key === "ArrowUp") {
+            console.log("arrow up");
             // If no task is expanded, expand the last task
             if (currentIndex === -1) {
               if (filteredTasks.length > 0) {
@@ -634,13 +657,14 @@ const Body = () => {
       } else if (
         e.key === "Backspace" &&
         (e.metaKey || e.ctrlKey) &&
-        expandedTaskId &&
         !isAllExpanded
       ) {
         e.preventDefault();
         const task = tasks.find((t) => t.id === expandedTaskId);
         if (task) {
           handleDelete(task.id);
+        } else {
+          handleDelete(tasks[0].id);
         }
       } else if (
         e.key === "Backspace" &&
@@ -655,6 +679,19 @@ const Body = () => {
             ...task,
             subtasks: task.subtasks.slice(0, -1),
           });
+        }
+      }
+      // Handle Cmd+S (Mac) or Ctrl+S (Windows) to submit forms
+      else if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
+        e.preventDefault();
+        const task = tasks.find((t) => t.id === expandedTaskId);
+        if (isEditing && task) {
+          // Submit the edit form
+          handleTaskUpdate(updateTaskWithUserInfo(task));
+          setIsEditing(false);
+        } else if (isAddTaskPanelOpen && task) {
+          // Submit the add task form
+          closeAddTaskPanel();
         }
       }
     };
@@ -678,6 +715,7 @@ const Body = () => {
     filteredTasks,
     isMessagePanelOpen,
     isDeleteModalOpen,
+    isEditing,
   ]);
 
   const handleSearch = (query: string) => {

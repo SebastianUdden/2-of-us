@@ -12,65 +12,70 @@ export const useTaskPersistence = () => {
   const { user } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-  const saveTasks = async (tasks: Task[]) => {
+  const saveTasks = async (newTasks: Task[]) => {
     try {
-      if (storageType === "local") {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
-      } else if (storageType === "cloud") {
-        if (!user) {
-          console.warn("Cannot save to cloud storage: User not signed in");
-          return;
-        }
-        setIsLoading(true);
-        setError(null);
-        // First, get all existing tasks for this user
+      setIsLoading(true);
+      setError(null);
+
+      // Always update localStorage first
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(newTasks));
+
+      if (storageType === "cloud" && user) {
+        // Get existing tasks from Firestore
         const existingTasks = await firebaseTaskService.getTasks(user.uid);
 
-        // Delete tasks that are no longer in the list
-        for (const existingTask of existingTasks) {
-          if (!tasks.find((t) => t.id === existingTask.id)) {
-            await firebaseTaskService.deleteTask(existingTask.id);
-          }
+        // Delete tasks that are not in the new list
+        const tasksToDelete = existingTasks.filter(
+          (existingTask) =>
+            !newTasks.some((newTask) => newTask.id === existingTask.id)
+        );
+        for (const task of tasksToDelete) {
+          await firebaseTaskService.deleteTask(task.id);
         }
 
-        // Update or create tasks
-        for (const task of tasks) {
-          if (existingTasks.find((t) => t.id === task.id)) {
+        // Update or add tasks
+        for (const task of newTasks) {
+          if (existingTasks.some((t) => t.id === task.id)) {
             await firebaseTaskService.updateTask(task.id, task);
           } else {
             await firebaseTaskService.addTask(task, user.uid);
           }
         }
       }
-    } catch (error) {
-      console.error("Error saving tasks:", error);
-      setError("Failed to save tasks. Please try again.");
+
+      setTasks(newTasks);
+    } catch (err) {
+      console.error("Error saving tasks:", err);
+      setError("Failed to save tasks");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const loadTasks = async (): Promise<Task[]> => {
+  const loadTasks = async () => {
     try {
       setIsLoading(true);
       setError(null);
-      if (storageType === "local") {
-        const savedTasks = localStorage.getItem(STORAGE_KEY);
-        if (savedTasks) {
-          return JSON.parse(savedTasks);
-        }
-      } else if (storageType === "cloud") {
-        if (!user) {
-          console.warn("Cannot load from cloud storage: User not signed in");
-          return [];
-        }
-        return await firebaseTaskService.getTasks(user.uid);
+
+      let loadedTasks: Task[] = [];
+
+      if (storageType === "cloud" && user) {
+        // Always try to load from cloud first
+        loadedTasks = await firebaseTaskService.getTasks(user.uid);
+        // Update localStorage with cloud data
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedTasks));
+      } else {
+        const storedTasks = localStorage.getItem(STORAGE_KEY);
+        loadedTasks = storedTasks ? JSON.parse(storedTasks) : [];
       }
-      return [];
-    } catch (error) {
-      console.error("Error loading tasks:", error);
-      setError("Failed to load tasks. Please try again.");
+
+      setTasks(loadedTasks);
+      return loadedTasks;
+    } catch (err) {
+      console.error("Error loading tasks:", err);
+      setError("Failed to load tasks");
       return [];
     } finally {
       setIsLoading(false);
@@ -82,9 +87,10 @@ export const useTaskPersistence = () => {
     if (storageType === "cloud" && user) {
       const unsubscribe = firebaseTaskService.onTasksUpdate(
         user.uid,
-        (tasks) => {
-          // Update local storage to keep in sync
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+        (updatedTasks: Task[]) => {
+          // Update both state and localStorage when cloud data changes
+          setTasks(updatedTasks);
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(updatedTasks));
         }
       );
 
@@ -92,10 +98,10 @@ export const useTaskPersistence = () => {
     }
   }, [storageType, user]);
 
-  return {
-    saveTasks,
-    loadTasks,
-    isLoading,
-    error,
-  };
+  // Reload tasks when user signs in/out
+  useEffect(() => {
+    loadTasks();
+  }, [user]);
+
+  return { tasks, saveTasks, loadTasks, isLoading, error };
 };
