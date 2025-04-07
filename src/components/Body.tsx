@@ -5,7 +5,6 @@ import {
 } from "../data/hooks/useFilteredItems";
 
 import { ANIMATION } from "./task-card/constants";
-import DataManagementButtons from "./common/DataManagementButtons";
 import DeleteConfirmDialog from "./task-card/DeleteConfirmDialog";
 import DocsSection from "./sections/DocsSection";
 import { ErrorMessage } from "./common/ErrorMessage";
