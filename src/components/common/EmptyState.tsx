@@ -27,9 +27,9 @@ export const EmptyState = ({
       ) : (
         <>
           <button className="underline" onClick={onAddTask}>
-            {`Add your first ${type.slice(0, -1)}`}
+            {`Add a ${type.slice(0, -1)}`}
           </button>{" "}
-          to get started or{" "}
+          to track your progress or{" "}
           <button className="underline" onClick={onClearFilters}>
             clear your filters
           </button>

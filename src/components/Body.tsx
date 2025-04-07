@@ -5,6 +5,7 @@ import {
 } from "../data/hooks/useFilteredItems";
 
 import { ANIMATION } from "./task-card/constants";
+import DataManagementButtons from "./common/DataManagementButtons";
 import DeleteConfirmDialog from "./task-card/DeleteConfirmDialog";
 import DocsSection from "./sections/DocsSection";
 import { ErrorMessage } from "./common/ErrorMessage";
@@ -16,14 +17,12 @@ import { LoadingSpinner } from "./common/LoadingSpinner";
 import { ResetConfirmModal } from "./common/ResetConfirmModal";
 import SidePanel from "./common/SidePanel";
 import { SortControls } from "./sections/SortControls";
-import { SubTask } from "../types/SubTask";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
 import TaskAddPanel from "./TaskAddPanel";
 import TaskEditPanel from "./task-card/TaskEditPanel";
 import { TaskSection } from "./sections/TaskSection";
 import { firebaseTaskService } from "../services/firebaseTaskService";
-import { generateUUID } from "../utils/uuid";
 import { mockLists } from "../data/mock";
 import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
 import { useAuth } from "../context/AuthContext";

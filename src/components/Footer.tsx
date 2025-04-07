@@ -1,10 +1,15 @@
+import BackupPanel from "./common/BackupPanel";
+import SidePanel from "./common/SidePanel";
 import SignInButton from "./common/SignInButton";
 import { useAuth } from "../context/AuthContext";
+import { useState } from "react";
 /* import { useStorage } from "../context/StorageContext"; */
 
 const Footer = () => {
   /* const { storageType, setStorageType } = useStorage(); */
   const { user } = useAuth();
+  const [isBackupPanelOpen, setIsBackupPanelOpen] = useState(false);
+
   /* 
   const handleStorageToggle = () => {
     if (storageType === "local") {
@@ -37,11 +42,27 @@ const Footer = () => {
         {/* </div> */}
         {/* {storageType === "cloud" && ( */}
         {/* <div className="flex items-center space-x-4"> */}
-        {user && <p className="text-sm text-gray-300">{user.email}</p>}
+        <div className="flex items-center space-x-4">
+          {user && <p className="text-sm text-gray-300">{user.email}</p>}
+          <button
+            onClick={() => setIsBackupPanelOpen(true)}
+            className="rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          >
+            Data Backup
+          </button>
+        </div>
         <SignInButton />
         {/* </div> */}
         {/* )} */}
       </div>
+
+      <SidePanel
+        isOpen={isBackupPanelOpen}
+        onClose={() => setIsBackupPanelOpen(false)}
+        title="Data Backup"
+      >
+        <BackupPanel onClose={() => setIsBackupPanelOpen(false)} />
+      </SidePanel>
     </footer>
   );
 };
