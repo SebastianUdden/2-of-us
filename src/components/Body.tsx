@@ -712,7 +712,7 @@ const Body = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col calc(min-h-screen - 100px)">
       <div
         className={`bg-gray-900 border-b border-gray-800 fixed w-full transition-all duration-200 z-40 ${
           isHeaderVisible ? "translate-y-0" : "-translate-y-full"
@@ -728,12 +728,6 @@ const Body = () => {
               onSearchChange={handleSearch}
             />
           </div>
-          {/*   <button
-            onClick={() => setIsResetModalOpen(true)}
-            className="static px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors"
-          >
-            Återställ
-          </button> */}
         </div>
 
         {showSortControls && (
@@ -755,7 +749,7 @@ const Body = () => {
       </div>
       <div className="flex-1 overflow-y-auto mt-[120px]">
         <div className="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8">
-          <div className="pb-8 pt-8 sm:pt-20">
+          <div className="pb-10 pt-20">
             <div className="space-y-4">
               {error ? (
                 <ErrorMessage message={error} onRetry={loadTasks} />
