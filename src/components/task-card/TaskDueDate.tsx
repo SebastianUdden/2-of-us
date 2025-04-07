@@ -151,7 +151,7 @@ const TaskDueDate = ({
             : "bg-blue-500/20 text-blue-400"
         } ${className || ""}`}
       >
-        {dueDate ? timeRemaining : "Set due date"}
+        {dueDate ? timeRemaining : "Sätt måldatum"}
       </button>
 
       {showDatePicker && (
