@@ -15,6 +15,7 @@ interface TaskHeaderProps {
   setExpandedTaskId: (id: string | null) => void;
   setIsPriorityControlsVisible: (visible: boolean) => void;
   expandAll: boolean;
+  setFocusDescription: (focus: boolean) => void;
 }
 
 export const TaskHeader = ({
@@ -27,6 +28,7 @@ export const TaskHeader = ({
   setExpandedTaskId,
   setIsPriorityControlsVisible,
   expandAll,
+  setFocusDescription,
 }: TaskHeaderProps) => {
   return (
     <div className="flex items-start w-full justify-between">
@@ -38,6 +40,7 @@ export const TaskHeader = ({
             onClick={() => {
               setIsEditing(true);
               setExpandedTaskId(task.id);
+              setFocusDescription(false);
             }}
           >
             <h3

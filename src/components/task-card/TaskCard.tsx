@@ -35,6 +35,7 @@ interface TaskCardProps {
   setShowSubTasksId: (id: string | null) => void;
   expandAll: boolean;
   setIsEditing: (isEditing: boolean) => void;
+  setFocusDescription: (focus: boolean) => void;
 }
 
 const TaskCard = ({
@@ -56,6 +57,7 @@ const TaskCard = ({
   setShowSubTasksId,
   showPriorityControls,
   expandAll,
+  setFocusDescription,
 }: TaskCardProps) => {
   const [isPriorityControlsVisible, setIsPriorityControlsVisible] =
     useState(false);
@@ -184,11 +186,15 @@ const TaskCard = ({
                 }}
                 onDelete={() => onDelete(task.id)}
                 onArchive={onArchive}
-                setIsEditing={setIsEditing}
+                setIsEditing={(isEditing) => {
+                  setIsEditing(isEditing);
+                  setFocusDescription(false);
+                }}
                 expandedTaskId={expandedTaskId}
                 setExpandedTaskId={setExpandedTaskId}
                 setIsPriorityControlsVisible={setIsPriorityControlsVisible}
                 expandAll={expandAll}
+                setFocusDescription={setFocusDescription}
               />
             </div>
             <div className="flex items-center gap-2 mt-2">
@@ -221,7 +227,10 @@ const TaskCard = ({
               <>
                 <div
                   className="group flex items-start gap-1"
-                  onClick={() => setIsEditing(true)}
+                  onClick={() => {
+                    setIsEditing(true);
+                    setFocusDescription(true);
+                  }}
                 >
                   <p className="text-gray-200 text-sm mt-2">
                     {task.description}

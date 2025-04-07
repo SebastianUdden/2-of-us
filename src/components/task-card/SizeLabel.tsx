@@ -19,7 +19,7 @@ export const SizeLabel = ({ size }: { size: Size }) => {
   const opacity = getSizeOpacity(size);
   return (
     <div
-      className="border border-gray-900 shadow-lg w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-magenta-500 -mx-0.5"
+      className="border border-gray-700 shadow-lg w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold text-magenta-500 -mx-0.5"
       style={{ backgroundColor: `rgba(0, 0, 0, ${opacity})` }}
     >
       {size}

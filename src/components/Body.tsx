@@ -41,6 +41,7 @@ import { useTaskPersistence } from "../data/hooks/useTaskPersistence";
 const Body = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [focusDescription, setFocusDescription] = useState(false);
   const [taskTitle, setTaskTitle] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<List[]>(mockLists);
@@ -850,7 +851,11 @@ const Body = () => {
                           clearAllFilters();
                           searchInputRef.current?.focus();
                         }}
-                        setIsEditing={setIsEditing}
+                        setIsEditing={(isEditing) => {
+                          setIsEditing(isEditing);
+                          setFocusDescription(false);
+                        }}
+                        setFocusDescription={setFocusDescription}
                       />
                     )}
                     {tab === "docs" && <DocsSection />}
@@ -901,6 +906,7 @@ const Body = () => {
           isEditing={isEditing}
           onUpdate={handleTaskUpdate}
           onClose={() => setIsEditing(false)}
+          focusDescription={focusDescription}
         />
       </SidePanel>
       <SidePanel

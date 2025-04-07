@@ -10,12 +10,19 @@ interface TaskEditPanelProps {
   onUpdate: (updatedTask: Task) => void;
   onClose: () => void;
   isEditing: boolean;
+  focusDescription?: boolean;
 }
 
-const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
+const TaskEditPanel = ({
+  task,
+  onUpdate,
+  onClose,
+  focusDescription,
+}: TaskEditPanelProps) => {
   const { user } = useAuth();
   const formRef = useRef<HTMLFormElement>(null);
   const titleRef = useRef<HTMLInputElement>(null);
+  const descriptionRef = useRef<HTMLTextAreaElement>(null);
   const [editedTitle, setEditedTitle] = useState(task?.title || "");
   const [editedDescription, setEditedDescription] = useState(
     task?.description || ""
@@ -23,8 +30,12 @@ const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
   const [editedSize, setEditedSize] = useState(task?.size || "");
 
   useEffect(() => {
-    titleRef.current?.focus();
-  }, []);
+    if (focusDescription) {
+      descriptionRef.current?.focus();
+    } else {
+      titleRef.current?.focus();
+    }
+  }, [focusDescription]);
 
   if (!task) return null;
 
@@ -85,6 +96,7 @@ const TaskEditPanel = ({ task, onUpdate, onClose }: TaskEditPanelProps) => {
           Beskrivning
         </label>
         <textarea
+          ref={descriptionRef}
           id="description"
           rows={4}
           value={editedDescription}
