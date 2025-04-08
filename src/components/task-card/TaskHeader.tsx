@@ -36,7 +36,7 @@ export const TaskHeader = ({
     <div className="flex items-start w-full justify-between">
       <div className="flex-1">
         <div className="flex items-start gap-2">
-          <div className="flex-shrink-0 mt-0.5">
+          <div className="flex-shrink-0">
             <PriorityIndicator priority={task.priority} />
           </div>
           <div
@@ -48,7 +48,7 @@ export const TaskHeader = ({
             }}
           >
             <h3
-              className={`text-lg font-medium ${
+              className={`text-md md:text-lg font-medium ${
                 task.completed ? "line-through text-gray-400" : "text-gray-200"
               }`}
             >
@@ -67,7 +67,7 @@ export const TaskHeader = ({
         />
         <button
           onClick={() => onArchive(task.id)}
-          className="p-1 text-gray-400 hover:text-gray-300 transition-colors -mr-2"
+          className="py-0.5 text-gray-400 hover:text-gray-300 transition-colors -mr-1"
         >
           <ArchiveIcon className="w-7 h-7" />
         </button>

@@ -12,7 +12,7 @@ export const ChevronButton = ({
   return (
     <button
       onClick={onClick}
-      className={`p-1 text-gray-400 hover:text-gray-300 transition-colors ${className}`}
+      className={`py-1 -ml-1 text-gray-400 hover:text-gray-300 transition-colors ${className}`}
     >
       <svg
         className={`w-5 h-5 transform transition-transform ${
