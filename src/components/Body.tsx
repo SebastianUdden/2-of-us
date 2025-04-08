@@ -1,3 +1,4 @@
+import { mockLists, mockTasks } from "../data/mock";
 import { useEffect, useRef, useState } from "react";
 import {
   useFilteredLists,
@@ -24,7 +25,6 @@ import TaskAddPanel from "./TaskAddPanel";
 import TaskEditPanel from "./task-card/TaskEditPanel";
 import { TaskSection } from "./sections/TaskSection";
 import { firebaseTaskService } from "../services/firebaseTaskService";
-import { mockLists } from "../data/mock";
 import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
 import { useAuth } from "../context/AuthContext";
 import { useExpansionState } from "../data/hooks/useExpansionState";
@@ -417,19 +417,66 @@ const Body = () => {
 
   // Load saved tasks on mount
   useEffect(() => {
-    loadTasks().then((savedTasks: Task[]) => {
-      if (savedTasks.length > 0) {
-        setTasks(savedTasks);
+    const loadInitialTasks = async () => {
+      try {
+        if (user) {
+          // If user is logged in, try to load from API first
+          try {
+            const apiTasks = await firebaseTaskService.getTasks(user.uid);
+            if (apiTasks.length > 0) {
+              setTasks(apiTasks);
+              return;
+            }
+          } catch (error) {
+            console.error("Error loading tasks from API:", error);
+          }
+        }
+
+        // If no API data or not logged in, try localStorage
+        const savedTasks = await loadTasks();
+        if (savedTasks.length > 0) {
+          setTasks(savedTasks);
+        } else if (!user) {
+          // Only use mock data if not logged in and no saved tasks
+          setTasks(mockTasks);
+        }
+      } catch (error) {
+        console.error("Error loading tasks:", error);
+        if (!user) {
+          setTasks(mockTasks);
+        }
       }
-    });
-  }, []);
+    };
+
+    loadInitialTasks();
+  }, [user]);
 
   // Save tasks whenever they change
   useEffect(() => {
     if (tasks.length > 0) {
-      saveTasks(tasks);
+      if (user) {
+        // If logged in, save to API
+        tasks.forEach((task) => {
+          if (task.id) {
+            firebaseTaskService
+              .updateTask(task.id, task)
+              .catch((error: Error) => {
+                console.error("Error saving task to API:", error);
+              });
+          } else {
+            firebaseTaskService
+              .addTask(task, user.uid)
+              .catch((error: Error) => {
+                console.error("Error adding task to API:", error);
+              });
+          }
+        });
+      } else {
+        // If not logged in, save to localStorage
+        saveTasks(tasks);
+      }
     }
-  }, [tasks]);
+  }, [tasks, user]);
 
   useEffect(() => {
     if (!user) {
