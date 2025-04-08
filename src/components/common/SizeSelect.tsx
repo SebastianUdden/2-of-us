@@ -19,11 +19,9 @@ const SizeSelect = ({ value, onChange }: SizeSelectProps) => {
         className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
       >
         <option value="">Storlek</option>
-        <option value="XS">XS</option>
         <option value="S">S</option>
         <option value="M">M</option>
         <option value="L">L</option>
-        <option value="XL">XL</option>
       </select>
     </div>
   );

@@ -1,6 +1,6 @@
 import { LabelFilter, LabelState } from "../../types/LabelState";
 
-import { LabelPill } from "../LabelPill";
+import { LabelPill } from "../../components/LabelPill";
 import { List } from "../../types/List";
 import { MinimizeIcon } from "../icons/MinimizeIcon";
 import { Task } from "../../types/Task";
@@ -28,6 +28,15 @@ interface FilterSectionProps {
   getCompletedState: () => LabelState;
   getDueDateState: () => LabelState;
   getLabelState: (label: string) => LabelState;
+  getSizeSmallState: () => LabelState;
+  getSizeMediumState: () => LabelState;
+  getSizeLargeState: () => LabelState;
+  handleSizeSmallClick: () => void;
+  handleSizeMediumClick: () => void;
+  handleSizeLargeClick: () => void;
+  tasksWithSizeSmall: number;
+  tasksWithSizeMedium: number;
+  tasksWithSizeLarge: number;
 }
 
 /**
@@ -46,6 +55,12 @@ export const FilterSection = ({
   lists,
   completedCount,
   tasksWithDueDate,
+  tasksWithSizeSmall,
+  tasksWithSizeMedium,
+  tasksWithSizeLarge,
+  handleSizeSmallClick,
+  handleSizeMediumClick,
+  handleSizeLargeClick,
   labels,
   counts,
   labelFilters,
@@ -56,6 +71,9 @@ export const FilterSection = ({
   getCompletedState,
   getDueDateState,
   getLabelState,
+  getSizeSmallState,
+  getSizeMediumState,
+  getSizeLargeState,
 }: FilterSectionProps) => {
   const filteredTasks =
     tab === "tasks"
@@ -122,6 +140,30 @@ export const FilterSection = ({
             onClick={handleDueDateClick}
             state={getDueDateState()}
             count={tasksWithDueDate}
+          />
+        )}
+        {tasksWithSizeSmall > 0 && (
+          <LabelPill
+            label="Storlek (S)"
+            onClick={handleSizeSmallClick}
+            state={getSizeSmallState()}
+            count={tasksWithSizeSmall}
+          />
+        )}
+        {tasksWithSizeMedium > 0 && (
+          <LabelPill
+            label="Storlek (M)"
+            onClick={handleSizeMediumClick}
+            state={getSizeMediumState()}
+            count={tasksWithSizeMedium}
+          />
+        )}
+        {tasksWithSizeLarge > 0 && (
+          <LabelPill
+            label="Storlek (L)"
+            onClick={handleSizeLargeClick}
+            state={getSizeLargeState()}
+            count={tasksWithSizeLarge}
           />
         )}
         {Array.from(labels)

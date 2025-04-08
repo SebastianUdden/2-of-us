@@ -62,15 +62,40 @@ export const useTaskPersistence = () => {
 
       let loadedTasks: Task[] = [];
 
+      // First try to load from localStorage
+      const localStorageTasks = localStorage.getItem(STORAGE_KEY);
+      if (localStorageTasks) {
+        loadedTasks = JSON.parse(localStorageTasks);
+      }
+
+      // If using cloud storage and user is authenticated, try to load from cloud
       if (storageType === "cloud" && user) {
-        console.log("Loading tasks from cloud for user:", user.uid);
-        // Always try to load from cloud first
-        loadedTasks = await firebaseTaskService.getTasks(user.uid);
-        console.log("Loaded tasks from cloud:", loadedTasks.length);
-        // Update localStorage with cloud data
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedTasks));
-      } else {
+        try {
+          console.log("Loading tasks from cloud for user:", user.uid);
+          const cloudTasks = await firebaseTaskService.getTasks(user.uid);
+          console.log("Loaded tasks from cloud:", cloudTasks.length);
+
+          // If we got tasks from cloud, use those instead
+          if (cloudTasks.length > 0) {
+            loadedTasks = cloudTasks;
+            // Update localStorage with cloud data
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedTasks));
+          }
+        } catch (cloudError) {
+          console.error("Error loading from cloud:", cloudError);
+          // If cloud fails but we have localStorage data, keep using that
+          if (loadedTasks.length === 0) {
+            throw cloudError; // Only throw if we have no data at all
+          }
+        }
+      }
+
+      // If we still have no tasks, use mock data as a last resort
+      if (loadedTasks.length === 0) {
+        console.log("No tasks found, using mock data");
         loadedTasks = mockTasks;
+        // Save mock data to localStorage
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedTasks));
       }
 
       setTasks(loadedTasks);

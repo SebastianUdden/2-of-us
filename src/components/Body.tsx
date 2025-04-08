@@ -103,8 +103,17 @@ const Body = () => {
     getLabelState,
     getCompletedState,
     getDueDateState,
+    getSizeSmallState,
+    getSizeMediumState,
+    getSizeLargeState,
     clearAllFilters,
-  } = useFilterManagement();
+    handleSizeSmallClick,
+    handleSizeMediumClick,
+    handleSizeLargeClick,
+    tasksWithSizeSmall,
+    tasksWithSizeMedium,
+    tasksWithSizeLarge,
+  } = useFilterManagement(tasks);
 
   const {
     isAddTaskPanelOpen,
@@ -641,6 +650,15 @@ const Body = () => {
                         getCompletedState={getCompletedState}
                         getDueDateState={getDueDateState}
                         getLabelState={getLabelState}
+                        getSizeSmallState={getSizeSmallState}
+                        getSizeMediumState={getSizeMediumState}
+                        getSizeLargeState={getSizeLargeState}
+                        handleSizeSmallClick={handleSizeSmallClick}
+                        handleSizeMediumClick={handleSizeMediumClick}
+                        handleSizeLargeClick={handleSizeLargeClick}
+                        tasksWithSizeSmall={tasksWithSizeSmall}
+                        tasksWithSizeMedium={tasksWithSizeMedium}
+                        tasksWithSizeLarge={tasksWithSizeLarge}
                       />
                     )}
                   </div>

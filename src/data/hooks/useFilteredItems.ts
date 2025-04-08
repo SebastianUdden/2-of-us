@@ -53,6 +53,17 @@ export const useFilteredTasks = ({
           if (filter.state === LabelState.SHOW_OTHERS) return !task.dueDate;
           return true;
         }
+        if (
+          filter.label === "S" ||
+          filter.label === "M" ||
+          filter.label === "L"
+        ) {
+          if (filter.state === LabelState.SHOW_ONLY)
+            return task.size === filter.label;
+          if (filter.state === LabelState.SHOW_OTHERS)
+            return task.size !== filter.label;
+          return true;
+        }
         const hasLabel = task.labels?.includes(filter.label);
         if (filter.state === LabelState.SHOW_ONLY) return hasLabel;
         if (filter.state === LabelState.SHOW_OTHERS) return !hasLabel;
