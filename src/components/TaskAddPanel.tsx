@@ -22,14 +22,12 @@ interface AddTaskPanelProps {
   isListMode?: boolean;
   onToggleMode?: () => void;
   onAddList?: (list: List) => void;
-  onTitleChange?: (title: string) => void;
   subtasks?: SubTask[];
 }
 
 const TaskAddPanel = ({
   onClose,
   onAddTask,
-  onTitleChange,
   totalTasks,
   parentTaskId,
   subtasks,
@@ -125,7 +123,6 @@ const TaskAddPanel = ({
         value={editedTitle}
         onChange={(value) => {
           setEditedTitle(value);
-          onTitleChange?.(value);
         }}
         placeholder="Ex. Handla mat"
         ref={

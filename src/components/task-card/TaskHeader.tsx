@@ -13,6 +13,7 @@ interface TaskHeaderProps {
   setIsEditing: (isEditing: boolean) => void;
   expandedTaskId: string | null;
   setExpandedTaskId: (id: string | null) => void;
+  setShowSubTasksId: (id: string | null) => void;
   setIsPriorityControlsVisible: (visible: boolean) => void;
   expandAll: boolean;
   setFocusDescription: (focus: boolean) => void;
@@ -26,6 +27,7 @@ export const TaskHeader = ({
   setIsEditing,
   expandedTaskId,
   setExpandedTaskId,
+  setShowSubTasksId,
   setIsPriorityControlsVisible,
   expandAll,
   setFocusDescription,
@@ -73,6 +75,7 @@ export const TaskHeader = ({
             isExpanded={expandedTaskId === task.id}
             onClick={() => {
               setExpandedTaskId(expandedTaskId === task.id ? null : task.id);
+              setShowSubTasksId(expandedTaskId === task.id ? null : task.id);
               setIsEditing(false);
               setIsPriorityControlsVisible(false);
             }}

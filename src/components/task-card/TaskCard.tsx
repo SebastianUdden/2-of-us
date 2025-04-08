@@ -192,6 +192,7 @@ const TaskCard = ({
                 }}
                 expandedTaskId={expandedTaskId}
                 setExpandedTaskId={setExpandedTaskId}
+                setShowSubTasksId={setShowSubTasksId}
                 setIsPriorityControlsVisible={setIsPriorityControlsVisible}
                 expandAll={expandAll}
                 setFocusDescription={setFocusDescription}
