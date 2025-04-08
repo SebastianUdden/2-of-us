@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { Task } from "../../types/Task";
 import { firebaseTaskService } from "../../services/firebaseTaskService";
+import { mockTasks } from "../mock";
 import { useAuth } from "../../context/AuthContext";
 import { useStorage } from "../../context/StorageContext";
 
@@ -69,10 +70,7 @@ export const useTaskPersistence = () => {
         // Update localStorage with cloud data
         localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedTasks));
       } else {
-        console.log("Loading tasks from localStorage");
-        const storedTasks = localStorage.getItem(STORAGE_KEY);
-        loadedTasks = storedTasks ? JSON.parse(storedTasks) : [];
-        console.log("Loaded tasks from localStorage:", loadedTasks.length);
+        loadedTasks = mockTasks;
       }
 
       setTasks(loadedTasks);

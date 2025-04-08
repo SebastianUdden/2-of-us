@@ -4,25 +4,7 @@ import { Task } from "../types/Task";
 export const mockTasks: Task[] = [
   {
     id: "1",
-    title: "Test-titel",
-    description: "Test-beskrivning",
-    priority: 1,
-    completed: false,
-    createdAt: new Date("2025-03-25"),
-    updatedAt: new Date("2025-03-25"),
-    dueDate: new Date(),
-    labels: ["inköp", "mat"],
-    updates: [],
-    subtasks: [],
-    archived: false,
-    size: "S",
-  },
-];
-
-export const mockTasks2: Task[] = [
-  {
-    id: "1",
-    title: "Handla mat",
+    title: "1. Utan inloggning visas bara mock-data",
     description: "Gå igenom kylen och skapa en inköpslista för veckan",
     priority: 1,
     completed: false,
@@ -37,7 +19,8 @@ export const mockTasks2: Task[] = [
   },
   {
     id: "2",
-    title: "Städa på söndagar",
+    title:
+      "2. Logga in med Google för att se dina uppgifter och börja samarbeta",
     description: "Göra en grundlig städning av hela lägenheten",
     priority: 2,
     completed: false,

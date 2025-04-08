@@ -12,9 +12,11 @@ import { FilterSection } from "./sections/FilterSection";
 import Header from "./Header";
 import { List } from "../types/List";
 import { ListSection } from "./sections/ListSection";
+import { Loader } from "./common/Loader";
 import { LoadingSpinner } from "./common/LoadingSpinner";
 import { ResetConfirmModal } from "./common/ResetConfirmModal";
 import SidePanel from "./common/SidePanel";
+import { SignInModal } from "./common/SignInModal";
 import { SortControls } from "./sections/SortControls";
 import Tabs from "./Tabs";
 import { Task } from "../types/Task";
@@ -55,7 +57,7 @@ const Body = () => {
   const [isListMode, setIsListMode] = useState(false);
   const { loadTab, saveTab } = useTabPersistence();
   const { loadTasks, saveTasks, isLoading, error } = useTaskPersistence();
-  const { user } = useAuth();
+  const { user, loading: isAuthLoading } = useAuth();
   const { storageType } = useStorage();
 
   const {
@@ -151,6 +153,8 @@ const Body = () => {
 
   const sortedAndFilteredTasks = getSortedTasks(filteredTasks);
   const sortedAndFilteredLists = getSortedLists(filteredLists);
+
+  const [showSignInModal, setShowSignInModal] = useState(false);
 
   const handleComplete = (taskId: string, allCompleted?: boolean) => {
     const task = tasks.find((t) => t.id === taskId);
@@ -427,6 +431,14 @@ const Body = () => {
     }
   }, [tasks]);
 
+  useEffect(() => {
+    if (!user) {
+      setShowSignInModal(true);
+    } else {
+      setShowSignInModal(false);
+    }
+  }, [isAuthLoading, user]);
+
   const handleReset = async () => {
     // Clear all localStorage data
     localStorage.clear();
@@ -487,8 +499,17 @@ const Body = () => {
     }
   };
 
+  const handleSkipSignIn = () => {
+    setShowSignInModal(false);
+  };
+
   return (
     <div className="flex flex-col calc(min-h-screen - 100px)">
+      {isAuthLoading ? (
+        <Loader />
+      ) : (
+        showSignInModal && <SignInModal onSkip={handleSkipSignIn} />
+      )}
       <div
         className={`bg-gray-900 border-b border-gray-800 fixed w-full transition-all duration-200 z-40 ${
           isHeaderVisible ? "translate-y-0" : "-translate-y-full"
@@ -523,7 +544,11 @@ const Body = () => {
           />
         )}
       </div>
-      <div className="flex-1 overflow-y-auto md:mt-[120px]">
+      <div
+        className={`flex-1 overflow-y-auto ${
+          showSortControls ? "mt-[60px] md:mt-[120px]" : "md:mt-[120px]"
+        }`}
+      >
         <div className="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="pb-10 pt-20">
             <div className="space-y-4">
