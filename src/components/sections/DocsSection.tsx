@@ -8,7 +8,10 @@ const DocsSection = () => {
           uppgifter tillsammans. Så här kommer du igång:
         </p>
         <ul className="list-disc pl-6 space-y-2">
-          <li>Logga in med ditt google konto i bottenmenyn.</li>
+          <li>
+            Ladda om sidan och logga in med ditt google konto för att se dina
+            uppgifter och börja samarbeta.
+          </li>
           <li>Använd "Lägg till uppgift" för att skapa nya uppgifter.</li>
           <li>
             Klicka på en uppgift för att expandera och se/redigera detaljer.
