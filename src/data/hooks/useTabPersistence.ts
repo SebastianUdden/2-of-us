@@ -14,7 +14,7 @@ export const useTabPersistence = () => {
 
   const loadTab = async () => {
     const tabState = await loadItem();
-    return tabState?.currentTab || "todos";
+    return tabState?.currentTab || "docs";
   };
 
   const saveTab = async (tab: "todos" | "archive" | "lists" | "docs") => {

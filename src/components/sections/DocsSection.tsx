@@ -158,14 +158,14 @@ const DocsSection = () => {
             </ul>
           </div>
 
-          <div>
+          {/* <div>
             <h3 className="text-lg font-semibold mb-2">Listor</h3>
             <ul className="list-disc pl-6 space-y-2">
               <li>Skapa ordnade eller oordnade listor</li>
               <li>Lägg till objekt i listor</li>
               <li>Konvertera listor till uppgifter med deluppgifter</li>
             </ul>
-          </div>
+          </div> */}
 
           <div>
             <h3 className="text-lg font-semibold mb-2">Organisation</h3>
@@ -175,7 +175,7 @@ const DocsSection = () => {
                 deadline
               </li>
               <li>Sortera uppgifter efter olika kriterier</li>
-              <li>Sök bland alla uppgifter och listor</li>
+              <li>Sök bland alla uppgifter</li>
               <li>Expandera/minimera alla uppgifter samtidigt</li>
             </ul>
           </div>

@@ -27,6 +27,7 @@ import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
 import { useAuth } from "../context/AuthContext";
 import { useExpansionState } from "../data/hooks/useExpansionState";
 import { useFilterManagement } from "../data/hooks/useFilterManagement";
+import { useKeyboardShortcuts } from "../data/hooks/useKeyboardShortcuts";
 import { useLabelsAndCounts } from "../data/hooks/useLabelsAndCounts";
 import { useMessagePanel } from "../data/hooks/useMessagePanel";
 import { usePriorityManagement } from "../data/hooks/usePriorityManagement";
@@ -285,29 +286,11 @@ const Body = () => {
     );
   };
 
-  const handleTaskUpdate = (updatedTask: Task) => {
-    setTasks((prevTasks) =>
-      prevTasks.map((task) => (task.id === updatedTask.id ? updatedTask : task))
-    );
-  };
-
-  const updateTaskWithUserInfo = (task: Task) => {
-    return {
-      ...task,
-      updatedAt: new Date(),
-      updates: [
-        ...task.updates,
-        {
-          updatedAt: new Date(),
-          username: user?.displayName || undefined,
-          initials:
-            user?.displayName
-              ?.split(" ")
-              .map((n) => n[0])
-              .join("") || undefined,
-        },
-      ],
-    };
+  const handleTaskUpdate = (task: Task) => {
+    setTasks((prevTasks) => {
+      const updatedTasks = prevTasks.map((t) => (t.id === task.id ? task : t));
+      return sortTasks(updatedTasks);
+    });
   };
 
   const handleLabelClickWithExpand = (label: string) => {
@@ -466,255 +449,35 @@ const Body = () => {
     setIsResetModalOpen(false);
   };
 
-  const handleTabNavigation = (direction: "left" | "right") => {
-    setIsAllExpandedMode(false);
-    setExpandedTaskId(null);
-    scrollToTop();
-    const tabs: ("todos" | "archive" | "lists" | "docs")[] = [
-      "todos",
-      "archive",
-      "docs",
-    ];
-    const currentIndex = tabs.indexOf(tab);
-    let newIndex: number;
-
-    if (direction === "right") {
-      newIndex = currentIndex === tabs.length - 1 ? 0 : currentIndex + 1;
-    } else {
-      newIndex = currentIndex === 0 ? tabs.length - 1 : currentIndex - 1;
-    }
-    saveTab(tabs[newIndex]);
-    setTab(tabs[newIndex]);
-  };
-
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        (document.activeElement?.tagName === "INPUT" ||
-          document.activeElement?.tagName === "TEXTAREA") &&
-        !(e.key === "s" && e.metaKey)
-      ) {
-        return;
-      }
-      if (e.code === "Space" && e.altKey && !isMessagePanelOpen) {
-        e.preventDefault();
-        closeAddTaskPanel();
-        setTab("todos");
-        openAddTaskPanel();
-      }
-      // Only handle Cmd+Space (Mac) or Ctrl+Space (Windows)
-      if (
-        e.code === "Space" &&
-        (e.metaKey || e.ctrlKey) &&
-        !isMessagePanelOpen
-      ) {
-        closeAddTaskPanel();
-        // If a task is expanded, create a subtask
-        const task = tasks.find((t) => t.id === expandedTaskId);
-        if (task && !isAllExpanded && !isMessagePanelOpen) {
-          setShowSubTasksId(expandedTaskId);
-          if (task) {
-            setTab("todos");
-            openAddTaskPanel(task.id, task.title);
-          }
-        }
-        // If we're on the tasks tab and no task is expanded, create a new task
-        else if (!isMessagePanelOpen) {
-          setTab("todos");
-          openAddTaskPanel();
-        }
-      }
-      // Handle Cmd+Enter (Mac) or Ctrl+Enter (Windows) to open expanded task in edit mode
-      else if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-        closeMessagePanel();
-        closeAddTaskPanel();
-        if (expandedTaskId && !isAllExpanded && !isAddTaskPanelOpen) {
-          const task = tasks.find((t) => t.id === expandedTaskId);
-          if (task) {
-            setIsEditing(true);
-            setFocusDescription(false);
-          }
-        } else {
-          setExpandedTaskId(tasks[0].id);
-          setIsEditing(true);
-          setFocusDescription(false);
-        }
-      }
-      // Handle Cmd+M (Mac) or Ctrl+M (Windows) to minimize/maximize all tasks
-      else if (e.key === "m" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        if (tab === "todos" || tab === "archive") {
-          setIsAllExpanded(!isAllExpanded);
-          setIsAllExpandedMode(!isAllExpandedMode);
-          if (!isAllExpanded) {
-            setExpandedTaskId("all");
-          } else {
-            setExpandedTaskId(null);
-          }
-        }
-      } else if (e.key === "f" && (e.metaKey || e.ctrlKey) && tab !== "docs") {
-        e.preventDefault();
-        setIsCategoriesExpanded(!isCategoriesExpanded);
-      }
-      // Handle Cmd+1-0 (Mac) or Ctrl+1-0 (Windows) to minimize/maximize individual tasks
-      else if (e.key >= "0" && e.key <= "9" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        if (tab === "todos" || tab === "archive") {
-          setIsAllExpandedMode(false);
-          const taskIndex = e.key === "0" ? 9 : parseInt(e.key) - 1;
-          const task = filteredTasks[taskIndex];
-          if (task) {
-            if (expandedTaskId === task.id) {
-              setExpandedTaskId(null);
-              setShowSubTasksId(null);
-            } else {
-              setExpandedTaskId(task.id);
-              setShowSubTasksId(task.id);
-            }
-          }
-        }
-      }
-      // Handle tab navigation with arrow keys
-      else if (
-        (e.key === "ArrowRight" || e.key === "ArrowLeft") &&
-        (e.metaKey || e.ctrlKey)
-      ) {
-        e.preventDefault();
-        handleTabNavigation(e.key === "ArrowRight" ? "right" : "left");
-      }
-      // Handle right/left arrow move tasks
-      else if (
-        (e.key === "ArrowRight" || e.key === "ArrowLeft") &&
-        e.altKey &&
-        (tab === "todos" || tab === "archive")
-      ) {
-        e.preventDefault();
-        const direction = e.key === "ArrowLeft" ? "top" : "bottom";
-        handleTaskMove(direction, expandedTaskId);
-      }
-      // Handle alt+up/down arrow move tasks
-      else if (
-        (e.key === "ArrowDown" || e.key === "ArrowUp") &&
-        e.altKey &&
-        (tab === "todos" || tab === "archive")
-      ) {
-        e.preventDefault();
-        const direction = e.key === "ArrowDown" ? "down" : "up";
-        handleTaskMove(direction, expandedTaskId);
-      }
-      // Handle up/down arrow navigation
-      else if (
-        (e.key === "ArrowDown" || e.key === "ArrowUp") &&
-        (tab === "todos" || tab === "archive")
-      ) {
-        e.preventDefault();
-        if (tab === "todos" || tab === "archive") {
-          setIsAllExpandedMode(false);
-          const currentIndex = expandedTaskId
-            ? filteredTasks.findIndex((task) => task.id === expandedTaskId)
-            : -1;
-
-          if (e.key === "ArrowDown") {
-            // If no task is expanded, expand the first task
-            if (currentIndex === -1) {
-              if (filteredTasks.length > 0) {
-                setExpandedTaskId(filteredTasks[0].id);
-                setShowSubTasksId(filteredTasks[0].id);
-              }
-            }
-            // Otherwise, close current task and expand next task
-            else if (currentIndex < filteredTasks.length - 1) {
-              setExpandedTaskId(filteredTasks[currentIndex + 1].id);
-              setShowSubTasksId(filteredTasks[currentIndex + 1].id);
-            }
-            // If we're at the last task, close it
-            else {
-              setExpandedTaskId(null);
-              setShowSubTasksId(null);
-            }
-          } else if (e.key === "ArrowUp") {
-            // If no task is expanded, expand the last task
-            if (currentIndex === -1) {
-              if (filteredTasks.length > 0) {
-                setExpandedTaskId(filteredTasks[filteredTasks.length - 1].id);
-                setShowSubTasksId(filteredTasks[filteredTasks.length - 1].id);
-              }
-            }
-            // Otherwise, close current task and expand previous task
-            else if (currentIndex > 0) {
-              setExpandedTaskId(filteredTasks[currentIndex - 1].id);
-              setShowSubTasksId(filteredTasks[currentIndex - 1].id);
-            }
-            // If we're at the first task, close it
-            else {
-              setExpandedTaskId(null);
-              setShowSubTasksId(null);
-            }
-          }
-        }
-      } else if (
-        e.key === "Backspace" &&
-        (e.metaKey || e.ctrlKey) &&
-        !isAllExpanded
-      ) {
-        e.preventDefault();
-        const task = tasks.find((t) => t.id === expandedTaskId);
-        if (task) {
-          handleDelete(task.id);
-        } else {
-          handleDelete(tasks[0].id);
-        }
-      } else if (
-        e.key === "Backspace" &&
-        e.altKey &&
-        expandedTaskId &&
-        !isAllExpanded
-      ) {
-        e.preventDefault();
-        const task = tasks.find((t) => t.id === expandedTaskId);
-        if (task) {
-          handleTaskUpdate({
-            ...task,
-            subtasks: task.subtasks.slice(0, -1),
-          });
-        }
-      }
-      // Handle Cmd+S (Mac) or Ctrl+S (Windows) to submit forms
-      else if (e.key === "s" && (e.metaKey || e.ctrlKey)) {
-        e.preventDefault();
-        const task = tasks.find((t) => t.id === expandedTaskId);
-        if (isEditing && task) {
-          // Submit the edit form
-          handleTaskUpdate(updateTaskWithUserInfo(task));
-          setIsEditing(false);
-        } else if (isAddTaskPanelOpen && task) {
-          // Submit the add task form
-          closeAddTaskPanel();
-        }
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [
-    expandedTaskId,
+  useKeyboardShortcuts({
     tab,
     tasks,
-    openAddTaskPanel,
-    isAllExpanded,
-    setIsAllExpanded,
-    setIsAllExpandedMode,
-    setExpandedTaskId,
-    setExpandedListId,
-    setShowSubTasksId,
-    handleDelete,
-    isAllExpanded,
-    isAddTaskPanelOpen,
     filteredTasks,
+    expandedTaskId,
+    isAllExpanded,
+    isAllExpandedMode,
+    isAddTaskPanelOpen,
     isMessagePanelOpen,
-    isDeleteModalOpen,
     isEditing,
-  ]);
+    isCategoriesExpanded,
+    onTabChange: (newTab) => {
+      setTab(newTab);
+      saveTab(newTab);
+    },
+    onExpandedTaskIdChange: setExpandedTaskId,
+    onShowSubTasksIdChange: setShowSubTasksId,
+    onIsAllExpandedChange: setIsAllExpanded,
+    onIsAllExpandedModeChange: setIsAllExpandedMode,
+    onIsCategoriesExpandedChange: setIsCategoriesExpanded,
+    onIsEditingChange: setIsEditing,
+    onFocusDescriptionChange: setFocusDescription,
+    onTaskMove: handleTaskMove,
+    onTaskDelete: handleDelete,
+    onTaskUpdate: handleTaskUpdate,
+    onAddTaskPanelOpen: openAddTaskPanel,
+    onAddTaskPanelClose: closeAddTaskPanel,
+    onMessagePanelClose: closeMessagePanel,
+  });
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
@@ -760,7 +523,7 @@ const Body = () => {
           />
         )}
       </div>
-      <div className="flex-1 overflow-y-auto mt-[120px]">
+      <div className="flex-1 overflow-y-auto md:mt-[120px]">
         <div className="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="pb-10 pt-20">
             <div className="space-y-4">
