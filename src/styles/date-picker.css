@@ -1,0 +1,87 @@
+/* Style the date input */
+input[type="date"] {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: #374151;
+  border: 1px solid;
+  border-radius: 0.375rem;
+  padding: 0.5rem;
+  font-size: 0.875rem;
+  cursor: pointer;
+}
+
+/* Style the calendar popup */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  border-radius: 0.25rem;
+  padding: 0.25rem;
+}
+
+/* Style the calendar popup container */
+input[type="date"]::-webkit-datetime-edit {
+  color: inherit;
+}
+
+/* Style the calendar popup when open */
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  opacity: 0.8;
+}
+
+/* Style the calendar popup when focused */
+input[type="date"]:focus {
+  outline: 2px solid;
+  outline-offset: 2px;
+}
+
+/* Style the calendar popup container */
+input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  background-color: #374151;
+  color: inherit;
+}
+
+/* Style the calendar popup text */
+input[type="date"]::-webkit-datetime-edit-text {
+  color: inherit;
+}
+
+/* Style the calendar popup month/year */
+input[type="date"]::-webkit-datetime-edit-month-field,
+input[type="date"]::-webkit-datetime-edit-year-field {
+  color: inherit;
+}
+
+/* Style the calendar popup day */
+input[type="date"]::-webkit-datetime-edit-day-field {
+  color: inherit;
+}
+
+/* Style the calendar popup itself */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  background-color: inherit;
+}
+
+/* Style the selected date in the calendar popup */
+input[type="date"]::-webkit-calendar-picker-indicator:focus {
+  background-color: inherit;
+}
+
+/* Style the calendar popup days */
+input[type="date"]::-webkit-calendar-picker-indicator::before {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: inherit;
+  border-radius: 0.25rem;
+}
+
+/* Style the calendar popup header */
+input[type="date"]::-webkit-calendar-picker-indicator::after {
+  content: "";
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background-color: inherit;
+  border-radius: 0.25rem;
+} 

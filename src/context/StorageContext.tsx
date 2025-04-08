@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 
+import { useAuth } from "./AuthContext";
 import { useStoragePersistence } from "../data/hooks/useStoragePersistence";
 
 type StorageType = "local" | "cloud";
@@ -20,18 +21,27 @@ const StorageContext = createContext<StorageContextType | undefined>(undefined);
 export const StorageProvider = ({ children }: { children: ReactNode }) => {
   const [storageType, setStorageType] = useState<StorageType>("local");
   const { loadStorageType, saveStorageType } = useStoragePersistence();
+  const { user } = useAuth();
 
   useEffect(() => {
     const loadInitialStorageType = async () => {
       const savedType = await loadStorageType();
-      setStorageType(savedType);
+      // If user is authenticated, always use cloud storage
+      if (user) {
+        setStorageType("cloud");
+      } else {
+        setStorageType(savedType);
+      }
     };
     loadInitialStorageType();
-  }, [loadStorageType]);
+  }, [loadStorageType, user]);
 
   const handleSetStorageType = async (type: StorageType) => {
-    setStorageType(type);
-    await saveStorageType(type);
+    // Only allow setting storage type if user is not authenticated
+    if (!user) {
+      setStorageType(type);
+      await saveStorageType(type);
+    }
   };
 
   return (

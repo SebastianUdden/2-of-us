@@ -5,6 +5,7 @@ import {
 } from "../data/hooks/useFilteredItems";
 
 import { ANIMATION } from "./task-card/constants";
+import DataManagementButtons from "./common/DataManagementButtons";
 import DeleteConfirmDialog from "./task-card/DeleteConfirmDialog";
 import DocsSection from "./sections/DocsSection";
 import { ErrorMessage } from "./common/ErrorMessage";
@@ -22,7 +23,6 @@ import TaskAddPanel from "./TaskAddPanel";
 import TaskEditPanel from "./task-card/TaskEditPanel";
 import { TaskSection } from "./sections/TaskSection";
 import { firebaseTaskService } from "../services/firebaseTaskService";
-import { generateInitials } from "../utils/user";
 import { mockLists } from "../data/mock";
 import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
 import { useAuth } from "../context/AuthContext";
@@ -41,6 +41,7 @@ const Body = () => {
   const searchInputRef = useRef<HTMLInputElement>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [focusDescription, setFocusDescription] = useState(false);
+  const [taskTitle, setTaskTitle] = useState("");
   const [tasks, setTasks] = useState<Task[]>([]);
   const [lists, setLists] = useState<List[]>(mockLists);
   const [tab, setTab] = useState<"todos" | "archive" | "lists" | "docs">(
@@ -301,7 +302,11 @@ const Body = () => {
         {
           updatedAt: new Date(),
           username: user?.displayName || undefined,
-          initials: generateInitials(user?.displayName),
+          initials:
+            user?.displayName
+              ?.split(" ")
+              .map((n) => n[0])
+              .join("") || undefined,
         },
       ],
     };
@@ -448,7 +453,7 @@ const Body = () => {
     // Reset state to initial values
     setTasks([]);
     setLists(mockLists);
-    setTab("todos");
+    setTab("docs");
     setIsSortMinimized(false);
     setSearchQuery("");
     setSelectedLabel(null);
@@ -606,14 +611,12 @@ const Body = () => {
       ) {
         e.preventDefault();
         if (tab === "todos" || tab === "archive") {
-          console.log("up/down arrow navigation");
           setIsAllExpandedMode(false);
           const currentIndex = expandedTaskId
             ? filteredTasks.findIndex((task) => task.id === expandedTaskId)
             : -1;
-          console.log(currentIndex);
+
           if (e.key === "ArrowDown") {
-            console.log("arrow down");
             // If no task is expanded, expand the first task
             if (currentIndex === -1) {
               if (filteredTasks.length > 0) {
@@ -632,7 +635,6 @@ const Body = () => {
               setShowSubTasksId(null);
             }
           } else if (e.key === "ArrowUp") {
-            console.log("arrow up");
             // If no task is expanded, expand the last task
             if (currentIndex === -1) {
               if (filteredTasks.length > 0) {
@@ -895,6 +897,7 @@ const Body = () => {
           parentTaskId={parentTaskId}
           parentTaskTitle={parentTaskTitle}
           subtasks={tasks.find((task) => task.id === parentTaskId)?.subtasks}
+          onTitleChange={(title) => setTaskTitle(title)}
           isListMode={isListMode}
           onToggleMode={() => setIsListMode(!isListMode)}
           onAddList={handleAddList}

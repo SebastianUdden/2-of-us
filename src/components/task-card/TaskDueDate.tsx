@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 
 import { Timestamp } from "firebase/firestore";
+import { parseDate } from "../../utils/date";
 
 interface TaskDueDateProps {
   dueDate?: Date | string | Timestamp;
@@ -23,28 +24,13 @@ const TaskDueDate = ({
       date: Date | string | Timestamp | { seconds: number } | undefined
     ): Date | undefined => {
       if (!date) return undefined;
-      try {
-        if (date instanceof Date) {
-          if (isNaN(date.getTime())) return undefined;
-          return date;
-        }
-        if (date instanceof Timestamp) {
-          const jsDate = date.toDate();
-          if (isNaN(jsDate.getTime())) return undefined;
-          return jsDate;
-        }
-        if (typeof date === "object" && "seconds" in date) {
-          const jsDate = new Date(date.seconds * 1000);
-          if (isNaN(jsDate.getTime())) return undefined;
-          return jsDate;
-        }
-        const parsedDate = new Date(date);
-        if (isNaN(parsedDate.getTime())) return undefined;
-        return parsedDate;
-      } catch (error) {
-        console.error("Error converting date:", error);
-        return undefined;
+      if (date instanceof Timestamp) {
+        return parseDate(date.toDate());
       }
+      if (typeof date === "object" && "seconds" in date) {
+        return parseDate(new Date(date.seconds * 1000));
+      }
+      return parseDate(date);
     },
     []
   );
@@ -138,6 +124,12 @@ const TaskDueDate = ({
     setShowDatePicker(!showDatePicker);
   };
 
+  const getDateColor = () => {
+    if (days < 0) return "rgb(248 113 113)"; // red-400
+    if (days === 0) return "rgb(250 204 21)"; // yellow-400
+    return "rgb(96 165 250)"; // blue-400
+  };
+
   return (
     <div className="relative">
       <button
@@ -157,10 +149,17 @@ const TaskDueDate = ({
       {showDatePicker && (
         <div className="absolute z-10 mt-1 bg-gray-800 border border-gray-700 rounded-lg shadow-lg p-2">
           <input
-            type="datetime-local"
+            type="date"
             value={selectedDate}
             onChange={handleDateChange}
             className="bg-gray-700 text-white text-sm rounded px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            style={
+              {
+                color: getDateColor(),
+                borderColor: getDateColor(),
+                "--calendar-color": getDateColor(),
+              } as React.CSSProperties
+            }
           />
         </div>
       )}

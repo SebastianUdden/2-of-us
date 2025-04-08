@@ -62,13 +62,17 @@ export const useTaskPersistence = () => {
       let loadedTasks: Task[] = [];
 
       if (storageType === "cloud" && user) {
+        console.log("Loading tasks from cloud for user:", user.uid);
         // Always try to load from cloud first
         loadedTasks = await firebaseTaskService.getTasks(user.uid);
+        console.log("Loaded tasks from cloud:", loadedTasks.length);
         // Update localStorage with cloud data
         localStorage.setItem(STORAGE_KEY, JSON.stringify(loadedTasks));
       } else {
+        console.log("Loading tasks from localStorage");
         const storedTasks = localStorage.getItem(STORAGE_KEY);
         loadedTasks = storedTasks ? JSON.parse(storedTasks) : [];
+        console.log("Loaded tasks from localStorage:", loadedTasks.length);
       }
 
       setTasks(loadedTasks);

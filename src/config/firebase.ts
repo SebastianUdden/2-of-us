@@ -17,13 +17,19 @@ const firebaseConfig = {
 let app: FirebaseApp;
 if (!getApps().length) {
   try {
+    console.log("Initializing Firebase with config:", {
+      ...firebaseConfig,
+      apiKey: "***", // Hide the actual API key in logs
+    });
     app = initializeApp(firebaseConfig);
+    console.log("Firebase initialized successfully");
   } catch (error) {
     console.error("Error initializing Firebase:", error);
     throw error; // Re-throw the error to prevent further initialization
   }
 } else {
   app = getApps()[0];
+  console.log("Using existing Firebase app instance");
 }
 
 export const db = getFirestore(app);
