@@ -35,8 +35,10 @@ export const TaskHeader = ({
   return (
     <div className="flex items-start w-full justify-between">
       <div className="flex-1">
-        <div className="flex items-center gap-2">
-          <PriorityIndicator priority={task.priority} />
+        <div className="flex items-start gap-2">
+          <div className="flex-shrink-0 mt-0.5">
+            <PriorityIndicator priority={task.priority} />
+          </div>
           <div
             className="group flex items-center gap-1"
             onClick={() => {

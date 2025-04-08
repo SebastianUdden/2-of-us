@@ -5,7 +5,7 @@ interface PriorityIndicatorProps {
 export const PriorityIndicator = ({ priority }: PriorityIndicatorProps) => {
   return (
     <div
-      className="w-6 h-6 rounded-full flex items-center justify-center text-sm font-medium text-white shadow-sm"
+      className="flex-shrink-0 w-6 h-6 min-w-[1.5rem] rounded-full flex items-center justify-center text-sm font-medium text-white shadow-sm"
       style={{
         backgroundColor:
           priority <= 3
