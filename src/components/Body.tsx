@@ -560,7 +560,7 @@ const Body = () => {
   };
 
   return (
-    <div className="flex flex-col calc(min-h-screen - 100px)">
+    <div className="flex flex-col h-screen overflow-x-hidden">
       {isAuthLoading ? (
         <Loader />
       ) : (

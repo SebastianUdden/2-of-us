@@ -2,7 +2,6 @@ import BackupPanel from "./common/BackupPanel";
 import SidePanel from "./common/SidePanel";
 import SignInButton from "./common/SignInButton";
 import { useState } from "react";
-/* import { useStorage } from "../context/StorageContext"; */
 
 const Footer = () => {
   const [isBackupPanelOpen, setIsBackupPanelOpen] = useState(false);
