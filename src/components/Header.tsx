@@ -20,7 +20,7 @@ const Header = forwardRef(
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <img
-              src="/src/assets/heart.svg"
+              src="/assets/heart.svg"
               alt="Heart"
               className="w-8 h-8 animate-heart-pulse"
             />
