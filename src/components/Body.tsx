@@ -306,8 +306,41 @@ const Body = () => {
     setTasks((prevTasks) => {
       const updatedTasks = prevTasks.map((t) => (t.id === task.id ? task : t));
       saveTasks(updatedTasks);
-      return sortTasks(updatedTasks);
+      // Only sort if the task's completion status changed
+      const prevTask = prevTasks.find((t) => t.id === task.id);
+      if (prevTask?.completed !== task.completed) {
+        return sortTasks(updatedTasks);
+      }
+      return updatedTasks;
     });
+  };
+
+  const handleTaskToggleComplete = async (task: Task) => {
+    // First update the completion status immediately
+    setTasks((prevTasks) => {
+      const updatedTasks = prevTasks.map((t) =>
+        t.id === task.id
+          ? {
+              ...t,
+              completed: !t.completed,
+              subtasks: t.subtasks?.map((subtask) => ({
+                id: subtask.id,
+                title: subtask.title,
+                completed: subtask.completed,
+              })),
+            }
+          : t
+      );
+      saveTasks(updatedTasks);
+      return updatedTasks;
+    });
+
+    // Then sort after a delay
+    setTimeout(() => {
+      setTasks((prevTasks) => {
+        return sortTasks(prevTasks);
+      });
+    }, 300);
   };
 
   const handleLabelClickWithExpand = (label: string) => {
@@ -531,6 +564,10 @@ const Body = () => {
     onAddTaskPanelOpen: openAddTaskPanel,
     onAddTaskPanelClose: closeAddTaskPanel,
     onMessagePanelClose: closeMessagePanel,
+    onSortTasks: () => {
+      setTasks((prevTasks) => sortTasks(prevTasks));
+    },
+    onTaskComplete: handleComplete,
   });
 
   const handleSearch = (query: string) => {

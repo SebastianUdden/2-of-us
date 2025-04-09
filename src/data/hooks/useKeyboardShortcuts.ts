@@ -29,6 +29,8 @@ interface UseKeyboardShortcutsProps {
   onAddTaskPanelOpen: (parentTaskId?: string, parentTaskTitle?: string) => void;
   onAddTaskPanelClose: () => void;
   onMessagePanelClose: () => void;
+  onSortTasks: () => void;
+  onTaskComplete: (taskId: string, allSubtasksCompleted: boolean) => void;
 }
 
 export const useKeyboardShortcuts = ({
@@ -56,6 +58,8 @@ export const useKeyboardShortcuts = ({
   onAddTaskPanelOpen,
   onAddTaskPanelClose,
   onMessagePanelClose,
+  onSortTasks,
+  onTaskComplete,
 }: UseKeyboardShortcutsProps) => {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -95,16 +99,17 @@ export const useKeyboardShortcuts = ({
         ) {
           e.preventDefault();
           const task = tasks.find((t) => t.id === expandedTaskId);
-          if (task) {
-            onTaskUpdate({
-              ...task,
-              completed: !task.completed,
-              subtasks: task.subtasks?.map((subtask) => ({
-                id: subtask.id,
-                title: subtask.title,
-                completed: subtask.completed,
-              })),
-            });
+          if (task && tab === "todos" && tasks.length > 0) {
+            // Check if all subtasks are completed
+            const allSubtasksCompleted = task.subtasks?.every(
+              (subtask) => subtask.completed
+            );
+            if (!allSubtasksCompleted && !task.completed) {
+              return;
+            }
+
+            // Call handleComplete with the expanded task ID
+            onTaskComplete(expandedTaskId, allSubtasksCompleted);
           }
         }
       }
@@ -297,5 +302,7 @@ export const useKeyboardShortcuts = ({
     onAddTaskPanelOpen,
     onAddTaskPanelClose,
     onMessagePanelClose,
+    onSortTasks,
+    onTaskComplete,
   ]);
 };

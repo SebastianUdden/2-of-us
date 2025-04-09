@@ -155,7 +155,6 @@ const TaskCard = ({
   const totalSubtasks = task.subtasks.length;
 
   const handleAssigneeChange = (newAssignee: string) => {
-    console.log("newAssignee", newAssignee);
     onUpdate({ ...task, assignee: newAssignee });
   };
 
