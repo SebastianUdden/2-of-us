@@ -315,34 +315,6 @@ const Body = () => {
     });
   };
 
-  const handleTaskToggleComplete = async (task: Task) => {
-    // First update the completion status immediately
-    setTasks((prevTasks) => {
-      const updatedTasks = prevTasks.map((t) =>
-        t.id === task.id
-          ? {
-              ...t,
-              completed: !t.completed,
-              subtasks: t.subtasks?.map((subtask) => ({
-                id: subtask.id,
-                title: subtask.title,
-                completed: subtask.completed,
-              })),
-            }
-          : t
-      );
-      saveTasks(updatedTasks);
-      return updatedTasks;
-    });
-
-    // Then sort after a delay
-    setTimeout(() => {
-      setTasks((prevTasks) => {
-        return sortTasks(prevTasks);
-      });
-    }, 300);
-  };
-
   const handleLabelClickWithExpand = (label: string) => {
     setIsCategoriesExpanded(true);
     handleLabelClick(label);
@@ -582,18 +554,27 @@ const Body = () => {
     setShowSignInModal(false);
   };
 
-  const handleSignIn = () => {
-    setShowSignInModal(false);
-  };
-
   return (
     <div className="flex flex-col h-full">
       <Header
-        isVisible={isHeaderVisible}
-        onSearchClick={() => setIsSearchVisible(!isSearchVisible)}
-        onResetClick={() => setIsResetModalOpen(true)}
-        onSignInClick={() => setShowSignInModal(true)}
-        user={user}
+        ref={searchInputRef}
+        onAddTask={() => openAddTaskPanel()}
+        searchQuery={searchQuery}
+        onSearchChange={handleSearch}
+        isSearchVisible={isSearchVisible}
+        showSearch={
+          (tab === "todos" && tasks.length > 0) ||
+          (tab === "archive" &&
+            tasks.filter((task) => task.archived).length > 0)
+        }
+        onSearchVisibilityChange={(visible) => {
+          setIsSearchVisible(visible);
+          setTimeout(() => {
+            if (visible) {
+              searchInputRef.current?.focus();
+            }
+          }, 100);
+        }}
       />
       {loading ? (
         <Loader />
@@ -652,11 +633,11 @@ const Body = () => {
         className={clsx(
           "flex-1 overflow-y-auto",
           showSortControls || isSearchVisible ? "mt-[60px]" : "",
-          isSearchVisible && showSortControls ? "mt-[120px]" : ""
+          isSearchVisible && showSortControls ? "mt-[60px]" : ""
         )}
       >
         <div className="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8">
-          <div className="pb-10 pt-20">
+          <div className="pb-10 pt-14">
             <div className="space-y-4">
               {error ? (
                 <ErrorMessage message={error} onRetry={loadTasks} />
