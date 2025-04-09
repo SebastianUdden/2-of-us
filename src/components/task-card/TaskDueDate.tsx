@@ -7,12 +7,18 @@ interface TaskDueDateProps {
   dueDate?: Date | string | Timestamp;
   onDueDateChange: (date: Date | undefined) => void;
   className?: string;
+  taskId?: string;
+  expandedTaskId?: string | null;
+  setExpandedTaskId?: (id: string | null) => void;
 }
 
 const TaskDueDate = ({
   dueDate,
   onDueDateChange,
   className,
+  taskId,
+  expandedTaskId,
+  setExpandedTaskId,
 }: TaskDueDateProps) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState<string>("");
@@ -121,6 +127,12 @@ const TaskDueDate = ({
       e.preventDefault();
       return;
     }
+
+    // If task is not expanded, expand it first
+    if (taskId && expandedTaskId !== taskId && setExpandedTaskId) {
+      setExpandedTaskId(taskId);
+    }
+
     setShowDatePicker(!showDatePicker);
   };
 

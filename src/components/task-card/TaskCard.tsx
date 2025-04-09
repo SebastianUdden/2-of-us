@@ -207,6 +207,10 @@ const TaskCard = ({
               <TaskDueDate
                 dueDate={task.dueDate}
                 onDueDateChange={handleDueDateChange}
+                className="task-due-date"
+                taskId={task.id}
+                expandedTaskId={expandedTaskId}
+                setExpandedTaskId={setExpandedTaskId}
               />
               {task.size && <SizeLabel size={task.size as Size} />}
               {task.labels && task.labels.length > 0 && (
