@@ -302,9 +302,10 @@ const Body = () => {
     );
   };
 
-  const handleTaskUpdate = (task: Task) => {
+  const handleTaskUpdate = async (task: Task) => {
     setTasks((prevTasks) => {
       const updatedTasks = prevTasks.map((t) => (t.id === task.id ? task : t));
+      saveTasks(updatedTasks);
       return sortTasks(updatedTasks);
     });
   };
@@ -440,20 +441,24 @@ const Body = () => {
           // If user is logged in, try to load from API first
           try {
             const apiTasks = await firebaseTaskService.getTasks(user.uid);
-            if (apiTasks.length > 0) {
-              setTasks(apiTasks);
-              return;
-            }
+            setTasks(apiTasks);
+            return;
           } catch (error) {
             console.error("Error loading tasks from API:", error);
+            // If API fails, try localStorage
+            const savedTasks = await loadTasks();
+            if (savedTasks.length > 0) {
+              setTasks(savedTasks);
+            }
+            return;
           }
         }
 
-        // If no API data or not logged in, try localStorage
+        // If not logged in, try localStorage first
         const savedTasks = await loadTasks();
         if (savedTasks.length > 0) {
           setTasks(savedTasks);
-        } else if (!user) {
+        } else {
           // Only use mock data if not logged in and no saved tasks
           setTasks(mockTasks);
         }
@@ -540,8 +545,19 @@ const Body = () => {
     setShowSignInModal(false);
   };
 
+  const handleSignIn = () => {
+    setShowSignInModal(false);
+  };
+
   return (
-    <div className="flex flex-col ">
+    <div className="flex flex-col h-full">
+      <Header
+        isVisible={isHeaderVisible}
+        onSearchClick={() => setIsSearchVisible(!isSearchVisible)}
+        onResetClick={() => setIsResetModalOpen(true)}
+        onSignInClick={() => setShowSignInModal(true)}
+        user={user}
+      />
       {loading ? (
         <Loader />
       ) : (

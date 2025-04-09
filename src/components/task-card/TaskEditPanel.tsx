@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 
+import { AVAILABLE_ASSIGNEES } from "../../data/mock-users";
 import LabelInput from "../common/LabelInput";
 import SizeSelect from "../common/SizeSelect";
 import { Task } from "../../types/Task";
@@ -34,6 +35,9 @@ const TaskEditPanel = ({
   const [editedDueDate, setEditedDueDate] = useState<Date | undefined>(
     task?.dueDate
   );
+  const [editedAssignee, setEditedAssignee] = useState<string | undefined>(
+    task?.assignee
+  );
 
   useEffect(() => {
     if (focusDescription) {
@@ -56,7 +60,8 @@ const TaskEditPanel = ({
       editedDescription !== task?.description ||
       editedSize !== task?.size ||
       JSON.stringify(selectedLabels) !== JSON.stringify(task?.labels) ||
-      editedDueDate?.getTime() !== task?.dueDate?.getTime()
+      editedDueDate?.getTime() !== task?.dueDate?.getTime() ||
+      editedAssignee !== task?.assignee
     ) {
       onUpdate({
         ...task,
@@ -65,6 +70,7 @@ const TaskEditPanel = ({
         size: editedSize,
         labels: selectedLabels,
         dueDate: editedDueDate,
+        assignee: editedAssignee,
       });
     }
     onClose();
@@ -105,6 +111,24 @@ const TaskEditPanel = ({
             onDueDateChange={handleDueDateChange}
           />
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-gray-300 mb-2">
+          Tilldelad
+        </label>
+        <select
+          value={editedAssignee || ""}
+          onChange={(e) => setEditedAssignee(e.target.value || undefined)}
+          className="mt-1 block w-full rounded-md border-gray-700 bg-gray-800 text-white shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm p-2"
+        >
+          <option value="">Ingen</option>
+          {AVAILABLE_ASSIGNEES.map((assignee) => (
+            <option key={assignee} value={assignee}>
+              {assignee}
+            </option>
+          ))}
+        </select>
       </div>
 
       <LabelInput

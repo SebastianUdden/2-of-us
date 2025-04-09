@@ -23,4 +23,5 @@ export interface Task {
   size?: string;
   username?: string;
   initials?: string;
+  assignee?: string;
 }

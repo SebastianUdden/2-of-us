@@ -8,7 +8,10 @@ interface TaskFooterProps {
 const TaskFooter = ({ task }: TaskFooterProps) => {
   return (
     <div className="flex items-center justify-between mt-2 text-sm text-gray-400">
-      <span>Skapad: {formatDate(task.createdAt)}</span>
+      <span>
+        Skapad: {formatDate(task.createdAt)}{" "}
+        {task.initials ? `(${task.initials})` : ""}
+      </span>
     </div>
   );
 };

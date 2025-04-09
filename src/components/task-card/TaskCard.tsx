@@ -154,6 +154,11 @@ const TaskCard = ({
   ).length;
   const totalSubtasks = task.subtasks.length;
 
+  const handleAssigneeChange = (newAssignee: string) => {
+    console.log("newAssignee", newAssignee);
+    onUpdate({ ...task, assignee: newAssignee });
+  };
+
   return (
     <>
       <Card
@@ -221,7 +226,11 @@ const TaskCard = ({
                 </div>
               )}
               <div className="ml-auto">
-                <UserAvatar initials={task.initials} username={task.username} />
+                <UserAvatar
+                  initials={task.assignee}
+                  username={task.assignee}
+                  onAssigneeChange={handleAssigneeChange}
+                />
               </div>
             </div>
             {expandedTaskId === task.id && (

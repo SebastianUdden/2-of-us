@@ -79,6 +79,7 @@ const TaskAddPanel = ({
       dueDate: editedDueDate,
       username: user?.displayName || undefined,
       initials: generateInitials(user?.displayName),
+      assignee: generateInitials(user?.displayName),
     };
 
     if (parentTaskId) {
