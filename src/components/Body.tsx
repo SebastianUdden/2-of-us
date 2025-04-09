@@ -541,7 +541,7 @@ const Body = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-x-hidden">
+    <div className="flex flex-col ">
       {loading ? (
         <Loader />
       ) : (
