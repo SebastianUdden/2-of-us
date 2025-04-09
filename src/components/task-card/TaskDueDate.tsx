@@ -122,17 +122,16 @@ const TaskDueDate = ({
     setShowDatePicker(false);
   };
 
-  const handleButtonClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+  const handleButtonClick = (e: React.MouseEvent) => {
+    console.log("event happened", e);
     e.preventDefault();
     e.stopPropagation();
-    if (e.type === "keydown" && (e as React.KeyboardEvent).key === "Enter") {
-      e.preventDefault();
-      return;
-    }
+
     // If task is not expanded, expand it first
     if (taskId && expandedTaskId !== taskId && setExpandedTaskId) {
       setExpandedTaskId(taskId);
     }
+
     setShowDatePicker(!showDatePicker);
   };
 
@@ -145,6 +144,7 @@ const TaskDueDate = ({
   return (
     <div className="relative">
       <button
+        type="button"
         onClick={handleButtonClick}
         className={`text-sm px-2 py-1 rounded ${
           days < 0
