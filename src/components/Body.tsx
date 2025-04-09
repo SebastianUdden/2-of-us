@@ -60,7 +60,7 @@ const Body = () => {
   const { loadTab, saveTab } = useTabPersistence();
   const { loadTasks, saveTasks, isLoading, error } = useTaskPersistence();
   const { user, loading: isAuthLoading } = useAuth();
-  const loading = isLoading || isAuthLoading;
+  const [loading, setLoading] = useState(true);
   const { storageType } = useStorage();
 
   const {
@@ -456,6 +456,15 @@ const Body = () => {
     });
   }, []);
 
+  useEffect(() => {
+    if (!isLoading && !isAuthLoading) {
+      setTimeout(() => {
+        setLoading(false);
+      }, 500);
+    } else {
+      setLoading(true);
+    }
+  }, [isLoading, isAuthLoading]);
   // Load saved tasks on mount
   useEffect(() => {
     const loadInitialTasks = async () => {
