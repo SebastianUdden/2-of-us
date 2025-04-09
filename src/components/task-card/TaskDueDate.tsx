@@ -123,16 +123,16 @@ const TaskDueDate = ({
   };
 
   const handleButtonClick = (e: React.MouseEvent | React.KeyboardEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (e.type === "keydown" && (e as React.KeyboardEvent).key === "Enter") {
       e.preventDefault();
       return;
     }
-
     // If task is not expanded, expand it first
     if (taskId && expandedTaskId !== taskId && setExpandedTaskId) {
       setExpandedTaskId(taskId);
     }
-
     setShowDatePicker(!showDatePicker);
   };
 

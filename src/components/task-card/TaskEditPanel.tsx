@@ -6,6 +6,7 @@ import SizeSelect from "../common/SizeSelect";
 import { Task } from "../../types/Task";
 import TaskDueDate from "./TaskDueDate";
 import TaskFormInput from "../common/TaskFormInput";
+import { Timestamp } from "firebase/firestore";
 
 interface TaskEditPanelProps {
   task?: Task;
@@ -33,7 +34,7 @@ const TaskEditPanel = ({
     task?.labels || []
   );
   const [editedDueDate, setEditedDueDate] = useState<Date | undefined>(
-    task?.dueDate
+    task?.dueDate instanceof Timestamp ? task.dueDate.toDate() : task?.dueDate
   );
   const [editedAssignee, setEditedAssignee] = useState<string | undefined>(
     task?.assignee
@@ -55,12 +56,21 @@ const TaskEditPanel = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const currentDueDate = task?.dueDate;
+    const currentDueDateTime =
+      currentDueDate instanceof Timestamp
+        ? currentDueDate.toDate().getTime()
+        : currentDueDate instanceof Date
+        ? currentDueDate.getTime()
+        : 0;
+    const editedDueDateTime = editedDueDate?.getTime() || 0;
+
     if (
       editedTitle !== task?.title ||
       editedDescription !== task?.description ||
       editedSize !== task?.size ||
       JSON.stringify(selectedLabels) !== JSON.stringify(task?.labels) ||
-      editedDueDate?.getTime() !== task?.dueDate?.getTime() ||
+      editedDueDateTime !== currentDueDateTime ||
       editedAssignee !== task?.assignee
     ) {
       onUpdate({
@@ -105,7 +115,7 @@ const TaskEditPanel = ({
         <label className="block text-sm font-medium text-gray-300 mb-2">
           Förfallodatum
         </label>
-        <div className="mt-1">
+        <div className="mt-1" onClick={(e) => e.stopPropagation()}>
           <TaskDueDate
             dueDate={editedDueDate}
             onDueDateChange={handleDueDateChange}
