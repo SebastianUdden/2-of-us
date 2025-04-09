@@ -8,6 +8,7 @@ import {
   query,
   updateDoc,
   where,
+  getDoc,
 } from "firebase/firestore";
 
 import { Task } from "../types/Task";
@@ -45,6 +46,12 @@ export const firebaseTaskService = {
 
   async updateTask(taskId: string, task: Partial<Task>): Promise<void> {
     const taskRef = doc(db, TASKS_COLLECTION, taskId);
+    const taskDoc = await getDoc(taskRef);
+
+    if (!taskDoc.exists()) {
+      throw new Error("TASK_NOT_FOUND");
+    }
+
     // Remove undefined values before sending to Firestore
     const cleanTask = removeUndefined(task);
     await updateDoc(taskRef, cleanTask);

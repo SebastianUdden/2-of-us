@@ -302,17 +302,40 @@ const Body = () => {
     );
   };
 
-  const handleTaskUpdate = async (task: Task) => {
-    setTasks((prevTasks) => {
-      const updatedTasks = prevTasks.map((t) => (t.id === task.id ? task : t));
-      saveTasks(updatedTasks);
-      // Only sort if the task's completion status changed
-      const prevTask = prevTasks.find((t) => t.id === task.id);
-      if (prevTask?.completed !== task.completed) {
-        return sortTasks(updatedTasks);
+  const handleUpdateTask = async (updatedTask: Task) => {
+    try {
+      if (storageType === "cloud" && user) {
+        try {
+          await firebaseTaskService.updateTask(updatedTask.id, updatedTask);
+        } catch (error) {
+          // If we get a permissions error, it likely means the task was deleted
+          if (error instanceof Error && error.message.includes("permissions")) {
+            // Re-add the task with the same data but a new ID
+            const { id, ...taskWithoutId } = updatedTask;
+            console.log(id);
+            const newTask = await firebaseTaskService.addTask(
+              taskWithoutId,
+              user.uid
+            );
+            setTasks((prevTasks) =>
+              prevTasks.map((task) =>
+                task.id === updatedTask.id ? newTask : task
+              )
+            );
+            return;
+          }
+          throw error;
+        }
       }
-      return updatedTasks;
-    });
+      setTasks((prevTasks) =>
+        prevTasks.map((task) =>
+          task.id === updatedTask.id ? updatedTask : task
+        )
+      );
+    } catch (error) {
+      console.error("Error updating task:", error);
+      loadTasks();
+    }
   };
 
   const handleLabelClickWithExpand = (label: string) => {
@@ -532,7 +555,7 @@ const Body = () => {
     onFocusDescriptionChange: setFocusDescription,
     onTaskMove: handleTaskMove,
     onTaskDelete: handleDelete,
-    onTaskUpdate: handleTaskUpdate,
+    onTaskUpdate: handleUpdateTask,
     onAddTaskPanelOpen: openAddTaskPanel,
     onAddTaskPanelClose: closeAddTaskPanel,
     onMessagePanelClose: closeMessagePanel,
@@ -721,7 +744,7 @@ const Body = () => {
                         onComplete={handleComplete}
                         onDelete={handleDelete}
                         onArchive={handleArchive}
-                        onUpdate={handleTaskUpdate}
+                        onUpdate={handleUpdateTask}
                         isCollapsed={isCollapsed}
                         onLabelClick={handleLabelClickWithExpand}
                         onAddSubtask={(id, title) =>
@@ -794,7 +817,7 @@ const Body = () => {
         <TaskEditPanel
           task={tasks.find((t) => t.id === expandedTaskId)}
           isEditing={isEditing}
-          onUpdate={handleTaskUpdate}
+          onUpdate={handleUpdateTask}
           onClose={() => setIsEditing(false)}
           focusDescription={focusDescription}
         />
