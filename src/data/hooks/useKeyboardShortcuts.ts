@@ -87,6 +87,25 @@ export const useKeyboardShortcuts = ({
             onTabChange("todos");
             onAddTaskPanelOpen();
           }
+        } else if (
+          expandedTaskId &&
+          !isAllExpanded &&
+          !isAddTaskPanelOpen &&
+          !isMessagePanelOpen
+        ) {
+          e.preventDefault();
+          const task = tasks.find((t) => t.id === expandedTaskId);
+          if (task) {
+            onTaskUpdate({
+              ...task,
+              completed: !task.completed,
+              subtasks: task.subtasks?.map((subtask) => ({
+                id: subtask.id,
+                title: subtask.title,
+                completed: subtask.completed,
+              })),
+            });
+          }
         }
       }
 
