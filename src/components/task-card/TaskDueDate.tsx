@@ -134,7 +134,6 @@ const TaskDueDate = ({
     <div className="relative">
       <button
         onClick={handleButtonClick}
-        onKeyDown={handleButtonClick}
         className={`text-sm px-2 py-1 rounded ${
           days < 0
             ? "bg-red-500/20 text-red-400"

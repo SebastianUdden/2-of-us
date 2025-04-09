@@ -24,6 +24,7 @@ import { Task } from "../types/Task";
 import TaskAddPanel from "./TaskAddPanel";
 import TaskEditPanel from "./task-card/TaskEditPanel";
 import { TaskSection } from "./sections/TaskSection";
+import clsx from "clsx";
 import { firebaseTaskService } from "../services/firebaseTaskService";
 import { useAddTaskPanel } from "../data/hooks/useAddTaskPanel";
 import { useAuth } from "../context/AuthContext";
@@ -55,9 +56,11 @@ const Body = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [taskToDelete, setTaskToDelete] = useState<Task | null>(null);
   const [isListMode, setIsListMode] = useState(false);
+  const [isSearchVisible, setIsSearchVisible] = useState(false);
   const { loadTab, saveTab } = useTabPersistence();
   const { loadTasks, saveTasks, isLoading, error } = useTaskPersistence();
   const { user, loading: isAuthLoading } = useAuth();
+  const loading = isLoading || isAuthLoading;
   const { storageType } = useStorage();
 
   const {
@@ -428,6 +431,11 @@ const Body = () => {
   useEffect(() => {
     const loadInitialTasks = async () => {
       try {
+        // Wait for auth loading to complete
+        if (loading) {
+          return;
+        }
+
         if (user) {
           // If user is logged in, try to load from API first
           try {
@@ -458,42 +466,15 @@ const Body = () => {
     };
 
     loadInitialTasks();
-  }, [user]);
-
-  // Save tasks whenever they change
-  useEffect(() => {
-    if (tasks.length > 0) {
-      if (user) {
-        // If logged in, save to API
-        tasks.forEach((task) => {
-          if (task.id) {
-            firebaseTaskService
-              .updateTask(task.id, task)
-              .catch((error: Error) => {
-                console.error("Error saving task to API:", error);
-              });
-          } else {
-            firebaseTaskService
-              .addTask(task, user.uid)
-              .catch((error: Error) => {
-                console.error("Error adding task to API:", error);
-              });
-          }
-        });
-      } else {
-        // If not logged in, save to localStorage
-        saveTasks(tasks);
-      }
-    }
-  }, [tasks, user]);
+  }, [user, loading]);
 
   useEffect(() => {
-    if (!user) {
+    if (!user && !loading) {
       setShowSignInModal(true);
     } else {
       setShowSignInModal(false);
     }
-  }, [isAuthLoading, user]);
+  }, [loading, user]);
 
   const handleReset = async () => {
     // Clear all localStorage data
@@ -561,7 +542,7 @@ const Body = () => {
 
   return (
     <div className="flex flex-col h-screen overflow-x-hidden">
-      {isAuthLoading ? (
+      {loading ? (
         <Loader />
       ) : (
         showSignInModal && <SignInModal onSkip={handleSkipSignIn} />
@@ -579,6 +560,20 @@ const Body = () => {
               onAddTask={() => openAddTaskPanel()}
               searchQuery={searchQuery}
               onSearchChange={handleSearch}
+              showSearch={
+                (tab === "todos" && tasks.length > 0) ||
+                (tab === "archive" &&
+                  tasks.filter((task) => task.archived).length > 0)
+              }
+              isSearchVisible={isSearchVisible}
+              onSearchVisibilityChange={(visible) => {
+                setIsSearchVisible(visible);
+                setTimeout(() => {
+                  if (visible) {
+                    searchInputRef.current?.focus();
+                  }
+                }, 100);
+              }}
             />
           </div>
         </div>
@@ -601,9 +596,11 @@ const Body = () => {
         )}
       </div>
       <div
-        className={`flex-1 overflow-y-auto ${
-          showSortControls ? "mt-[60px] md:mt-[120px]" : "md:mt-[120px]"
-        }`}
+        className={clsx(
+          "flex-1 overflow-y-auto",
+          showSortControls || isSearchVisible ? "mt-[60px]" : "",
+          isSearchVisible && showSortControls ? "mt-[120px]" : ""
+        )}
       >
         <div className="max-w-3xl mx-auto px-2 sm:px-6 lg:px-8">
           <div className="pb-10 pt-20">
@@ -682,7 +679,7 @@ const Body = () => {
                         onTabChange={setTab}
                       />
                     )}
-                    {(tab === "todos" || tab === "archive") && (
+                    {!loading && (tab === "todos" || tab === "archive") && (
                       <TaskSection
                         tasks={sortedAndFilteredTasks}
                         selectedLabel={selectedLabel}

@@ -3,7 +3,10 @@ import { useCallback, useState } from "react";
 import { List } from "../../types/List";
 import { SubTask } from "../../types/SubTask";
 import { Task } from "../../types/Task";
+import { firebaseTaskService } from "../../services/firebaseTaskService";
 import { generateUUID } from "../../utils/uuid";
+import { useAuth } from "../../context/AuthContext";
+import { useStorage } from "../../context/StorageContext";
 
 interface UseAddTaskPanelResult {
   isAddTaskPanelOpen: boolean;
@@ -25,6 +28,8 @@ export const useAddTaskPanel = (
   const [isAddTaskPanelOpen, setIsAddTaskPanelOpen] = useState(false);
   const [parentTaskId, setParentTaskId] = useState<string | undefined>();
   const [parentTaskTitle, setParentTaskTitle] = useState<string | undefined>();
+  const { user } = useAuth();
+  const { storageType } = useStorage();
 
   const openAddTaskPanel = useCallback(
     (parentTaskId?: string, parentTaskTitle?: string) => {
@@ -42,7 +47,7 @@ export const useAddTaskPanel = (
   }, []);
 
   const handleAddTask = useCallback(
-    (newTask: Task) => {
+    async (newTask: Task) => {
       if (
         tasks.some(
           (t) =>
@@ -51,16 +56,17 @@ export const useAddTaskPanel = (
         )
       )
         return;
-      if (parentTaskId) {
-        // Add as subtask
-        const newSubtask: SubTask = {
-          id: generateUUID(),
-          title: newTask.title,
-          completed: false,
-        };
 
-        onTasksUpdate(
-          tasks.map((task) => {
+      try {
+        if (parentTaskId) {
+          // Add as subtask
+          const newSubtask: SubTask = {
+            id: generateUUID(),
+            title: newTask.title,
+            completed: false,
+          };
+
+          const updatedTasks = tasks.map((task) => {
             if (task.id === parentTaskId) {
               return {
                 ...task,
@@ -68,23 +74,52 @@ export const useAddTaskPanel = (
               };
             }
             return task;
-          })
-        );
-        // Automatically expand the parent task
-        onExpandedTaskIdChange?.(parentTaskId);
-      } else {
-        // Add as main task
-        onTasksUpdate([...tasks, newTask]);
-        onExpandedTaskIdChange?.(newTask.id);
-        setTimeout(() => {
-          const taskElement = document.getElementById(`task-${newTask.id}`);
-          if (taskElement) {
-            taskElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          });
+
+          // Save to API if user is logged in
+          if (storageType === "cloud" && user) {
+            const parentTask = updatedTasks.find((t) => t.id === parentTaskId);
+            if (parentTask) {
+              await firebaseTaskService.updateTask(parentTaskId, parentTask);
+            }
           }
-        }, 100);
+
+          onTasksUpdate(updatedTasks);
+          onExpandedTaskIdChange?.(parentTaskId);
+        } else {
+          // Add as main task
+          const updatedTasks = [...tasks, newTask];
+
+          // Save to API if user is logged in
+          if (storageType === "cloud" && user) {
+            await firebaseTaskService.addTask(newTask, user.uid);
+          }
+
+          onTasksUpdate(updatedTasks);
+          onExpandedTaskIdChange?.(newTask.id);
+          setTimeout(() => {
+            const taskElement = document.getElementById(`task-${newTask.id}`);
+            if (taskElement) {
+              taskElement.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
+          }, 100);
+        }
+      } catch (error) {
+        console.error("Error saving task:", error);
+        // TODO: Add error handling UI
       }
     },
-    [tasks, parentTaskId, onTasksUpdate, onExpandedTaskIdChange]
+    [
+      tasks,
+      parentTaskId,
+      onTasksUpdate,
+      onExpandedTaskIdChange,
+      user,
+      storageType,
+    ]
   );
 
   const handleAddList = useCallback(

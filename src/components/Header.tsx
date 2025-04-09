@@ -1,18 +1,29 @@
-import { forwardRef, useState } from "react";
-
 import { PlusIcon } from "./icons/PlusIcon";
 import { SearchIcon } from "./icons/SearchIcon";
+import { forwardRef } from "react";
 import { useAuth } from "../context/AuthContext";
 
 interface HeaderProps {
   onAddTask: () => void;
   searchQuery: string;
   onSearchChange: (query: string) => void;
+  isSearchVisible: boolean;
+  showSearch: boolean;
+  onSearchVisibilityChange: (visible: boolean) => void;
 }
 
 const Header = forwardRef(
-  ({ onAddTask, searchQuery, onSearchChange }: HeaderProps, ref) => {
-    const [isSearchVisible, setIsSearchVisible] = useState(false);
+  (
+    {
+      onAddTask,
+      searchQuery,
+      onSearchChange,
+      isSearchVisible,
+      onSearchVisibilityChange,
+      showSearch,
+    }: HeaderProps,
+    ref
+  ) => {
     const { user } = useAuth();
 
     return (
@@ -28,13 +39,17 @@ const Header = forwardRef(
           </div>
           {user && (
             <div className="flex items-center gap-2">
-              <button
-                onClick={() => setIsSearchVisible(!isSearchVisible)}
-                className="p-2 text-gray-400 hover:text-gray-300 transition-colors sm:hidden"
-                aria-label={isSearchVisible ? "Hide search" : "Show search"}
-              >
-                <SearchIcon className="w-5 h-5" />
-              </button>
+              {showSearch && (
+                <button
+                  onClick={() => {
+                    onSearchVisibilityChange(!isSearchVisible);
+                  }}
+                  className="p-2 text-gray-400 hover:text-gray-300 transition-colors"
+                  aria-label={isSearchVisible ? "Hide search" : "Show search"}
+                >
+                  <SearchIcon className="w-5 h-5" />
+                </button>
+              )}
               <button
                 onClick={onAddTask}
                 className="p-2 text-gray-400 hover:text-gray-300 transition-colors"
@@ -46,7 +61,7 @@ const Header = forwardRef(
           )}
         </div>
         {user && (
-          <div className={`${isSearchVisible ? "block" : "hidden"} sm:block`}>
+          <div className={`${isSearchVisible ? "block" : "hidden"}`}>
             <div className="relative">
               <input
                 ref={ref as React.RefObject<HTMLInputElement>}
